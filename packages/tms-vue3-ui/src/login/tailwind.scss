@@ -1,0 +1,44 @@
+@import './index.scss';
+
+.tvu-login__form {
+  @apply p-8 rounded bg-white grid grid-cols-1 gap-y-4;
+
+  .tvu-login__input,
+  .tvu-login__captcha {
+    input {
+      @apply rounded p-2 border-2 border-gray-200;
+    }
+  }
+
+  .tvu-login__input {
+    input {
+      @apply w-full;
+    }
+  }
+
+  .tvu-login__captcha {
+    @apply flex flex-row gap-x-2;
+
+    input {
+      @apply flex-grow;
+    }
+
+    button {
+      @apply rounded bg-blue-600 p-2 text-white shadow-md;
+    }
+
+    button:hover {
+      @apply bg-blue-700;
+    }
+  }
+
+  .tvu-login__button {
+    button {
+      @apply w-full bg-blue-600 text-white font-bold py-2 px-4 rounded;
+    }
+
+    button:hover {
+      @apply bg-blue-700;
+    }
+  }
+}

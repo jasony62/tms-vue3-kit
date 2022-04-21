@@ -1,0 +1,44 @@
+.tms-frame {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+
+  & > .tms-frame__main {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: row;
+    & > .tms-frame__main__center {
+      flex-grow: 1;
+    }
+    & > .tms-frame__main__left,
+    & > .tms-frame__main__right {
+      flex-shrink: 0;
+    }
+  }
+
+  & > .tms-frame__main.tms-frame__main_row {
+    flex-direction: row;
+  }
+
+  & > .tms-frame__main.tms-frame__main_row-reverse {
+    flex-direction: row-reverse;
+  }
+
+  & > .tms-frame__main.tms-frame__main_column {
+    flex-direction: column;
+  }
+
+  & > .tms-frame__main.tms-frame__main_column-reverse {
+    flex-direction: column-reverse;
+  }
+
+  & > .tms-frame__header,
+  & > .tms-frame__footer {
+    width: 100%;
+  }
+}

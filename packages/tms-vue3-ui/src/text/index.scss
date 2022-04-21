@@ -1,0 +1,40 @@
+.tms-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+
+  &.tms-text_lines_1 {
+    -webkit-line-clamp: 1;
+  }
+
+  &.tms-text_lines_2 {
+    -webkit-line-clamp: 2;
+  }
+
+  &.tms-text_lines_3 {
+    -webkit-line-clamp: 3;
+  }
+
+  &.tms-text_lines_4 {
+    -webkit-line-clamp: 4;
+  }
+
+  @media screen and (max-width: 768px) {
+    &.tms-text_lines-sm_1 {
+      -webkit-line-clamp: 1;
+    }
+
+    &.tms-text_lines-sm_2 {
+      -webkit-line-clamp: 2;
+    }
+
+    &.tms-text_lines-sm_3 {
+      -webkit-line-clamp: 3;
+    }
+
+    &.tms-text_lines-sm_4 {
+      -webkit-line-clamp: 4;
+    }
+  }
+}
