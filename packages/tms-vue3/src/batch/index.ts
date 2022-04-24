@@ -118,15 +118,16 @@ class Batch {
  * @param {[]} [argsArray=[]] - 方法的参数列表
  * @param {object} [options={}] - 批次任务配置
  * @param {number} [options.size=1] - 每个批次包含的任务数
+ * @param {function} [options.wrap] - 截获批量操作，例如：使用vue.reactive
  *
  * @returns {Batch} 批量任务实例。
  */
 function startBatch(
   action: Function,
   argsArray: any[],
-  { size = 1, reactiveWrap = (ins) => ins } = {}
+  { size = 1, wrap = (ins) => ins } = {}
 ): Batch {
-  let batch = reactiveWrap(new Batch(action, ...argsArray))
+  let batch = wrap(new Batch(action, ...argsArray))
   batch.size = size
 
   setTimeout(() => {
