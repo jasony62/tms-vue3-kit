@@ -6,7 +6,7 @@
 
 ```javascript
 import { createApp } from 'vue'
-import { TmsAxiosPlugin } from 'tms-vue3-ts'
+import { TmsAxiosPlugin } from 'tms-vue3'
 
 const app = createApp({})
 app.use(TmsAxiosPlugin)

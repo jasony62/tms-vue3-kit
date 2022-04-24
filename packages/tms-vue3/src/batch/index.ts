@@ -119,15 +119,20 @@ class Batch {
  * @param {object} [options={}] - 批次任务配置
  * @param {number} [options.size=1] - 每个批次包含的任务数
  *
- * @returns {Batch} 批量任务实例
+ * @returns {Batch} 批量任务实例。
  */
-function startBatch(action: Function, argsArray: any[], { size = 1 } = {}) {
-  let batch = new Batch(action, ...argsArray)
+function startBatch(
+  action: Function,
+  argsArray: any[],
+  { size = 1, reactiveWrap = (ins) => ins } = {}
+): Batch {
+  let batch = reactiveWrap(new Batch(action, ...argsArray))
   batch.size = size
+
   setTimeout(() => {
     batch.next()
   })
   return batch
 }
 
-export { Batch, startBatch }
+export { Batch, BatchArg, startBatch }

@@ -1,20 +1,22 @@
 {
   "name": "tms-vue3-ui",
-  "version": "0.0.0",
+  "version": "0.0.11",
+  "description": "Vue3基础UI库。",
+  "author": "jasony62",
   "license": "MIT",
   "main": "./dist/es/index.js",
   "files": [
-    "./dist/es"
+    "dist",
+    "docs",
+    "README.md"
   ],
   "scripts": {
     "build": "rimraf ./dist && node ./bin/build && tsc"
   },
   "dependencies": {
     "lodash": "^4.17.21",
+    "tms-vue3": "^0.0.3",
     "vue": "^3.2.25"
-  },
-  "peerDependencies": {
-    "vant": "^3.4.8"
   },
   "devDependencies": {
     "@types/node": "^17.0.24",

@@ -1,0 +1,18 @@
+.tms-card {
+  max-width: 100%;
+}
+.tms-card main {
+  height: 100%;
+}
+.tms-card main > .tms-flex {
+  height: 100%;
+}
+.tms-card main > .tms-flex > .tms-card__item {
+  height: 100%;
+}
+.tms-card .tms-card__thumb {
+  height: 100%;
+}
+.tms-card .tms-flex__item_elastic {
+  overflow: hidden;
+}

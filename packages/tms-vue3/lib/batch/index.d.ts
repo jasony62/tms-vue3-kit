@@ -1,3 +1,12 @@
+/**
+ * 按批次执行任务
+ */
+declare class BatchArg {
+    page: number;
+    size: number;
+    constructor(page: any, size: any);
+    toString(): string;
+}
 declare class Batch {
     action: Function;
     actionArgs: any[];
@@ -57,9 +66,10 @@ declare class Batch {
  * @param {object} [options={}] - 批次任务配置
  * @param {number} [options.size=1] - 每个批次包含的任务数
  *
- * @returns {Batch} 批量任务实例
+ * @returns {Batch} 批量任务实例。
  */
-declare function startBatch(action: Function, argsArray: any[], { size }?: {
+declare function startBatch(action: Function, argsArray: any[], { size, reactiveWrap }?: {
     size?: number | undefined;
+    reactiveWrap?: ((ins: any) => any) | undefined;
 }): Batch;
-export { Batch, startBatch };
+export { Batch, BatchArg, startBatch };
