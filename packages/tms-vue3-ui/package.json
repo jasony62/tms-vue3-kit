@@ -6,8 +6,8 @@
   "license": "MIT",
   "main": "./dist/es/index.js",
   "files": [
-    "dist",
-    "docs",
+    "dist/",
+    "docs/",
     "README.md"
   ],
   "scripts": {

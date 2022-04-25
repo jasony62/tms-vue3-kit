@@ -4,9 +4,9 @@
     <div id="myJsonSchema">
       <tms-json-schema ref="myJsonSchema" :schema="jsonSchema" :extendSchema="extendSchema" :on-upload="onUploadFile">
         <template v-slot:extKeywords="props">
-          <el-form-item label="不可修改">
-            <el-switch v-model="props.schema.readonly"></el-switch>
-          </el-form-item>
+          <div label="不可修改">
+            <input v-model="props.schema.readonly" />
+          </div>
         </template>
       </tms-json-schema>
     </div>
@@ -14,7 +14,9 @@
 </template>
 
 <script>
-import { JsonSchema } from 'tms-vue3-ui'
+import { JsonSchemaFactory } from 'tms-vue3-ui'
+
+const JsonSchema = JsonSchemaFactory()
 
 export default {
   name: 'JsonSchemaUi',
@@ -161,8 +163,3 @@ export default {
   }
 }
 </script>
-<style>
-.tms-flex .tms-flex__item:last-child {
-  flex: 1;
-}
-</style>

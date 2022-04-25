@@ -4,6 +4,15 @@ import Flex from './flex'
 import Card from './card'
 import ObjectInput from './object-input'
 import Login from './login'
-import JsonSchema from './json-schema'
+import JsonSchema, { factory } from './json-schema'
 
-export { Frame, Text, Flex, Card, ObjectInput, Login, JsonSchema }
+export {
+  Frame,
+  Text,
+  Flex,
+  Card,
+  ObjectInput,
+  Login,
+  JsonSchema,
+  factory as JsonSchemaFactory,
+}
