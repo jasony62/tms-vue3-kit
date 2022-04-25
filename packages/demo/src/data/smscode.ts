@@ -5,9 +5,9 @@ function getCaptcha() {
   return Promise.resolve({ code: 0, result: svg })
 }
 
-function getToken(userData: { [key: string]: string }) {
+function fnVerify(userData: { [key: string]: string }) {
   let { uname, password, pin } = userData
-  console.log('login user data', { uname, password, pin })
+  console.info('register user data', { uname, password, pin })
   return Promise.resolve({
     code: 0,
     msg: '成功',
@@ -18,21 +18,16 @@ function getToken(userData: { [key: string]: string }) {
 const loginDataSchema = [
   {
     // 当前双向绑定的属性名
-    key: 'uname',
+    key: 'mobile',
     // 组件类型
     type: 'text',
-    placeholder: '用户名',
+    placeholder: '请输入手机号',
   },
   {
-    key: 'password',
-    type: 'password',
-    placeholder: '密码',
-  },
-  {
-    key: 'pin',
+    key: 'code',
     type: 'code',
-    placeholder: '验证码',
+    placeholder: '请出入验证码',
   },
 ]
 
-export { getCaptcha, getToken, loginDataSchema }
+export { getCaptcha, fnVerify, loginDataSchema }

@@ -4,6 +4,8 @@ import Home from '../views/Home.vue'
 import LayoutUi from '../views/LayoutUi.vue'
 import ObjectInputUi from '../views/ObjectInputUi.vue'
 import LoginUi from '../views/LoginUi.vue'
+import RegisterUi from '../views/RegisterUi.vue'
+import SmsCodeUi from '../views/SmsCodeUi.vue'
 import JsonSchemaUi from '../views/JsonSchemaUi.vue'
 
 const VITE_BASE_URL =
@@ -31,6 +33,16 @@ const routes = [
     path: '/login',
     name: 'login',
     component: LoginUi,
+  },
+  {
+    path: '/register',
+    name: 'register',
+    component: RegisterUi,
+  },
+  {
+    path: '/sms-code',
+    name: 'sms-code',
+    component: SmsCodeUi,
   },
   {
     path: '/json-schema',

@@ -13,7 +13,7 @@
 <script setup lang="ts">
 import { Login as TmsLogin } from 'tms-vue3-ui'
 import 'tms-vue3-ui/dist/es/login/style/tailwind.scss'
-import { getCaptcha as fnCaptcha, getToken as fnToken, loginDataSchema as schema } from '../login'
+import { getCaptcha as fnCaptcha, getToken as fnToken, loginDataSchema as schema } from '../data/login'
 
 const showLoginDialog = () => {
   TmsLogin.open({ schema, fnCaptcha, fnToken })
