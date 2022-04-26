@@ -1,10 +1,10 @@
 <template>
   <div ref="el" class="tvu-sms-code__form" :class="{ 'tvu-sms-code__form--modal': asDialog }">
     <div class="tvu-sms-code__input" v-for="(item, index) in otherInputs" :key="index">
-      <input :placeholder="item.placeholder" :type="item.type" v-model="loginData[item.key]" required />
+      <input :placeholder="item.placeholder" :type="item.type" v-model="submitData[item.key]" required />
     </div>
     <div class="tvu-sms-code__code" v-if="codeInput">
-      <input :placeholder="codeInput.placeholder" v-model="loginData[codeInput.key]" required />
+      <input :placeholder="codeInput.placeholder" v-model="submitData[codeInput.key]" required />
       <button @click="sendCode">获取验证码</button>
     </div>
     <div class="tvu-sms-code__button">
@@ -18,20 +18,13 @@
   <div class="tvu-sms-code__modal" v-if="asDialog"></div>
 </template>
 
-<script lang="ts">
-// 调用方指定的登录字段定义
-interface Item {
-  key: string
-  type: string
-  placeholder: string
-}
-</script>
 <script setup lang="ts">
 import { reactive, PropType, ref, nextTick, onMounted } from 'vue';
+import { SubmitDataItem } from '@/types';
 
 // 支持通过属性传递需要数据和方法
 const props = defineProps({
-  schema: Array as PropType<Item[]>,
+  schema: Array as PropType<SubmitDataItem[]>,
   actionText: { default: '验证' },
   smsCodeTip: Object,
   fnSendCode: Function,
@@ -48,14 +41,15 @@ const el = ref(null as unknown as Element)
 // 使用通过属性传递的外部参数
 let { schema, smsCodeTip, fnVerify, fnSendCode, onSuccess, onFail, asDialog, onClose } = props
 
-const loginData = reactive({} as { [key: string]: string })
+// 用户要提交的数据
+const submitData = reactive({} as { [key: string]: string })
 
 // 整理需要用户输入的数据，为了优化模板
-const otherInputs = ref([] as Item[])
+const otherInputs = ref([] as SubmitDataItem[])
 const codeInput = ref()
 if (schema && schema.length)
-  schema.forEach((item: Item) => {
-    if (item.type === 'code') {
+  schema.forEach((item: SubmitDataItem) => {
+    if (item.type === 'smscode') {
       codeInput.value = item
     } else {
       otherInputs.value.push(item)
@@ -74,7 +68,7 @@ const sendCode = () => {
 
 const verify = () => {
   if (typeof fnVerify === 'function') {
-    fnVerify(loginData).then((response: any) => {
+    fnVerify(submitData).then((response: any) => {
       let { code, result, msg } = response
       if (code !== 0) {
         sendCode()

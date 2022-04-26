@@ -1,7 +1,7 @@
 @import './index.scss';
 
 .tvu-sms-code__form {
-  @apply p-8 rounded bg-white grid grid-cols-1 gap-y-4;
+  @apply p-4 rounded bg-white grid grid-cols-1 gap-y-4;
 
   .tvu-sms-code__input,
   .tvu-sms-code__code {

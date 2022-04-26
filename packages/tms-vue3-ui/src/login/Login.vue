@@ -1,10 +1,10 @@
 <template>
   <div ref="el" class="tvu-login__form" :class="{ 'tvu-login__form--modal': asDialog }">
     <div class="tvu-login__input" v-for="(item, index) in otherInputs" :key="index">
-      <input :placeholder="item.placeholder" :type="item.type" v-model="loginData[item.key]" required />
+      <input :placeholder="item.placeholder" :type="item.type" v-model="submitData[item.key]" required />
     </div>
     <div class="tvu-login__captcha" v-if="captchaInput">
-      <input :placeholder="captchaInput.placeholder" v-model="loginData[captchaInput.key]" required />
+      <input :placeholder="captchaInput.placeholder" v-model="submitData[captchaInput.key]" required />
       <div ref="elCaptcha" :style="{ width: '150px', height: '44px' }"></div>
       <button @click="refresh">刷新</button>
     </div>
@@ -18,23 +18,16 @@
   </div>
   <div class="tvu-login__modal" v-if="asDialog"></div>
 </template>
-
 <script setup lang="ts">
 import { reactive, PropType, ref, nextTick, onMounted } from 'vue';
-
-// 调用方指定的登录字段定义
-interface Item {
-  key: string
-  type: string
-  placeholder: string
-}
+import { SubmitDataItem, CaptchaResponse, LoginResponse } from '@/types';
 
 // 支持通过属性传递需要数据和方法
 const props = defineProps({
-  schema: Array as PropType<Item[]>,
+  schema: Array as PropType<SubmitDataItem[]>,
   loginTip: Object,
-  fnCaptcha: Function,
-  fnToken: Function,
+  fnCaptcha: Function as PropType<() => Promise<CaptchaResponse>>,
+  fnLogin: Function as PropType<(data: { [key: string]: any }) => Promise<LoginResponse>>,
   onSuccess: { type: Function, default: () => { } },
   onFail: { type: Function, default: () => { } },
   asDialog: { type: Boolean, default: false },
@@ -48,49 +41,51 @@ const el = ref(null as unknown as Element)
 const elCaptcha = ref(null as unknown as Element)
 
 // 使用通过属性传递的外部参数
-let { schema, loginTip, fnToken, fnCaptcha, onSuccess, onFail, asDialog, onClose } = props
+let { schema, loginTip, fnLogin, fnCaptcha, onSuccess, onFail, asDialog, onClose } = props
 
-const loginData = reactive({} as { [key: string]: string })
+// 用户提交的数据
+const submitData = reactive({} as { [key: string]: string })
 
 // 整理需要用户输入的数据，为了优化模板
-const otherInputs = ref([] as Item[])
+const otherInputs = ref([] as SubmitDataItem[])
 const captchaInput = ref()
 if (schema && schema.length)
-  schema.forEach((item: Item) => {
-    if (item.type === 'code') {
+  schema.forEach((item: SubmitDataItem) => {
+    if (item.type === 'captcha') {
       captchaInput.value = item
     } else {
       otherInputs.value.push(item)
     }
   })
 
+/** 刷新验证码*/
 const refresh = () => {
-  if (elCaptcha.value && typeof fnCaptcha === 'function') {
-    fnCaptcha().then((response: any) => {
-      let { code, result } = response
+  if (elCaptcha?.value && typeof fnCaptcha === 'function') {
+    fnCaptcha().then((response: CaptchaResponse) => {
+      let { code, captcha } = response
       if (code !== 0) {
-        result =
-          '<div style="background:#f5f5f5;color:red;text-align:center;font-size:14px;line-height:44px;">获取错误</div>'
+        elCaptcha.value.innerHTML = '获取失败'
+      } else {
+        elCaptcha.value.innerHTML = captcha
       }
-      elCaptcha!.value.innerHTML = result
     })
   }
 }
-
+/*执行登录操作*/
 const login = () => {
-  if (typeof fnToken === 'function') {
-    fnToken(loginData).then((response: any) => {
-      let { code, result, msg } = response
+  if (typeof fnLogin === 'function') {
+    fnLogin(submitData).then((response: LoginResponse) => {
+      let { code, msg } = response
       if (code !== 0) {
         refresh()
-        // TODO 如何解决错误信息提示？
+        // TODO 需要解决错误信息提示？
         return onFail(response)
       }
-      onSuccess(result.access_token)
+      onSuccess(response)
     })
   }
 }
-
+/*关闭对话框*/
 const close = () => {
   if (typeof onClose === 'function') {
     onClose()

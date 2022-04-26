@@ -13,7 +13,7 @@
 <script setup lang="ts">
 import { Register } from 'tms-vue3-ui'
 import 'tms-vue3-ui/dist/es/register/style/tailwind.scss'
-import { getCaptcha as fnCaptcha, fnRegister, loginDataSchema as schema } from '../data/register'
+import { fnCaptcha, fnRegister, schema } from '@/data/register'
 
 const showRegisterDialog = () => {
   Register.open({ schema, fnCaptcha, fnRegister })

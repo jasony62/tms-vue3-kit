@@ -3,25 +3,27 @@
   <div>
     <p>页面引入组件方式使用登录框：</p>
     <div class="w-2/5">
-      <tms-login :schema="schema" :fn-captcha="fnCaptcha" :fn-token="fnToken" :on-success="fnSuccessToken"
-        :on-fail="fnFailToken">
-      </tms-login>
+      <login :schema="schema" :fn-captcha="fnCaptcha" :fn-login="fnLogin" :on-success="fnSuccessLogin"
+        :on-fail="fnFailLogin">
+      </login>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { Login as TmsLogin } from 'tms-vue3-ui'
+import { Login } from 'tms-vue3-ui'
 import 'tms-vue3-ui/dist/es/login/style/tailwind.scss'
-import { getCaptcha as fnCaptcha, getToken as fnToken, loginDataSchema as schema } from '../data/login'
+import { schema, fnCaptcha, fnLogin, LoginResponse } from '@/data/login'
 
 const showLoginDialog = () => {
-  TmsLogin.open({ schema, fnCaptcha, fnToken })
+  Login.open({ schema, fnCaptcha, fnLogin })
 }
-const fnSuccessToken = (token: string) => {
-  console.log('已获得token:' + token)
+
+const fnSuccessLogin = (response: LoginResponse) => {
+  console.info('登录成功', response)
 }
-const fnFailToken = (msg: string) => {
-  console.log(msg)
+
+const fnFailLogin = (response: LoginResponse) => {
+  console.info('登录失败', response)
 }
 </script>
