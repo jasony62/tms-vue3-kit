@@ -1,8 +1,4 @@
-import {
-  SubmitDataItem,
-  CaptchaResponse,
-  LoginResponse,
-} from 'tms-vue3-ui/dist/es/types'
+import { SubmitDataItem, CaptchaResponse, LoginResponse } from 'tms-vue3-ui'
 
 import captcha from './captcha'
 

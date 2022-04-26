@@ -15,6 +15,7 @@
 
 <script>
 import { JsonSchemaFactory } from 'tms-vue3-ui'
+import 'tms-vue3-ui/dist/es/json-schema/style/tailwind.scss'
 
 const JsonSchema = JsonSchemaFactory()
 
@@ -36,15 +37,15 @@ export default {
             title: '上传图片和文件',
             items: {
               type: 'object',
-              properties: {
-                name: { title: '名字', type: 'string' },
-                url: { title: '地址', type: 'string' }
-              },
               format: 'file',
               formatAttrs: {
                 accept: 'image/png,image/jpeg',
                 size: '20MB',
                 limit: 2
+              },
+              properties: {
+                name: { title: '名字', type: 'string' },
+                url: { title: '地址', type: 'string' }
               }
             }
           },
@@ -61,6 +62,7 @@ export default {
           },
           additionalName: {
             type: 'array',
+            items: { type: 'string' },
             default: ['a', 'b'],
             enum: [
               { label: '选项1', value: 'a' },

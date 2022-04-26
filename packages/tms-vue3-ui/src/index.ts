@@ -8,6 +8,8 @@ import Register from './register'
 import SmsCode from './sms-code'
 import JsonSchema, { factory } from './json-schema'
 
+export * from './types'
+
 export {
   Frame,
   Text,
