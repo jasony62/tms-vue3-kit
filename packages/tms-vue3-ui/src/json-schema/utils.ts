@@ -85,7 +85,7 @@ function walk(
   name: string,
   node: { [k: string]: any },
   stack: SchemaField[],
-  required: string[],
+  // required: string[],
   dependencies: any,
   eventDependencies: any
 ) {
@@ -94,7 +94,7 @@ function walk(
     name,
     attrs: { type: '' },
   }
-  field.attrs.required = required?.includes(name) ?? false
+  // field.attrs.required = required?.includes(name) ?? false
   field.dependencies = dependencies?.[name]
   field.eventDependency = eventDependencies?.[name]
 
@@ -115,7 +115,7 @@ function walk(
           k,
           node.properties[k],
           stack,
-          node.required,
+          // node.required,
           node.dependencies,
           node.eventDependencies
         )
@@ -132,7 +132,7 @@ function walk(
               k3,
               items.properties[k3],
               stack,
-              [],
+              // [],
               null,
               null
             )
@@ -154,7 +154,7 @@ export class FlattenJSONSchema {
 
   flatten(root: { [k: string]: any }): FlattenJSONSchema {
     this.fields.splice(0, this.fields.length)
-    walk('', '$', root, this.fields, [], null, null)
+    walk('', '$', root, this.fields, null, null)
     return this
   }
 
