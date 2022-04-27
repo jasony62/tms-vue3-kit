@@ -11,8 +11,9 @@ export const Type2Format = {
     { value: 'url', label: '链接' },
     { value: 'score', label: '打分' },
   ],
-}
-type EnumGroups = {
+} as { [k: string]: { value: string; label: string }[] }
+
+export type EnumGroup = {
   id: any
   label: string
   assocEnum: {
@@ -20,29 +21,57 @@ type EnumGroups = {
     value: any
   }
 }
-type EnumOptions = {
+
+export type EnumOption = {
   label: string
   value: any
   group?: any
 }
 
-export type SchemaFieldAttrs = {
+export type EventRule = {
+  url: string
+  params: string[]
+  type: string
+}
+
+export type FieldDepRule = {
+  property: string
+  value: string
+}
+
+export type FieldDepRuleSet = {
+  dependencyRules: {
+    [k: string]: { rules: FieldDepRule[]; operator: string }
+  }
+  operator: string
+}
+
+export type FieldDep = {
+  [k: string]: FieldDepRuleSet
+}
+
+export type FieldAttrs = {
   type: string
   title?: string
   description?: string
   format?: string
   required?: boolean
-  enum?: EnumOptions[]
-  enumGroups?: EnumGroups[]
+  enum?: EnumOption[]
+  enumGroups?: EnumGroup[]
+  minItems?: number
+  maxItems?: number
   default?: any
+  attachment?: any
+  groupable?: boolean
 }
 
 export type SchemaField = {
   path: string
   name: string
-  attrs: SchemaFieldAttrs
+  attrs: FieldAttrs
   items?: { type: string; [k: string]: any }
-  dependencies?: any
+  dependencies?: FieldDepRuleSet
+  eventDependency?: { rule: EventRule }
 }
 
 function fieldFullname(field: SchemaField) {
@@ -57,7 +86,8 @@ function walk(
   node: { [k: string]: any },
   stack: SchemaField[],
   required: string[],
-  dependencies: any
+  dependencies: any,
+  eventDependencies: any
 ) {
   let field: SchemaField = {
     path,
@@ -66,6 +96,7 @@ function walk(
   }
   field.attrs.required = required?.includes(name) ?? false
   field.dependencies = dependencies?.[name]
+  field.eventDependency = eventDependencies?.[name]
 
   stack.push(field)
 
@@ -85,7 +116,8 @@ function walk(
           node.properties[k],
           stack,
           node.required,
-          node.dependencies
+          node.dependencies,
+          node.eventDependencies
         )
       })
     } else if ('items' === k) {
@@ -101,6 +133,7 @@ function walk(
               items.properties[k3],
               stack,
               [],
+              null,
               null
             )
           })
@@ -121,7 +154,7 @@ export class FlattenJSONSchema {
 
   flatten(root: { [k: string]: any }): FlattenJSONSchema {
     this.fields.splice(0, this.fields.length)
-    walk('', '$', root, this.fields, [], null)
+    walk('', '$', root, this.fields, [], null, null)
     return this
   }
 

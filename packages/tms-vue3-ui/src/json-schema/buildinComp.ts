@@ -3,26 +3,6 @@ import { defineComponent, h } from 'vue'
  * 依赖的组件
  */
 const components = {
-  tabs: defineComponent({
-    render() {
-      return h('div', {}, this.$slots.default?.())
-    },
-  }),
-  tabPane: defineComponent({
-    render() {
-      return h('div', {}, this.$slots.default?.())
-    },
-  }),
-  tree: defineComponent({
-    render() {
-      return h('div', {}, this.$slots.default?.())
-    },
-  }),
-  form: defineComponent({
-    render() {
-      return h('div', {}, this.$slots.default?.())
-    },
-  }),
   formItem: defineComponent({
     props: ['label'],
     render() {
@@ -77,11 +57,6 @@ const components = {
       return h('div', {}, [h('input', inputProps), h('div', {}, this.label)])
     },
   }),
-  checkboxGroup: defineComponent({
-    render() {
-      return h('div', {}, this.$slots.default?.())
-    },
-  }),
   select: defineComponent({
     props: ['modelValue'],
     emits: ['update:modelValue'],
@@ -112,18 +87,6 @@ const components = {
 
 /**内置组件实现*/
 const BuildinComponents: { [k: string]: { [k: string]: any } } = {
-  'tvu-tabs': {
-    ...components.tabs,
-  },
-  'tvu-tab-pane': {
-    ...components.tabPane,
-  },
-  'tvu-tree': {
-    ...components.tree,
-  },
-  'tvu-form': {
-    ...components.form,
-  },
   'tvu-form-item': {
     ...components.formItem,
   },
@@ -138,9 +101,6 @@ const BuildinComponents: { [k: string]: { [k: string]: any } } = {
   },
   'tvu-checkbox': {
     ...components.checkbox,
-  },
-  'tvu-checkbox-group': {
-    ...components.checkboxGroup,
   },
   'tvu-select': {
     ...components.select,
