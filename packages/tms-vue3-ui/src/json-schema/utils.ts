@@ -12,10 +12,18 @@ export const Type2Format = {
     { value: 'score', label: '打分' },
   ],
 }
-
+type EnumGroups = {
+  id: any
+  label: string
+  assocEnum: {
+    property: string
+    value: any
+  }
+}
 type EnumOptions = {
   label: string
   value: any
+  group?: any
 }
 
 export type SchemaFieldAttrs = {
@@ -25,6 +33,7 @@ export type SchemaFieldAttrs = {
   format?: string
   required?: boolean
   enum?: EnumOptions[]
+  enumGroups?: EnumGroups[]
   default?: any
 }
 
@@ -33,6 +42,13 @@ export type SchemaField = {
   name: string
   attrs: SchemaFieldAttrs
   items?: { type: string; [k: string]: any }
+  dependencies?: any
+}
+
+function fieldFullname(field: SchemaField) {
+  let fullname
+  fullname = field.path ? field.path + '.' : '' + field.name
+  return fullname
 }
 
 function walk(
@@ -40,7 +56,8 @@ function walk(
   name: string,
   node: { [k: string]: any },
   stack: SchemaField[],
-  required: string[]
+  required: string[],
+  dependencies: any
 ) {
   let field: SchemaField = {
     path,
@@ -48,11 +65,16 @@ function walk(
     attrs: { type: '' },
   }
   field.attrs.required = required?.includes(name) ?? false
+  field.dependencies = dependencies?.[name]
 
   stack.push(field)
 
   Object.keys(node).forEach((k) => {
-    if (/type|title|description|format|enum|default/.test(k)) {
+    if (
+      /type|title|description|format|enum|enumGroups|default|dependencies/.test(
+        k
+      )
+    ) {
       Object.assign(field.attrs, { [k]: node[k] })
     } else if ('properties' === k) {
       /*对象的子属性*/
@@ -62,7 +84,8 @@ function walk(
           k,
           node.properties[k],
           stack,
-          node.required
+          node.required,
+          node.dependencies
         )
       })
     } else if ('items' === k) {
@@ -77,17 +100,15 @@ function walk(
               k3,
               items.properties[k3],
               stack,
-              []
+              [],
+              null
             )
           })
         } else {
+          // 需要吗？允许携带不识别的数据？要考虑恢复的问题
           Object.assign(field.items, { [k2]: items[k2] })
         }
       })
-    } else if ('enum' === k) {
-    } else if ('default' === k) {
-    } else if ('dependencies' === k) {
-      Object.assign(field.attrs, { [k]: node[k] })
     }
   })
 }
@@ -100,15 +121,13 @@ export class FlattenJSONSchema {
 
   flatten(root: { [k: string]: any }): FlattenJSONSchema {
     this.fields.splice(0, this.fields.length)
-    walk('', '$', root, this.fields, root.required)
+    walk('', '$', root, this.fields, [], null)
     return this
   }
 
   /**获得属性完成的路径名 */
   fieldFullname(field: SchemaField) {
-    let fullname
-    fullname = field.path ? field.path + '.' : '' + field.name
-    return fullname
+    return fieldFullname(field)
   }
 
   /**指定属性下最后一个子节点的索引 */

@@ -1,10 +1,10 @@
 import JsonSchema from './Editor.vue'
 
-import { BuildinComponents } from './buildinComp'
+// import { BuildinComponents } from './buildinComp'
 
 export function factory() {
   /*指定使用的组件*/
-  JsonSchema.components = BuildinComponents
+  // JsonSchema.components = BuildinComponents
   return JsonSchema
 }
 

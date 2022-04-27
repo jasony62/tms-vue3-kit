@@ -60,6 +60,15 @@ export default {
           givenName: {
             type: 'string'
           },
+          prop1: {
+            type: 'array',
+            items: { type: 'string' },
+            enum: [
+              { label: '选项x', value: 'x' },
+              { label: '选项y', value: 'y' },
+              { label: '选项z', value: 'z' }
+            ]
+          },
           additionalName: {
             type: 'array',
             items: { type: 'string' },
@@ -67,6 +76,9 @@ export default {
             enum: [
               { label: '选项1', value: 'a' },
               { label: '选项2', value: 'b' }
+            ],
+            enumGroups: [
+              { id: "g1", label: "第1组", assocEnum: { property: 'prop1', value: 'y' } }
             ]
           },
           honorificPrefix: {
@@ -143,7 +155,7 @@ export default {
           }
         },
         dependencies: {
-          "name": {
+          "file": {
             "dependencyRules": {
               "1": { "rules": [{ "property": "resource", "value": "a" }, { "property": "methods", "value": "b" }], "operator": "and" },
               "2": { "rules": [{ "property": "areaCode", "value": "010" }], "operator": "and" }

@@ -65,7 +65,27 @@
           <tvu-checkbox v-model="hasEnum" @change="onChangeHasEnum"></tvu-checkbox>
         </tvu-form-item>
         <div class="tvu-jse__enum" v-if="hasEnum">
-          <tvu-jse-enum-config :field-attrs="currField.attrs"></tvu-jse-enum-config>
+          <tvu-form-item class="tvu-jse__enum-option" label="选择范围">
+            <div class="tvu-jse__input" v-for="(opt, i) in currField.attrs.enum" :key="i">
+              <tvu-input v-model="opt.value"></tvu-input>
+              <tvu-input v-model="opt.label"></tvu-input>
+              <tvu-button @click="onDelEnumOption(opt, i)">删除</tvu-button>
+            </div>
+            <tvu-button @click="onAddEnumOption">新增选项</tvu-button>
+          </tvu-form-item>
+          <tvu-form-item class="tvu-jse__input" label="至少选">
+            <tvu-input-number v-model="currField.attrs.minItems"></tvu-input-number>
+          </tvu-form-item>
+          <tvu-form-item class="tvu-jse__input" label="最多选">
+            <tvu-input-number v-model="currField.attrs.maxItems"></tvu-input-number>
+          </tvu-form-item>
+          <tvu-form-item class="tvu-jse__input" label="默认选项">
+            <tvu-checkbox-group>
+              <tvu-checkbox v-model="currField.attrs.default" class="tvu-jse__checkbox"
+                v-for="(v, i) in currField.attrs.enum" :key="i" :value="v.value" :label="v.label">
+              </tvu-checkbox>
+            </tvu-checkbox-group>
+          </tvu-form-item>
         </div>
         <tvu-form-item class="tvu-jse__input" label="默认值" v-if="!hasEnum">
           <tvu-input v-model="currField.attrs.default"></tvu-input>
@@ -78,16 +98,86 @@
         </tvu-form-item>
         <!-- <slot name="extKeywords" :schema="currField.attrs"></slot> -->
         <tvu-form-item class="tvu-jse__form__actions">
-          <tvu-button @click="onRemoveField">删除属性</tvu-button>
+          <tvu-button @click="onRemoveField">删除</tvu-button>
           <tvu-button @click="onAddField" v-if="['object', 'array'].includes(currField.attrs.type)">添加属性</tvu-button>
         </tvu-form-item>
       </tvu-form>
     </div>
     <!-- 开始：扩展定义 -->
     <div class="tvu-jse__extra">
-      <tvu-jse-dependency v-if="currField.dependencies" :dependencies="currField.dependencies">
-      </tvu-jse-dependency>
-      <tvu-jse-event-dependency></tvu-jse-event-dependency>
+      <tvu-tab-pane label="属性依赖" name="dependencies">
+        <div class="tvu-jse__dependencies">
+          <tms-flex v-for="(config, pname) in currField.attrs.dependencies" :key="pname" direction="column">
+            <tms-flex direction="column">
+              <span>{{ pname }}</span>
+              <tms-flex direction="column">
+                <tms-flex direction="column" v-for="(group, index) in config.dependencyRules" :key="index">
+                  <div v-for="(rule, index) in group.rules" :key="index">
+                    <tvu-form-item label="属性">
+                      <tvu-input v-model="rule.property"></tvu-input>
+                    </tvu-form-item>
+                    <tvu-form-item label="取值">
+                      <tvu-input v-model="rule.value"></tvu-input>
+                    </tvu-form-item>
+                  </div>
+                  <span>{{ group.operator }}</span>
+                </tms-flex>
+                <div>
+                  <span>{{ config.operator }}</span>
+                </div>
+              </tms-flex>
+            </tms-flex>
+            <div>
+              <tvu-button @click="onSetDependency(p)">修改</tvu-button>
+              <tvu-button @click="onDelDependency(p)">删除</tvu-button>
+            </div>
+          </tms-flex>
+          <div>
+            <tvu-button @click="onAddDependency">添加</tvu-button>
+          </div>
+        </div>
+      </tvu-tab-pane>
+      <tvu-tab-pane label="选项依赖" name="enumDependencies">
+        <tms-flex v-for="g in currField.attrs.enumGroups" :key="g.id">
+          <span>{{ g.label }}</span>
+          <span>{{ g.assocEnum.property }}</span>
+          <span>{{ g.assocEnum.value }}</span>
+        </tms-flex>
+        <div v-for="(v, i) in currField.attrs.enum" :key="i">
+          <div v-for="g in currField.attrs.enumGroups" :key="g.id">
+            <tms-flex v-if="g.id === v.group">
+              <span>{{ v.label }}</span>
+              <span>{{ g.label }}</span>
+            </tms-flex>
+          </div>
+        </div>
+        <div>
+          <tvu-button :disabled="!currField.attrs.enum" @click="onEditEnumDependency">
+            编辑选项依赖</tvu-button>
+        </div>
+      </tvu-tab-pane>
+      <tvu-tab-pane label="事件依赖" name="eventDependencies">
+        <tms-flex direction="column">
+          <tms-flex v-for="(config, p) in currField.attrs.eventDependencies" :key="p" direction="column">
+            <tms-flex>
+              <span>{{ p }}</span>
+              <tms-flex direction="column">
+                <span>{{ config.rule.url }}</span>
+                <tms-flex><span v-for="(value, key) in config.rule.params" :key="key">{{ value }}</span>
+                </tms-flex>
+                <span>{{ config.rule.type }}</span>
+              </tms-flex>
+            </tms-flex>
+            <div>
+              <tvu-button @click="onSetEventDependency(p)">修改</tvu-button>
+              <tvu-button @click="onDelEventDependency(p)">删除</tvu-button>
+            </div>
+          </tms-flex>
+          <div>
+            <tvu-button @click="onAddEventDependency">添加</tvu-button>
+          </div>
+        </tms-flex>
+      </tvu-tab-pane>
     </div>
     <!-- 结束：扩展定义 -->
   </div>
@@ -95,11 +185,9 @@
 
 <script>
 import { Type2Format, FlattenJSONSchema } from './utils'
-import { BuildinComponents } from "./buildinComp"
 import File from './formats/File.vue'
-import TvuJseDependency from './Dependency.vue'
-import TvuJseEnumConfig from './EnumConfig.vue'
-import TvuJseEventDependency from './EventDependency.vue'
+import { showAsDialog as fnShowDependencyDlg } from './DependencyDlg.vue'
+import { showAsEnumDialog as fnShowEnumDependencyDlg } from './EnumDependencyDIg.vue'
 import { showAsEventDialog as fnShowEventDependencyDlg } from './EventDependencyDIg.vue'
 
 const Format2Comp = {
@@ -108,12 +196,7 @@ const Format2Comp = {
 
 export default {
   name: 'tms-json-schema',
-  components: {
-    ...BuildinComponents,
-    TvuJseDependency,
-    TvuJseEnumConfig,
-    TvuJseEventDependency
-  },
+  components: {},
   props: { schema: Object, extendSchema: Function, onUpload: Function },
   data() {
     return {
@@ -200,6 +283,15 @@ export default {
         delete attrs.enumGroups
       }
     },
+    onAddEnumOption() {
+      this.currField.attrs.enum.push({
+        label: '新选项',
+        value: 'newKey',
+      })
+    },
+    onDelEnumOption(v, i) {
+      this.currField.attrs.enum.splice(i, 1)
+    },
     onClickField(field) {
       this.currField = field
       if (Array.isArray(field.attrs.enum)) {
@@ -219,6 +311,56 @@ export default {
       if (prev) {
         this.currField = prev
       }
+    },
+    /* 添加属性依赖规则 */
+    onAddDependency() {
+      let dependencies = this.currField.attrs.dependencies
+      fnShowDependencyDlg(this.currField.attrs).then((result) => {
+        if (result) {
+          let { property, dependencyRules, operator } = result
+          dependencies[property] = {
+            dependencyRules: dependencyRules,
+            operator,
+          }
+        }
+      })
+    },
+    /* 修改属性依赖规则 */
+    onSetDependency(propName) {
+      let dependencies = this.currField.attrs.dependencies
+      fnShowDependencyDlg(
+        this.currField.attrs,
+        propName,
+        dependencies[propName]
+      ).then((result) => {
+        if (result) {
+          let { property, dependencyRules, operator } = result
+          dependencies[property] = {
+            dependencyRules: dependencyRules,
+            operator,
+          }
+        }
+      })
+    },
+    /* 删除属性依赖规则 */
+    onDelDependency(propName) {
+      delete this.currField.attrs.dependencies[propName]
+    },
+    /* 编辑选项依赖规则 */
+    onEditEnumDependency() {
+      // let allProperties = this.form.node.data.parent.children
+      let allProperties = []
+      fnShowEnumDependencyDlg(
+        this.currField.attrs,
+        this.currField.name,
+        allProperties
+      ).then((result) => {
+        if (result) {
+          let { enumGroups } = result
+          this.currField.attrs.enumGroups = enumGroups
+          this.currField.attrs.enum = result.enum
+        }
+      })
     },
     /* 添加事件依赖规则 */
     onAddEventDependency() {
