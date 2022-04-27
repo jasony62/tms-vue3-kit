@@ -75,13 +75,13 @@ const refresh = () => {
 const register = () => {
   if (typeof fnRegister === 'function') {
     fnRegister(submitData).then((response: any) => {
-      let { code, result, msg } = response
+      let { code, msg } = response
       if (code !== 0) {
         refresh()
         // TODO 如何解决错误信息提示？
         return onFail(response)
       }
-      onSuccess(result.access_token)
+      onSuccess(response)
     })
   }
 }

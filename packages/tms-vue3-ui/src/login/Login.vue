@@ -5,7 +5,7 @@
     </div>
     <div class="tvu-login__captcha" v-if="captchaInput">
       <input :placeholder="captchaInput.placeholder" v-model="submitData[captchaInput.key]" required />
-      <div ref="elCaptcha" :style="{ width: '150px', height: '44px' }"></div>
+      <div ref="elCaptcha"></div>
       <button @click="refresh">刷新</button>
     </div>
     <div class="tvu-login__button">

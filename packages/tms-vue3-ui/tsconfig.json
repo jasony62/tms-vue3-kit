@@ -14,7 +14,9 @@
     "esModuleInterop": true,
     "lib": ["esnext", "dom"],
     "allowJs": true, // 允许编译器编译JS，JSX文件
-    "outDir": "./dist/es"
+    "outDir": "./dist/es",
+    "baseUrl": "./",
+    "paths": { "@/*": ["src/*"] }
   },
   "include": [
     "src/**/*.ts",

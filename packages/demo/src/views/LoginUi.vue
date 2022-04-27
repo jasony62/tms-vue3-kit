@@ -11,9 +11,9 @@
 </template>
 
 <script setup lang="ts">
-import { Login } from 'tms-vue3-ui'
+import { Login, LoginResponse } from 'tms-vue3-ui'
 import 'tms-vue3-ui/dist/es/login/style/tailwind.scss'
-import { schema, fnCaptcha, fnLogin, LoginResponse } from '@/data/login'
+import { schema, fnCaptcha, fnLogin } from '@/data/login'
 
 const showLoginDialog = () => {
   Login.open({ schema, fnCaptcha, fnLogin })
