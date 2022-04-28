@@ -140,6 +140,10 @@ import { JsonSchema } from 'tms-vue-ui'
 
 文件类型
 
+和 json path 的关系
+
+如何控制属性的顺序
+
 # 参考
 
 https://json-schema.org

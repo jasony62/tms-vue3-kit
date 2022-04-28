@@ -1,7 +1,12 @@
 {
   "name": "tms-vue3-ui",
-  "version": "0.0.17",
+  "version": "0.0.18",
   "description": "Vue3基础UI库。",
+  "keywords": [
+    "vue3",
+    "ts",
+    "JSONSchema"
+  ],
   "author": "jasony62",
   "license": "MIT",
   "main": "./dist/es/index.js",

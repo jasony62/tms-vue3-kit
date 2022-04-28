@@ -2,10 +2,11 @@
   <div class="json-schema-ui">
     <h3>编辑JSONSchema</h3>
     <div id="myJsonSchema">
-      <tms-json-schema ref="myJsonSchema" :schema="jsonSchema" :extendSchema="extendSchema" :on-upload="onUploadFile">
-        <template v-slot:extKeywords="props">
-          <div label="不可修改">
-            <input v-model="props.schema.readonly" />
+      <tms-json-schema ref="myJsonSchema" :schema="jsonSchema" :on-upload="onUploadFile">
+        <template #extattrs="{ attrs }">
+          <div>
+            <div>不允许编辑</div>
+            <input type="checkbox" v-model="attrs.readonly" />
           </div>
         </template>
       </tms-json-schema>
@@ -29,7 +30,6 @@ export default {
         $schema: 'http://json-schema.org/draft-07/schema#',
         description: 'A representation of a person, company, organization, or place',
         type: 'object',
-        required: ['familyName', 'givenName'],
         properties: {
           file: {
             readonly: true,
@@ -55,10 +55,12 @@ export default {
             enum: []
           },
           familyName: {
-            type: 'string'
+            type: 'string',
+            required: true
           },
           givenName: {
-            type: 'string'
+            type: 'string',
+            required: true
           },
           prop1: {
             type: 'array',
@@ -229,9 +231,6 @@ export default {
           }
         }
       },
-      extendSchema: (vm, schema) => {
-        schema.readonly = schema.readonly || false
-      }
     }
   },
   methods: {
