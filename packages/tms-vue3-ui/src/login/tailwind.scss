@@ -14,6 +14,8 @@
     input {
       @apply w-full;
     }
+    .tvu-login__password--icon{
+    }
   }
 
   .tvu-login__captcha {
@@ -23,13 +25,6 @@
       @apply flex-grow;
     }
 
-    button {
-      @apply rounded bg-blue-600 p-2 text-white shadow-md;
-    }
-
-    button:hover {
-      @apply bg-blue-700;
-    }
   }
 
   .tvu-login__button {
