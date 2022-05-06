@@ -254,6 +254,10 @@ export function getChild(data: { [x: string]: any }, ns: string[]) {
   return val
 }
 
+export function setChild(data: { [k: string]: any }, ns: string[], val: any) {
+  _.set(data, ns.join('.'), val)
+}
+
 export function initChild(data: { [x: string]: any }, ns: any[]) {
   if (ns.length === 1) {
     const ret = getExtendibleLeaf(data, ns[0], true)

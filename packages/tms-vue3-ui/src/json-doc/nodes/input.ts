@@ -1,5 +1,5 @@
 import { h, toRaw, VNode } from 'vue'
-import { initChild } from '../../utils'
+import { initChild, setChild } from '../../utils'
 import { FieldNode } from './field-node'
 import { components } from '.'
 import { FieldBoolean } from '../fields'
@@ -33,7 +33,7 @@ export class Input extends FieldNode {
         if (typeof newValue === 'string') updatedValue = newValue.trim()
         else updatedValue = newValue
       }
-      formModel[name] = updatedValue
+      setChild(this.ctx.editDoc, fieldName.split('.').slice(1), updatedValue)
     }
   }
   /**

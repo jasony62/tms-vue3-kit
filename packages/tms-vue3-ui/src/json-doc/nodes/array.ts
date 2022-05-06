@@ -49,7 +49,9 @@ export class ArrayNode extends FieldNode {
       components.button.tag,
       {
         onClick: () => {
-          console.log('添加数据')
+          if (Array.isArray(fieldValue)) {
+            fieldValue.push('')
+          }
         },
       },
       '添加'
