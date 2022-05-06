@@ -1,38 +1,5 @@
 import _ from 'lodash'
 
-export class Render {
-  /**
-   * 按层级创建节点
-   *
-   * @param {*} createElement
-   * @param {*} tags
-   * @param {*} options
-   * @param {*} children
-   */
-  static layered(
-    createElement: Function,
-    tags: string | string[],
-    options: { [x: string]: any },
-    children: any
-  ) {
-    if (typeof tags === 'string') tags = tags.split('.')
-    if (!Array.isArray(tags))
-      throw Error('[Render.wrapByTag] 参数(tags)类型错误，需要数组或字符串')
-    if (!options) options = {}
-
-    let tag, node
-    tag = tags.pop()
-    if (tag) {
-      node = createElement(tag, options[tag], children)
-      while (tags.length > 0) {
-        tag = tags.pop()
-        if (tag) node = createElement(tag, options[tag], [node])
-      }
-    }
-    return node
-  }
-}
-
 const RE_SEPARATOR = '\\.' // 字段分割符
 const RE_OBJECT_FIELD = '[\\w-]+' // 字段名
 const RE_ARRAY_INDEX = '\\[\\d+\\]'
