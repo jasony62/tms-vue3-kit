@@ -1,3 +1,5 @@
+import { SchemaIter, RawSchema, SchemaProp } from './model'
+
 export const Type2Format = {
   string: [
     { value: 'name', label: '姓名' },
@@ -13,164 +15,99 @@ export const Type2Format = {
   ],
 } as { [k: string]: { value: string; label: string }[] }
 
-export type EnumGroup = {
-  id: any
-  label: string
-  assocEnum: {
-    property: string
-    value: any
+const propToRaw = (prop: SchemaProp, parent: any): any => {
+  let { items, dependencies, eventDependency } = prop
+
+  let rawProp: any = {
+    ...prop.attrs,
   }
-}
 
-export type EnumOption = {
-  label: string
-  value: any
-  group?: any
-}
-
-export type EventRule = {
-  url: string
-  params: string[]
-  type: string
-}
-
-export type FieldDepRule = {
-  property: string
-  value: string
-}
-
-export type FieldDepRuleSet = {
-  dependencyRules: {
-    [k: string]: { rules: FieldDepRule[]; operator: string }
+  if (items) {
+    rawProp.items = items
   }
-  operator: string
-}
 
-export type FieldDep = {
-  [k: string]: FieldDepRuleSet
-}
-
-export type FieldAttrs = {
-  type: string
-  title?: string
-  description?: string
-  format?: string
-  required?: boolean
-  enum?: EnumOption[]
-  enumGroups?: EnumGroup[]
-  minItems?: number
-  maxItems?: number
-  default?: any
-  attachment?: any
-  groupable?: boolean
-}
-
-export type SchemaField = {
-  path: string
-  name: string
-  attrs: FieldAttrs
-  items?: { type: string; [k: string]: any }
-  dependencies?: FieldDepRuleSet
-  eventDependency?: { rule: EventRule }
-}
-
-function fieldFullname(field: SchemaField) {
-  let fullname
-  fullname = field.path ? field.path + '.' : '' + field.name
-  return fullname
-}
-
-function walk(
-  path: string,
-  name: string,
-  node: { [k: string]: any },
-  stack: SchemaField[],
-  // required: string[],
-  dependencies: any,
-  eventDependencies: any
-) {
-  let field: SchemaField = {
-    path,
-    name,
-    attrs: { type: '' },
-  }
-  // field.attrs.required = required?.includes(name) ?? false
-  field.dependencies = dependencies?.[name]
-  field.eventDependency = eventDependencies?.[name]
-
-  stack.push(field)
-
-  Object.keys(node).forEach((k) => {
-    if (
-      /type|title|description|format|enum|enumGroups|default|dependencies/.test(
-        k
-      )
-    ) {
-      Object.assign(field.attrs, { [k]: node[k] })
-    } else if ('properties' === k) {
-      /*对象的子属性*/
-      Object.keys(node.properties).forEach((k) => {
-        walk(
-          `${path ? path + '.' : ''}${name}`,
-          k,
-          node.properties[k],
-          stack,
-          // node.required,
-          node.dependencies,
-          node.eventDependencies
-        )
-      })
-    } else if ('items' === k) {
-      field.items = { type: '' }
-      /*数组内元素的类型*/
-      let { items } = node
-      Object.keys(items).forEach((k2) => {
-        if (k2 === 'properties') {
-          Object.keys(items.properties).forEach((k3) => {
-            walk(
-              `${path ? path + '.' : ''}${name}.[]`,
-              k3,
-              items.properties[k3],
-              stack,
-              // [],
-              null,
-              null
-            )
-          })
-        } else {
-          // 需要吗？允许携带不识别的数据？要考虑恢复的问题
-          Object.assign(field.items, { [k2]: items[k2] })
-        }
-      })
+  /*子节点的数据集中放到父属性中*/
+  if (parent) {
+    if (dependencies) {
+      if (typeof parent.dependencies === 'undefined') parent.dependencies = {}
+      parent.dependencies[prop.name] = dependencies
     }
-  })
+    if (eventDependency) {
+      if (typeof parent.eventDependencies === 'undefined')
+        parent.eventDependencies = {}
+      parent.eventDependencies[prop.name] = eventDependency
+    }
+  }
+
+  return rawProp
 }
 
 export class FlattenJSONSchema {
-  fields: SchemaField[]
+  props: SchemaProp[]
   constructor() {
-    this.fields = []
+    this.props = []
   }
-
-  flatten(root: { [k: string]: any }): FlattenJSONSchema {
-    this.fields.splice(0, this.fields.length)
-    walk('', '$', root, this.fields, null, null)
+  // 将对象变为数组
+  flatten(root: RawSchema): FlattenJSONSchema {
+    const iter = new SchemaIter(root)
+    this.props = Array.from(iter)
     return this
   }
+  // 恢复成层级结构
+  unflatten() {
+    if (this.props.length === 0) throw Error('[fields]为空，无法进行数据转换')
 
-  /**获得属性完成的路径名 */
-  fieldFullname(field: SchemaField) {
-    return fieldFullname(field)
+    const root = this.props[0]
+    if (root.name !== '$' && root.path !== '')
+      throw Error('[fields]第1个节点不是根节点，无法进行数据转换')
+
+    /*处理根节点*/
+    const rootObj = propToRaw(root, null)
+
+    for (let i = 1; i < this.props.length; i++) {
+      let prop = this.props[i]
+
+      /**在对象查找或创建父节点。子属性总是在父属性的properties字段中 */
+      let { path, name } = prop
+      let pathsegs = path.split('.')
+      let parent = pathsegs.reduce((prev, seg) => {
+        // 根节点
+        if (seg === '$') {
+          return prev
+        }
+        // 父节点是数组类型，子节点加到父节点的items字段
+        if (seg === '[]') {
+          if (typeof prev.items === 'undefined') {
+            prev.items = {}
+          }
+          return prev.items
+        }
+        // 子节点加到父节点的properties字段中
+        if (typeof prev.properties === 'undefined') {
+          prev.properties = { [seg]: {} }
+        } else if (typeof prev.properties[seg] === 'undefined') {
+          prev.properties[seg] = {}
+        }
+        return prev.properties[seg]
+      }, rootObj)
+
+      /**在父对象中添加当前属性 */
+      let newProp = propToRaw(prop, parent)
+      /**加入父属性 */
+      if (typeof parent.properties === 'undefined') parent.properties = {}
+      parent.properties[name] = newProp
+    }
+
+    return rootObj
   }
 
   /**指定属性下最后一个子节点的索引 */
-  getLastChildIndex(field: SchemaField): number {
+  getLastChildIndex(prop: SchemaProp): number {
     let lastIndex = -1
-    let fullname = this.fieldFullname(field)
     let child
-    for (let i = 0; i < this.fields.length; i++) {
-      child = this.fields[i]
-      if (child.path.indexOf(fullname) === 0) {
+    for (let i = 0; i < this.props.length; i++) {
+      child = this.props[i]
+      if (child.path.indexOf(prop.fullname) === 0) {
         lastIndex = i
       }
     }
@@ -180,31 +117,33 @@ export class FlattenJSONSchema {
   /**
    * 在指定的属性下添加子属性
    */
-  addField(parent: SchemaField): SchemaField | boolean {
+  addProp(parent: SchemaProp): SchemaProp {
+    let newProp = new SchemaProp(parent.fullname, 'newKey')
+    newProp.attrs.type = 'string'
+
     let lastIndex = this.getLastChildIndex(parent)
     if (lastIndex !== -1) {
-      let newFiled: SchemaField = {
-        path: this.fieldFullname(parent),
-        name: 'newKey',
-        attrs: { type: 'string' },
-      }
-      this.fields.splice(lastIndex + 1, 0, newFiled)
-      return newFiled
+      // 作为最后1个子节点
+      this.props.splice(lastIndex + 1, 0, newProp)
+    } else {
+      // 父节点下的第1个节点
+      let parentIndex = this.props.indexOf(parent)
+      this.props.splice(parentIndex + 1, 0, newProp)
     }
 
-    return false
+    return newProp
   }
   /**
    * 删除指定的属性
    *
    * 根节点不允许删除
    */
-  removeField(field: SchemaField): SchemaField | boolean {
-    let childIndex = this.fields.indexOf(field)
+  removeProp(prop: SchemaProp): SchemaProp | boolean {
+    let childIndex = this.props.indexOf(prop)
     if (childIndex <= 0) return false
 
-    let prev = this.fields[childIndex - 1]
-    this.fields.splice(childIndex, 1)
+    let prev = this.props[childIndex - 1]
+    this.props.splice(childIndex, 1)
 
     return prev
   }

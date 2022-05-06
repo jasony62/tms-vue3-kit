@@ -12,6 +12,7 @@ export default defineConfig({
           libraryName: 'tms-vue3-ui',
           // esModule: true,
           resolveStyle: (name) => {
+            if (name === 'json-doc') return ''
             if (name === 'json-schema-factory')
               return `tms-vue3-ui/dist/es/json-schema/style/index.css`
             return `tms-vue3-ui/dist/es/${name}/style/index.css`

@@ -7,6 +7,7 @@ import Login from './login'
 import Register from './register'
 import SmsCode from './sms-code'
 import JsonSchema, { factory } from './json-schema'
+import JsonDoc from './json-doc'
 
 export * from './types'
 
@@ -21,4 +22,5 @@ export {
   SmsCode,
   JsonSchema,
   factory as JsonSchemaFactory,
+  JsonDoc,
 }
