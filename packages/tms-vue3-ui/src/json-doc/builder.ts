@@ -78,7 +78,6 @@ function createLeafNode(ctx: FormContext, prop: any): VNode {
 /**创建嵌套节点*/
 function createNestNode(ctx: FormContext, prop: any, children: VNode[]): VNode {
   const newField = createField(prop, {}, {})
-
   const node = prepareFieldNode(ctx, newField)
 
   if (prop.attrs.title) {

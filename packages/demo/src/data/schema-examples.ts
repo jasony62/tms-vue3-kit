@@ -14,7 +14,7 @@ export const CardSchema = {
       type: 'string',
     },
     additionalName: {
-      title: '其他名称（数组）',
+      title: '其他名称（基础类型数组）',
       type: 'array',
       items: {
         type: 'string',

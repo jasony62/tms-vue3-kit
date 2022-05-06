@@ -61,14 +61,19 @@ export class SchemaProp {
   eventDependency?: { rule: PropEventRule }
   attachment?: any
 
-  constructor(path: string, name: string) {
+  constructor(path: string, name: string, type?: string) {
     this.path = path
     this.name = name
-    this.attrs = { type: '' }
+    this.attrs = { type: type ?? '' }
   }
 
   get fullname(): string {
-    let fullname = (this.path ? this.path + '.' : '') + this.name
+    let fullname
+    if (/^\[.*\]$/.test(this.name)) {
+      fullname = (this.path ? this.path : '') + this.name
+    } else {
+      fullname = (this.path ? this.path + '.' : '') + this.name
+    }
     return fullname
   }
 }

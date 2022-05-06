@@ -127,7 +127,7 @@ import { JsonSchema } from 'tms-vue-ui'
 
 改变属性顺序
 
-数组类型
+支持数组类型题目
 
 如果类型是数组，必须包含`items`属性。
 
@@ -148,6 +148,14 @@ import { JsonSchema } from 'tms-vue-ui'
 和 json path 的关系
 
 如何控制属性的顺序
+
+通过 API 动态获取数据
+
+日期数据
+
+移动端自适应
+
+替换组件的机制（将表现和逻辑分离）
 
 # 参考
 

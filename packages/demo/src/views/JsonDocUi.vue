@@ -23,6 +23,7 @@ import { CardSchema } from '../data/schema-examples'
 
 const doc = {
   name: '张三',
+  additionalName: ['alice', 'bob']
 }
 const jsonDocEditor = ref<{ editing: () => string } | null>(null)
 

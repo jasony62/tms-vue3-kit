@@ -6,6 +6,7 @@ import { Textarea } from './textarea'
 import { Checkboxgroup } from './checkboxgroup'
 import { FileNode } from './file'
 import { DateTime } from './dateTime'
+import { ArrayNode } from './array'
 import { ObjectNode } from './object'
 import { LabelNode } from './label'
 import { FormNode } from './form'
@@ -20,7 +21,7 @@ const components: { [k: string]: any } = {
   title: { tag: 'h1', option },
   description: { tag: 'p', option },
   error: { tag: 'div', option },
-  form: { tag: 'form', option },
+  form: { tag: 'div', option },
   label: { tag: 'label', option },
   input: { tag: 'input', option },
   textarea: { tag: 'textarea', option },
@@ -31,6 +32,7 @@ const components: { [k: string]: any } = {
   checkbox: { tag: 'input', option },
   checkboxgroup: { tag: 'div', option },
   object: { tag: 'div', option },
+  array: { tag: 'div', option },
   file: { tag: 'div', option },
   button: {
     tag: 'button',
@@ -53,6 +55,7 @@ function prepareFieldNode(ctx: FormContext, field: Field): Node {
     case 'checkboxgroup':
       return new Checkboxgroup(ctx, field)
     case 'array':
+      return new ArrayNode(ctx, field)
     case 'object':
       return new ObjectNode(ctx, field)
     case 'file':
@@ -74,6 +77,7 @@ export {
   Textarea,
   Checkboxgroup,
   FileNode,
+  ArrayNode,
   ObjectNode,
   LabelNode,
   FormNode,

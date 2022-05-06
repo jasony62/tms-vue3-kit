@@ -16,7 +16,7 @@ export class LabelNode extends Node {
     const { field } = this
 
     const options = {
-      'schema-name': `${field.name}`,
+      name: field.name,
       class: ['tvu-jdoc__node tvu-jdoc__node--label'],
     }
 

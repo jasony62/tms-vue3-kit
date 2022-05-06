@@ -1,7 +1,5 @@
 import { SchemaProp, SchemaPropAttrs } from '@/json-schema/model'
 
-import { getChild } from '../utils'
-
 export const ARRAY_KEYWORDS: (keyof SchemaPropAttrs)[] = [
   'anyOf',
   'oneOf',
@@ -71,6 +69,10 @@ export abstract class Field {
 
   get schemaType() {
     return this._prop.attrs.type
+  }
+
+  get itemSchemaType() {
+    return this._prop.items?.type
   }
 
   get schemaRequired() {

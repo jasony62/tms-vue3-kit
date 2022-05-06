@@ -1,7 +1,7 @@
 import { h, nextTick, VNode } from 'vue'
 import { FormContext } from '../builder'
 import { Field } from '../fields'
-import { getChild } from '../utils'
+import { getChild } from '../../utils'
 import { components, Node } from './index'
 const option = { native: true }
 const defaultInput = { tag: 'input', option }

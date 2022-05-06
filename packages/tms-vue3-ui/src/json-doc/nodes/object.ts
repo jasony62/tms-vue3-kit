@@ -1,4 +1,4 @@
-import { deepClone } from '../utils'
+import { deepClone } from '../../utils'
 import { components } from './index'
 import { FieldNode } from './field-node'
 

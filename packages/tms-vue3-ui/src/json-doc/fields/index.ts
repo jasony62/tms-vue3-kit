@@ -15,8 +15,8 @@ import { RawSchema, SchemaProp } from '../../json-schema/model'
  */
 function createField(
   prop: SchemaProp,
-  refs: { [k: string]: RawSchema },
-  value: any
+  refs?: { [k: string]: RawSchema },
+  value?: any
 ): Field {
   let newField
   switch (prop.attrs.type) {

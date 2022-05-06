@@ -1,5 +1,4 @@
 import { RawSchema, SchemaProp } from '../../json-schema/model'
-import { components } from '../nodes'
 import { Field } from './field'
 
 export class FieldObject extends Field {
@@ -8,13 +7,13 @@ export class FieldObject extends Field {
   // 子字段
   children: Field[] = []
 
-  constructor(prop: SchemaProp, refs: { [k: string]: RawSchema }) {
+  constructor(prop: SchemaProp, refs?: { [k: string]: RawSchema }) {
     super(prop)
     const { attrs, items } = prop
     this.multiple = attrs.type === 'array'
     this.type = attrs.type
     if (items?.$ref) {
-      if (refs[items.$ref]) {
+      if (refs?.[items.$ref]) {
         this.itemSchema = refs[items.$ref]
       }
     } else {

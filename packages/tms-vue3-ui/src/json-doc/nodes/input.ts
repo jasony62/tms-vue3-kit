@@ -1,6 +1,5 @@
 import { h, toRaw, VNode } from 'vue'
-import { initChild } from '../utils'
-import { Node } from './node'
+import { initChild } from '../../utils'
 import { FieldNode } from './field-node'
 import { components } from '.'
 import { FieldBoolean } from '../fields'
@@ -12,7 +11,6 @@ export class Input extends FieldNode {
    * 更新field对应的model数据
    */
   updateModel(newValue: any) {
-    console.log('updateModel...')
     const { field } = this
     const fieldName = field.fullname
     // 去掉开头的$
