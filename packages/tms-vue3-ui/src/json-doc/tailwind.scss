@@ -1,0 +1,19 @@
+.tvu-jdoc__root {
+  @apply flex flex-col gap-y-4;
+
+  .tvu-jdoc__form {
+    @apply flex flex-col gap-y-4;
+
+    .tvu-jdoc__node {
+      @apply flex flex-col gap-y-2;
+    }
+
+    input,
+    select,
+    textarea {
+      &.tvu-jdoc__input {
+        @apply rounded p-2 border-2 border-gray-200;
+      }
+    }
+  }
+}
