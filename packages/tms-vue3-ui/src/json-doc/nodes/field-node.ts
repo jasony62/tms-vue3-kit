@@ -1,8 +1,9 @@
 import { h, nextTick, VNode } from 'vue'
+import { getChild } from '@/utils'
 import { FormContext } from '../builder'
 import { Field } from '../fields'
-import { getChild } from '../../utils'
 import { components, Node } from './index'
+
 const option = { native: true }
 const defaultInput = { tag: 'input', option }
 const defaultGroup = { tag: 'div', option }
@@ -37,7 +38,10 @@ export abstract class FieldNode extends Node {
     super(ctx, getRawCreateArgs(field))
     this.field = field
     this.assocEnum()
-    /**通过API自动更新数据*/
+    /**
+     * 通过API自动更新数据
+     * 每次有数据更新都会调用，这样对性能有影响，是否可以缓存数据？
+     */
     nextTick(() => {
       this.outerValue()
     })

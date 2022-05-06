@@ -1,4 +1,4 @@
-import { RawSchema, SchemaProp } from '../../json-schema/model'
+import { RawSchema, SchemaProp } from '@/json-schema/model'
 import { Field } from './field'
 
 export class FieldObject extends Field {

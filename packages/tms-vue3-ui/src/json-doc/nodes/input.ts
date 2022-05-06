@@ -1,5 +1,5 @@
 import { h, toRaw, VNode } from 'vue'
-import { initChild, setChild } from '../../utils'
+import { getChild, setChild } from '@/utils'
 import { FieldNode } from './field-node'
 import { components } from '.'
 import { FieldBoolean } from '../fields'
@@ -18,9 +18,6 @@ export class Input extends FieldNode {
     const name = path.pop()
     if (name) {
       let updatedValue
-      // 获得底层数据对象
-      const formModel =
-        path.length > 0 ? initChild(this.ctx.editDoc, path) : this.ctx.editDoc
       /**设置对象的值*/
       if (field.schemaType === 'json') {
         try {
@@ -28,11 +25,16 @@ export class Input extends FieldNode {
           updatedValue = jsonValue
         } catch (e) {}
       } else if (field instanceof FieldBoolean) {
-        updatedValue = !formModel[name]
+        updatedValue = !getChild(
+          this.ctx.editDoc,
+          fieldName.split('.').slice(1)
+        )
+      } else if (typeof newValue === 'string') {
+        updatedValue = newValue.trim()
       } else {
-        if (typeof newValue === 'string') updatedValue = newValue.trim()
-        else updatedValue = newValue
+        updatedValue = newValue
       }
+      /**修改底层数据*/
       setChild(this.ctx.editDoc, fieldName.split('.').slice(1), updatedValue)
     }
   }
