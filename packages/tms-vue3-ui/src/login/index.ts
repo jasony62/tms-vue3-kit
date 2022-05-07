@@ -7,7 +7,6 @@ import Login from './Login.vue'
  * @param options
  */
 function showAsDialog(options: any) {
-  // let { schema, fnGetCaptcha, fnGetToken, loginTip } = options
   const root = document.createElement('div')
   document.body.appendChild(root)
   let app = createApp(Login, {

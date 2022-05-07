@@ -1,7 +1,9 @@
 {
   "name": "tms-vue3",
-  "private": true,
-  "version": "0.0.0",
+  "description": "Vue3基础工具库。",
+  "author": "jasony62",
+  "license": "MIT",
+  "version": "0.0.4",
   "main": "lib/index.js",
   "files": [
     "lib"

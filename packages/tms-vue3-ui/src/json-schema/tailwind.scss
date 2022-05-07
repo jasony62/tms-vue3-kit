@@ -1,0 +1,122 @@
+@import './index.scss';
+.tvu-jse__fields {
+  .tvu-jse__field {
+    @apply p-2;
+    &.tvu-jse__field--active {
+      @apply bg-gray-200;
+    }
+  }
+}
+.tvu-jse__field-form {
+  @apply p-4 rounded bg-white grid grid-cols-1 gap-y-4;
+
+  .tvu-jse__input {
+    input,
+    select {
+      @apply rounded p-2 border-2 border-gray-200;
+    }
+  }
+
+  .tvu-jse__checkbox {
+    @apply flex flex-row;
+  }
+
+  .tvu-jse__file-attrs {
+    @apply grid grid-cols-1 gap-y-4;
+  }
+
+  .tvu-jse__form__actions {
+    @apply flex flex-row;
+
+    button {
+      @apply w-full;
+    }
+  }
+
+  .tvu-jse__enum-config {
+    @apply flex flex-col gap-y-4;
+    .tvu-jse__enum-options {
+      @apply flex flex-col gap-y-2;
+
+      .tvu-jse__enum-options__header {
+        @apply flex flex-row gap-x-2;
+      }
+      .tvu-jse__enum-option {
+        @apply flex flex-row gap-y-2;
+
+        input,
+        select {
+          @apply rounded p-2 border-2 border-gray-200;
+        }
+      }
+      .tvu-jse__enum-option__actions {
+        @apply flex flex-row gap-y-2;
+      }
+    }
+    .tvu-jse__enum-range {
+      @apply flex flex-row gap-x-2;
+    }
+  }
+
+  button {
+    @apply bg-blue-600 text-white font-bold py-2 px-4 rounded;
+  }
+
+  button:hover {
+    @apply bg-blue-700;
+  }
+}
+.tvu-jse__dependencies {
+  @apply flex flex-col gap-y-4;
+
+  .tvu-jse__dependencies__rule-group {
+    @apply flex flex-col gap-y-2;
+  }
+
+  .tvu-jse__dependencies__rule {
+    @apply flex flex-row gap-x-2;
+
+    .tvu-jse__input {
+      @apply flex flex-row;
+
+      .tvu-jse__label {
+        @apply p-2 flex-initial;
+      }
+      input,
+      select {
+        @apply rounded p-2 border-2 border-gray-200;
+      }
+    }
+  }
+  .tvu-jse__dependencies__rule-group-actions {
+    @apply flex flex-row gap-x-2;
+
+    .tvu-jse__label {
+      @apply p-2 flex-initial;
+    }
+  }
+  button {
+    @apply bg-blue-600 text-white font-bold py-2 px-4 rounded;
+  }
+
+  button:hover {
+    @apply bg-blue-700;
+  }
+}
+
+.tvu-jse__event-config {
+  @apply flex flex-col gap-y-2;
+
+  input,
+  select {
+    @apply rounded p-2 border-2 border-gray-200;
+  }
+
+  button {
+    @apply bg-blue-600 text-white font-bold py-2 px-4 rounded;
+  }
+
+  button:hover {
+    @apply bg-blue-700;
+  }
+}

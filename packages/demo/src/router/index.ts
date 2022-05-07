@@ -2,9 +2,11 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 import Home from '../views/Home.vue'
 import LayoutUi from '../views/LayoutUi.vue'
-import ObjectInputUi from '../views/ObjectInputUi.vue'
 import LoginUi from '../views/LoginUi.vue'
+import RegisterUi from '../views/RegisterUi.vue'
+import SmsCodeUi from '../views/SmsCodeUi.vue'
 import JsonSchemaUi from '../views/JsonSchemaUi.vue'
+import JsonDocUi from '../views/JsonDocUi.vue'
 
 const VITE_BASE_URL =
   typeof import.meta.env.VITE_BASE_URL === 'string'
@@ -23,19 +25,29 @@ const routes = [
     component: LayoutUi,
   },
   {
-    path: '/object-input',
-    name: 'object-input',
-    component: ObjectInputUi,
-  },
-  {
     path: '/login',
     name: 'login',
     component: LoginUi,
   },
   {
+    path: '/register',
+    name: 'register',
+    component: RegisterUi,
+  },
+  {
+    path: '/sms-code',
+    name: 'sms-code',
+    component: SmsCodeUi,
+  },
+  {
     path: '/json-schema',
     name: 'json-schema',
     component: JsonSchemaUi,
+  },
+  {
+    path: '/json-doc',
+    name: 'json-doc',
+    component: JsonDocUi,
   },
 ]
 const router = createRouter({

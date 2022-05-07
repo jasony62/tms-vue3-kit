@@ -92,3 +92,10 @@ class BatchArg {
 | options               | 批次任务参数                | object   |        |
 | options.size          | 每个批次包含任务数          | number   | 1      |
 | options.firstCallback | 第 1 个批次执行完的回调函数 | function |        |
+
+# 批量执行参数（BatchArg）
+
+| 参数 | 说明           | 类型   | 默认值 |
+| ---- | -------------- | ------ | ------ |
+| page | 批量执行的位置 | number |        |
+| size | 每个批量的大小 | number |        |

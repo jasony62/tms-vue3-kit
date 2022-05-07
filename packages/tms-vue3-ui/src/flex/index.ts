@@ -37,23 +37,46 @@ export default function install(app: App) {
         : this.direction === 'column'
         ? 'stretch'
         : 'flex-start'
-      let items = this.$slots.default?.()
-      if (items && items.length) {
-        let items2 = items.map((item: any, index: any) => {
-          addStyleClass(item, 'class', 'tms-flex__item')
+
+      const vnodes = this.$slots.default?.()
+      if (vnodes?.length) {
+        vnodes.forEach((vnode: any, index: number) => {
           if (
-            this.elasticItems &&
-            this.elasticItems.length &&
-            this.elasticItems.includes(index)
+            typeof vnode.type === 'string' ||
+            typeof vnode.type === 'object'
           ) {
-            addStyleClass(item, 'class', 'tms-flex__item_elastic')
+            vnode.props ??= {}
+            addStyleClass(vnode.props, 'class', 'tms-flex__item')
+            if (
+              this.elasticItems &&
+              this.elasticItems.length &&
+              this.elasticItems.includes(index)
+            ) {
+              addStyleClass(vnode.props, 'class', 'tms-flex__item_elastic')
+            }
+          } else if (typeof vnode.type === 'symbol') {
+            /*子对象被fragment包裹的情况，例如：<div v-for=""></div>*/
+            if (typeof vnode.children.forEach === 'function') {
+              vnode.children.forEach((child: any, index: number) => {
+                child.props ??= {}
+                addStyleClass(child.props, 'class', 'tms-flex__item')
+                if (
+                  this.elasticItems &&
+                  this.elasticItems.length &&
+                  this.elasticItems.includes(index)
+                ) {
+                  addStyleClass(child.props, 'class', 'tms-flex__item_elastic')
+                }
+              })
+            } else {
+              console.warn(`不支持的vnode.children类型`, vnode.children)
+            }
+          } else {
+            console.warn(`不支持的vnode.type=${vnode.type}`, vnode)
           }
-          return h(item, { class: item.class })
         })
-        return h('div', { class: classes, style: { alignItems } }, items2)
-      } else {
-        return h('div', { class: classes, style: { alignItems } }, items)
       }
+      return h('div', { class: classes, style: { alignItems } }, vnodes)
     },
   })
 }

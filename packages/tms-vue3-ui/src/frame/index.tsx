@@ -1,4 +1,4 @@
-import { App } from 'vue'
+import { App, nextTick } from 'vue'
 
 export default function install(app: App) {
   app.component('tms-frame', {
@@ -82,13 +82,13 @@ export default function install(app: App) {
       this.isSmallScreen = window.screen && window.screen.width <= 768
       window.addEventListener('resize', () => {
         this.isSmallScreen = window.screen && window.screen.width <= 768
-        // _this.nextTick(() => {
-        //   this.adjust()
-        // })
+        nextTick(() => {
+          this.adjust()
+        })
       })
-      // this.nextTick(() => {
-      //   this.adjust()
-      // })
+      nextTick(() => {
+        this.adjust()
+      })
     },
     render() {
       let slots = this.$slots

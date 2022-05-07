@@ -61,7 +61,12 @@
 
 ```json
 {
-  "dependencies": { "file": { "rules": { "familyName": "1", "givenName": "2" }, "operator": "or" } }
+  "dependencies": {
+    "file": {
+      "rules": { "familyName": "1", "givenName": "2" },
+      "operator": "or"
+    }
+  }
 }
 ```
 
@@ -82,7 +87,11 @@
 ```json
 {
   "enumGroups": [
-    { "id": "选项组id", "label": "选项组名称", "assocEnum": { "property": "关联的属性id", "value": "关联属性的取值" } }
+    {
+      "id": "选项组id",
+      "label": "选项组名称",
+      "assocEnum": { "property": "关联的属性id", "value": "关联属性的取值" }
+    }
   ],
   "enum": [
     { "label": "选项1", "value": "选项1的值", "group": "选项组的id" },
@@ -90,6 +99,11 @@
   ]
 }
 ```
+
+## 动态数据
+
+v1 获得值
+v2 获得列表
 
 ## 使用组件
 
@@ -103,4 +117,46 @@ import { JsonSchema } from 'tms-vue-ui'
 
 > 注意在 JavaScript 中对象和数组是通过引用传入的，所以对于一个数组或对象类型的 prop 来说，在子组件中改变这个对象或数组本身将会影响到父组件的状态。
 
-参考：https://json-schema.org
+# 编辑规则
+
+删除属性
+
+修改属性名
+
+修改属性类型
+
+改变属性顺序
+
+支持数组类型题目
+
+如果类型是数组，必须包含`items`属性。
+
+必填项
+
+默认值
+
+数组类型的默认值
+
+支持根据默认值的类型自动推到`type`
+
+枚举值
+
+设置范围
+
+文件类型
+
+和 json path 的关系
+
+如何控制属性的顺序
+
+通过 API 动态获取数据
+
+日期数据
+
+移动端自适应
+
+替换组件的机制（将表现和逻辑分离）
+
+# 参考
+
+https://json-schema.org

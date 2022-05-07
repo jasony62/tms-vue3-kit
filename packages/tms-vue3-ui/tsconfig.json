@@ -14,15 +14,17 @@
     "esModuleInterop": true,
     "lib": ["esnext", "dom"],
     "allowJs": true, // 允许编译器编译JS，JSX文件
-    "outDir": "./dist/es"
+    "outDir": "./dist/es",
+    "baseUrl": "./",
+    "paths": { "@/*": ["src/*"] },
+    "types": ["jest"]
   },
   "include": [
     "src/**/*.ts",
     "src/**/*.js",
     "src/**/*.d.ts",
     "src/**/*.tsx",
-    "src/**/*.vue",
-    "src/login/index.tsc"
+    "src/**/*.vue"
   ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

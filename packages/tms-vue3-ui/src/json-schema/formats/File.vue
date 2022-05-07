@@ -1,19 +1,22 @@
 <template>
-  <div>
-    <tvu-form-item label="文件类型">
+  <div class="tvu-jse__file-attrs">
+    <tvu-form-item class="tvu-jse__input" label="文件类型">
       <tvu-input v-model="fileAccept" placeholder="标准格式，如'png,jpeg'"></tvu-input>
     </tvu-form-item>
-    <tvu-form-item label="文件最大">
+    <tvu-form-item class="tvu-jse__input" label="文件最大">
       <tvu-input v-model.number="fileSize" placeholder="请输入数字，默认以MB为单位"></tvu-input>
     </tvu-form-item>
-    <tvu-form-item label="文件个数">
+    <tvu-form-item class="tvu-jse__input" label="文件个数">
       <tvu-input v-model.number="fileLimit" placeholder="请输入数字，0无意义"></tvu-input>
     </tvu-form-item>
   </div>
 </template>
 <script>
+import { BuildinComponents } from "../buildinComp"
+
 export default {
-  name: 'file',
+  name: 'tvu-file-attr',
+  components: BuildinComponents,
   props: ['accept', 'size', 'limit'],
   defaultFormatAttrs() {
     return { accept: '', size: null, limit: null }

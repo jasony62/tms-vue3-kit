@@ -6,14 +6,14 @@
 
 通过组件调用时，支持以下 Props：
 
-| 参数           | 说明                             | 类型    | 默认值 |
-| -------------- | -------------------------------- | ------- | ------ |
-| schema         | JSONSchema 定义                  | Object  | -      |
-| value          | 要编辑的 json 文档对象           | Object  | -      |
-| fieldWrapClass | 输入控件的包裹类                 | String  | -      |
-| requireButtons | 是否显示表单操作按钮，例如：提交 | Boolean | true   |
-| oneWay         | 传入数据是单向的，不会被修改     | Boolean | true   |
-| isSubmit       | 是否提交，若已提交则置为loading状态，防止多次提交     | Boolean | false   |
+| 参数           | 说明                                                | 类型    | 默认值 |
+| -------------- | --------------------------------------------------- | ------- | ------ |
+| schema         | JSONSchema 定义                                     | Object  | -      |
+| value          | 要编辑的 json 文档对象                              | Object  | -      |
+| fieldWrapClass | 输入控件的包裹类                                    | String  | -      |
+| requireButtons | 是否显示表单操作按钮，例如：提交                    | Boolean | true   |
+| oneWay         | 传入数据是单向的，不会被修改                        | Boolean | true   |
+| isSubmit       | 是否提交，若已提交则置为 loading 状态，防止多次提交 | Boolean | false  |
 
 必须传入`schema`对象。支持`v-model`传递要编辑的 json 文档。
 
@@ -111,7 +111,11 @@ import { ElJsonDoc } from 'tms-vue-ui'
 ```
 
 ```html
-<tms-el-json-doc :schema="schema" :doc="doc" v-on:submit="jsonDocSubmit"></tms-el-json-doc>
+<tms-el-json-doc
+  :schema="schema"
+  :doc="doc"
+  v-on:submit="jsonDocSubmit"
+></tms-el-json-doc>
 ```
 
 | 控件名称      | 说明                                        | 默认组件          |
@@ -140,3 +144,7 @@ import { ElJsonDoc } from 'tms-vue-ui'
 | jsondoc       | 编辑`array`和`object`中的子文档时使用的组件 | tms-el-json-doc   |
 | array         | 不限制输入长度的数组，数组中必须是对象      | -                 |
 | object        | 不限制字段数量和名称的独享                  | -                 |
+
+# 单元测试
+
+# 其它
