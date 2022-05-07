@@ -62,7 +62,7 @@ export class JSONSchemaBuilder {
 
   /**将对象变为数组*/
   flatten(root: RawSchema): JSONSchemaBuilder {
-    const iter = new SchemaIter(root)
+    const iter = new SchemaIter(root, this.rootName)
     this.props = Array.from(iter)
     return this
   }

@@ -40,19 +40,12 @@
   </div>
 </template>
 
-<script lang="ts">
-import { PropType } from "vue";
-import { BuildinComponents } from "./buildinComp"
-import { FieldDepRuleSet, FieldDepRule } from "./utils";
-
-export default {
-  name: 'tvu-jse-dependency',
-  components: BuildinComponents,
-}
-</script>
 <script setup lang="ts">
+import { PropType } from "vue";
+import { PropDepRuleSet, PropDepRule } from "./model";
+
 const props = defineProps(
-  { dependencies: { type: Object as PropType<FieldDepRuleSet>, required: true } }
+  { dependencies: { type: Object as PropType<PropDepRuleSet>, required: true } }
 )
 
 const { dependencies } = props
@@ -68,11 +61,11 @@ const onDelRuleGroup = (groupKey: string) => {
   delete dependencies.dependencyRules[groupKey]
 }
 
-const onAddRule = (rules: FieldDepRule[]) => {
+const onAddRule = (rules: PropDepRule[]) => {
   const newRule = { property: "", value: "" }
   rules.push(newRule)
 }
-const onDelRule = (rules: FieldDepRule[], indexRule: number, groupKey: string) => {
+const onDelRule = (rules: PropDepRule[], indexRule: number, groupKey: string) => {
   rules.splice(indexRule, 1)
   if (rules.length === 0) onDelRuleGroup(groupKey)
 }

@@ -71,7 +71,7 @@
           <tvu-input v-model="data.currProp.attrs.default"></tvu-input>
         </tvu-form-item>
         <div v-if="onUpload && data.currProp.attrs.type === 'array' && data.currProp.items">
-          <tvu-jse-attachment :field-attrs="data.currProp.attrs" :on-upload="onUpload"></tvu-jse-attachment>
+          <tvu-jse-attachment :schema-prop="data.currProp" :on-upload="onUpload"></tvu-jse-attachment>
         </div>
         <tvu-jse-event-config v-if="data.currProp.eventDependency?.rule" :rule="data.currProp.eventDependency.rule">
         </tvu-jse-event-config>
@@ -82,7 +82,6 @@
           <tvu-button @click="onRemoveNode">删除属性</tvu-button>
           <tvu-button @click="onAddNode" v-if="['object', 'array'].includes(data.currProp.attrs.type)">添加属性
           </tvu-button>
-          <tvu-button @click="onPreview">预览</tvu-button>
         </tvu-form-item>
       </div>
     </div>
@@ -96,7 +95,6 @@
 </template>
 <script lang="ts">
 import { Type2Format, JSONSchemaBuilder, SchemaProp } from './builder'
-import { BuildinComponents } from "./buildinComp"
 import File from './formats/File.vue'
 import TvuJseDependency from './Dependency.vue'
 import TvuJseEnumConfig from './EnumConfig.vue'
@@ -107,7 +105,6 @@ import { computed, onMounted, reactive, ref, toRaw } from 'vue'
 export default {
   name: 'tms-json-schema',
   components: {
-    ...BuildinComponents,
     TvuJseDependency,
     TvuJseEnumConfig,
     TvuJseEventConfig
@@ -120,20 +117,20 @@ const Format2Comp = {
   file: File
 }
 
-const props = defineProps({ schema: Object, onUpload: Function })
+const props = defineProps({ schema: Object, onUpload: Function, rootName: { type: String, default: '' } })
 
-const builder = new JSONSchemaBuilder()
+const builder = new JSONSchemaBuilder(props.rootName)
 const nodes = ref([] as SchemaProp[])
 const data = reactive({ currProp: { name: '', attrs: {} } as SchemaProp })
 const hasEnum = ref(false)
 
 // 获得当前的JSONSchema数据
-const outcome = () => {
+const editing = () => {
   return builder.unflatten()
 }
 
 // 允许在父组件中获取
-defineExpose({ outcome })
+defineExpose({ editing })
 
 const compFormatAttrs = computed(() => {
   const format = data.currProp.items?.format
@@ -216,10 +213,6 @@ const onRemoveNode = () => {
   if (typeof prev === 'object') {
     data.currProp = prev
   }
-}
-
-const onPreview = () => {
-  console.log(outcome())
 }
 
 onMounted(() => {

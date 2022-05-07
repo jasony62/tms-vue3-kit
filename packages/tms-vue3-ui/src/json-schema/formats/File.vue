@@ -12,11 +12,8 @@
   </div>
 </template>
 <script>
-import { BuildinComponents } from "../buildinComp"
-
 export default {
   name: 'tvu-file-attr',
-  components: BuildinComponents,
   props: ['accept', 'size', 'limit'],
   defaultFormatAttrs() {
     return { accept: '', size: null, limit: null }

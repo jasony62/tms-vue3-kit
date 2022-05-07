@@ -40,18 +40,12 @@
     </div>
   </div>
 </template>
-<script lang="ts">
-import { BuildinComponents } from "./buildinComp"
-export default {
-  components: BuildinComponents
-}
-</script>
 <script setup lang="ts">
 import { PropType } from "vue";
-import { FieldAttrs, EnumOption, EnumGroup } from './utils'
+import { SchemaPropAttrs, EnumOption, EnumGroup } from './model'
 
 const props = defineProps({
-  fieldAttrs: { type: Object as PropType<FieldAttrs>, required: true }
+  fieldAttrs: { type: Object as PropType<SchemaPropAttrs>, required: true }
 })
 
 const { fieldAttrs } = props
