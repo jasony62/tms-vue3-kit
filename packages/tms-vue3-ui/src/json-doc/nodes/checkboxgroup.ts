@@ -18,11 +18,7 @@ export class Checkboxgroup extends Input {
         newValue = Number(newValue)
       }
 
-      const formModel = initChild(
-        this.ctx.editDoc,
-        fieldName.split('.').slice(1),
-        []
-      )
+      const formModel = initChild(this.ctx.editDoc, fieldName, [])
       const index = formModel.indexOf(newValue)
       if (index !== -1) formModel.splice(index, 1)
       else formModel.push(newValue)

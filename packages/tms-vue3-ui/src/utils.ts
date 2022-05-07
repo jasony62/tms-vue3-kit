@@ -216,19 +216,19 @@ export function getExtendibleLeaf(
   }
 }
 
-export function getChild(data: { [x: string]: any }, ns: string[]): any {
-  let val = _.get(data, ns.join('.'))
+export function getChild(data: { [x: string]: any }, ns: string): any {
+  let val = _.get(data, ns)
   return val
 }
 
-export function setChild(data: { [k: string]: any }, ns: string[], val: any) {
-  _.set(data, ns.join('.'), val)
+export function setChild(data: { [k: string]: any }, ns: string, val: any) {
+  _.set(data, ns, val)
   return val
 }
 
 export function initChild(
   data: { [x: string]: any },
-  ns: any[],
+  ns: string,
   initVal?: any
 ) {
   let val = getChild(data, ns) ?? setChild(data, ns, initVal)

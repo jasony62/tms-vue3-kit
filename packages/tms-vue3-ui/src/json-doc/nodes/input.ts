@@ -13,30 +13,22 @@ export class Input extends FieldNode {
   updateModel(newValue: any) {
     const { field } = this
     const fieldName = field.fullname
-    // 去掉开头的$
-    const path = fieldName.split('.').slice(1)
-    const name = path.pop()
-    if (name) {
-      let updatedValue
-      /**设置对象的值*/
-      if (field.schemaType === 'json') {
-        try {
-          let jsonValue = JSON.parse(newValue)
-          updatedValue = jsonValue
-        } catch (e) {}
-      } else if (field instanceof FieldBoolean) {
-        updatedValue = !getChild(
-          this.ctx.editDoc,
-          fieldName.split('.').slice(1)
-        )
-      } else if (typeof newValue === 'string') {
-        updatedValue = newValue.trim()
-      } else {
-        updatedValue = newValue
-      }
-      /**修改底层数据*/
-      setChild(this.ctx.editDoc, fieldName.split('.').slice(1), updatedValue)
+    let updatedValue
+    /**设置对象的值*/
+    if (field.schemaType === 'json') {
+      try {
+        let jsonValue = JSON.parse(newValue)
+        updatedValue = jsonValue
+      } catch (e) {}
+    } else if (field instanceof FieldBoolean) {
+      updatedValue = !getChild(this.ctx.editDoc, fieldName)
+    } else if (typeof newValue === 'string') {
+      updatedValue = newValue.trim()
+    } else {
+      updatedValue = newValue
     }
+    /**修改底层数据*/
+    setChild(this.ctx.editDoc, fieldName, updatedValue)
   }
   /**
    *

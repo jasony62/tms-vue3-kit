@@ -243,6 +243,11 @@ export class SchemaIter {
     this._rawSchema = rawSchema
     this._rootName = rootName
   }
+
+  get rootName() {
+    return this._rootName
+  }
+
   /**
    * 迭代访问JSONSchema的属性
    */

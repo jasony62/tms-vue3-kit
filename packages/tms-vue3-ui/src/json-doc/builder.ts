@@ -137,13 +137,6 @@ function createNestNode(ctx: FormContext, prop: any, children: VNode[]): VNode {
   const fieldNode = node.createElem(children)
 
   return fieldNode
-  // return h(
-  //   'div',
-  //   {
-  //     class: 'tvu-jdoc__nest',
-  //   },
-  //   [title, fieldNode]
-  // )
 }
 
 function getFieldVisible(prop: SchemaProp, doc: any): boolean {
@@ -268,7 +261,7 @@ export function build(ctx: FormContext): VNode[] {
   let prop: SchemaProp
   for (prop of iter) {
     // 不处理根节点
-    if (prop.path === '') continue
+    if (prop.name === iter.rootName) continue
     // 需要处理题目是否可见
     if (false === getFieldVisible(prop, editDoc)) {
       // 子字段也不能显示
@@ -288,8 +281,8 @@ export function build(ctx: FormContext): VNode[] {
     } else {
       // 创建节点，放入堆栈，或结果
       let node = createLeafNode(ctx, prop)
-      if (prop.path === '$') {
-        // 根属性的子属性，直接放入结果中
+      if (prop.path === iter.rootName) {
+        // 顶层属性，直接放入结果中
         nodes.push(node)
       } else {
         stack.addNode(prop, node)

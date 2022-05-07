@@ -52,7 +52,7 @@ export abstract class FieldNode extends Node {
   fieldValue() {
     const { field } = this
     const fieldName = field.fullname
-    let fieldValue = getChild(this.ctx.editDoc, fieldName.split('.').slice(1))
+    let fieldValue = getChild(this.ctx.editDoc, fieldName)
     fieldValue ??= field.value
 
     return fieldValue
