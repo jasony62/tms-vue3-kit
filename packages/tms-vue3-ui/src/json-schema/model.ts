@@ -227,21 +227,27 @@ function* _parseOne(
     }
   }
 }
+/**
+ * 根节点默认名称
+ */
+export const DEFAULT_ROOT_NAME = ''
 
 /**
  * JSONSchema对象迭代器
  */
 export class SchemaIter {
   private _rawSchema
+  private _rootName
 
-  constructor(rawSchema: any) {
+  constructor(rawSchema: any, rootName = DEFAULT_ROOT_NAME) {
     this._rawSchema = rawSchema
+    this._rootName = rootName
   }
   /**
    * 迭代访问JSONSchema的属性
    */
   *[Symbol.iterator]() {
     // 从根属性开始遍历
-    yield* _parseOne('$', this._rawSchema)
+    yield* _parseOne(this._rootName, this._rawSchema)
   }
 }

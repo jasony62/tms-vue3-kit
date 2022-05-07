@@ -95,7 +95,7 @@
   </div>
 </template>
 <script lang="ts">
-import { Type2Format, FlattenJSONSchema, SchemaProp } from './utils'
+import { Type2Format, JSONSchemaBuilder, SchemaProp } from './builder'
 import { BuildinComponents } from "./buildinComp"
 import File from './formats/File.vue'
 import TvuJseDependency from './Dependency.vue'
@@ -122,14 +122,14 @@ const Format2Comp = {
 
 const props = defineProps({ schema: Object, onUpload: Function })
 
-const FJS = new FlattenJSONSchema()
+const builder = new JSONSchemaBuilder()
 const nodes = ref([] as SchemaProp[])
 const data = reactive({ currProp: { name: '', attrs: {} } as SchemaProp })
 const hasEnum = ref(false)
 
 // 获得当前的JSONSchema数据
 const outcome = () => {
-  return FJS.unflatten()
+  return builder.unflatten()
 }
 
 // 允许在父组件中获取
@@ -207,12 +207,12 @@ const onClickNode = (field: SchemaProp) => {
 }
 
 const onAddNode = () => {
-  let child = FJS.addProp(toRaw(data.currProp))
+  let child = builder.addProp(toRaw(data.currProp))
   data.currProp = child
 }
 
 const onRemoveNode = () => {
-  let prev = FJS.removeProp(toRaw(data.currProp))
+  let prev = builder.removeProp(toRaw(data.currProp))
   if (typeof prev === 'object') {
     data.currProp = prev
   }
@@ -223,9 +223,9 @@ const onPreview = () => {
 }
 
 onMounted(() => {
-  FJS.flatten(JSON.parse(JSON.stringify(props.schema)))
-  nodes.value = FJS.props
-  data.currProp = FJS.props?.[0]
+  builder.flatten(JSON.parse(JSON.stringify(props.schema)))
+  nodes.value = builder.props
+  data.currProp = builder.props?.[0]
 })
 /**
  * 设置格式特定属性的编辑组件

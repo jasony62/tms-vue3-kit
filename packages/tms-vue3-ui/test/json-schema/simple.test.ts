@@ -1,4 +1,4 @@
-import { SampleSchema } from '../data/schema7'
+import { SampleSchema } from '../data/schema-simple'
 import { SchemaIter } from '../../src/json-schema/model'
 
 describe('处理JSONSchema', () => {

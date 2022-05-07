@@ -1,4 +1,4 @@
-import { SampleSchema } from '../data/schema7'
+import { SampleSchema } from '../data/schema-event'
 import { build } from '../../src/json-doc/builder'
 
 describe('通过API从外部获取值', () => {
