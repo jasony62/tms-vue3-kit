@@ -12,7 +12,6 @@
         <tms-flex direction="column">
           <router-link to="/">首页</router-link>
           <router-link to="/layout">布局组件</router-link>
-          <router-link to="/object-input">对象输入框</router-link>
           <router-link to="/login">登录框</router-link>
           <router-link to="/register">注册框</router-link>
           <router-link to="/sms-code">短信验证码</router-link>

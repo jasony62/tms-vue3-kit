@@ -2,7 +2,6 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 import Home from '../views/Home.vue'
 import LayoutUi from '../views/LayoutUi.vue'
-import ObjectInputUi from '../views/ObjectInputUi.vue'
 import LoginUi from '../views/LoginUi.vue'
 import RegisterUi from '../views/RegisterUi.vue'
 import SmsCodeUi from '../views/SmsCodeUi.vue'
@@ -24,11 +23,6 @@ const routes = [
     path: '/layout',
     name: 'layout',
     component: LayoutUi,
-  },
-  {
-    path: '/object-input',
-    name: 'object-input',
-    component: ObjectInputUi,
   },
   {
     path: '/login',

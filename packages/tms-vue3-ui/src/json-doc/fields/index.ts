@@ -1,10 +1,10 @@
+import { RawSchema, SchemaProp } from '@/json-schema/model'
 import { Field, ARRAY_KEYWORDS } from './field'
 import { FieldBoolean } from './boolean'
 import { FieldText } from './text'
 import { FieldArray } from './array'
 import { FieldFile } from './file'
 import { FieldObject } from './object'
-import { RawSchema, SchemaProp } from '../../json-schema/model'
 
 /**
  * 创建表单字段对象

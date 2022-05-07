@@ -4,14 +4,38 @@ import { h, VNode } from 'vue'
 import { SchemaProp } from '../../json-schema/model'
 import { createField } from '../fields'
 
+const itemAddVNode = (fieldValue: any[]) => {
+  return h(
+    components.button.tag,
+    {
+      onClick: () => {
+        if (Array.isArray(fieldValue)) {
+          fieldValue.push('')
+        }
+      },
+    },
+    '添加'
+  )
+}
+const itemRemoveVNode = (fieldValue: any[], index: number) => {
+  return h(
+    components.button.tag,
+    {
+      onClick: () => {
+        // 删除数组中的内容
+        fieldValue.splice(index, 1)
+      },
+    },
+    '删除'
+  )
+}
+
 export class ArrayNode extends FieldNode {
   options() {
     const { field } = this
-    // const { schema } = field
     const options = {
       type: field.type,
       name: field.name,
-      // value: fieldValue,
       class: ['tvu-jdoc__nest'],
     }
 
@@ -35,28 +59,19 @@ export class ArrayNode extends FieldNode {
             )
             let itemField = createField(itemProp)
             const node = prepareFieldNode(ctx, itemField)
-            itemVNodes.push(node.createElem())
+            const wrap = h('div', { class: ['tvu-jdoc__node__item-wrap'] }, [
+              node.createElem(),
+              itemRemoveVNode(fieldValue, index),
+            ])
+            itemVNodes.push(wrap)
           })
           break
       }
     }
 
     /**数组内容容器*/
-    const items = h('dev', { class: ['tvu-jdoc__node__items'] }, itemVNodes)
+    const items = h('div', { class: ['tvu-jdoc__node__items'] }, itemVNodes)
 
-    /**添加内部操作*/
-    const add = h(
-      components.button.tag,
-      {
-        onClick: () => {
-          if (Array.isArray(fieldValue)) {
-            fieldValue.push('')
-          }
-        },
-      },
-      '添加'
-    )
-
-    return [items, add]
+    return [items, itemAddVNode(fieldValue)]
   }
 }

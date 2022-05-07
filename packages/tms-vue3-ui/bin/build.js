@@ -22,6 +22,11 @@ const baseConfig = defineConfig({
   configFile: false,
   publicDir: false,
   plugins: [vue(), vueJsx()],
+  resolve: {
+    alias: {
+      '@': baseEntryDir,
+    },
+  },
 })
 // rollup配置
 const rollupOptions = {

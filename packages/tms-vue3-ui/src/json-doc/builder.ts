@@ -1,5 +1,5 @@
 import { h, VNode } from 'vue'
-import { SchemaIter, RawSchema, SchemaProp } from '../json-schema/model'
+import { SchemaIter, RawSchema, SchemaProp } from '@/json-schema/model'
 import { createField, Field } from './fields'
 import { LabelNode, FormNode, components, prepareFieldNode } from './nodes'
 
@@ -189,20 +189,6 @@ function getFieldVisible(prop: SchemaProp, doc: any): boolean {
 
   return visible
 }
-/**
- * 根据schema的定义初始化表单的model对象
- *
- * @param {Field} field
- */
-// function setModelValue(prop: SchemaProp, editDoc: any, value: any) {
-//   const ns = prop.fullname.split('.').slice(1)
-//   const vmValue = getChild(editDoc, ns)
-//   if (!vmValue) {
-//     const n = ns.pop()
-//     const ret = ns.length > 0 ? initChild(editDoc, ns) : editDoc
-//     if (n) ret[n] = field.value
-//   }
-// }
 
 class Stack {
   nodes: VNode[]

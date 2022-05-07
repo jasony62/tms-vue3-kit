@@ -1,8 +1,8 @@
 <script lang="ts">
-import BuildEditor from './builder'
 import { h, PropType, reactive, toRaw } from 'vue'
 import { RawSchema } from '@/json-schema/model';
-import { deepClone } from '../utils';
+import { deepClone } from '@/utils';
+import BuildEditor from './builder'
 
 export default {
   props: {

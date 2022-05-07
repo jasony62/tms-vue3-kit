@@ -1,38 +1,5 @@
 import _ from 'lodash'
 
-export class Render {
-  /**
-   * 按层级创建节点
-   *
-   * @param {*} createElement
-   * @param {*} tags
-   * @param {*} options
-   * @param {*} children
-   */
-  static layered(
-    createElement: Function,
-    tags: string | string[],
-    options: { [x: string]: any },
-    children: any
-  ) {
-    if (typeof tags === 'string') tags = tags.split('.')
-    if (!Array.isArray(tags))
-      throw Error('[Render.wrapByTag] 参数(tags)类型错误，需要数组或字符串')
-    if (!options) options = {}
-
-    let tag, node
-    tag = tags.pop()
-    if (tag) {
-      node = createElement(tag, options[tag], children)
-      while (tags.length > 0) {
-        tag = tags.pop()
-        if (tag) node = createElement(tag, options[tag], [node])
-      }
-    }
-    return node
-  }
-}
-
 const RE_SEPARATOR = '\\.' // 字段分割符
 const RE_OBJECT_FIELD = '[\\w-]+' // 字段名
 const RE_ARRAY_INDEX = '\\[\\d+\\]'
@@ -249,57 +216,23 @@ export function getExtendibleLeaf(
   }
 }
 
-export function getChild(data: { [x: string]: any }, ns: string[]) {
+export function getChild(data: { [x: string]: any }, ns: string[]): any {
   let val = _.get(data, ns.join('.'))
   return val
 }
 
 export function setChild(data: { [k: string]: any }, ns: string[], val: any) {
   _.set(data, ns.join('.'), val)
+  return val
 }
 
-export function initChild(data: { [x: string]: any }, ns: any[]) {
-  if (ns.length === 1) {
-    const ret = getExtendibleLeaf(data, ns[0], true)
-    if (ret === undefined) {
-      throw new TypeError(
-        'fail to init because namespace ' + ns[0] + ' = ' + data[ns[0]]
-      )
-    }
-    return ret
-  }
-  let parent = data
-  let obj = data[ns[0]]
-  if (obj === undefined) {
-    data[ns[0]] = {}
-    obj = data[ns[0]]
-  }
-  for (let i = 1; i < ns.length; i++) {
-    const n = ns[i]
-    const ret = getExtendibleLeaf(obj, n, true)
-    if (ret === undefined) {
-      throw new TypeError(
-        'fail to init because namespace ' +
-          ns.join('.') +
-          ' = ' +
-          obj +
-          '(' +
-          typeof obj +
-          ')'
-      )
-    }
-    parent = obj
-    obj = ret
-    if (parent[n] === undefined) {
-      throw new TypeError(
-        'fail to init because namespace ' +
-          ns.slice(0, i).join('.') +
-          ' = ' +
-          parent
-      )
-    }
-  }
-  return obj
+export function initChild(
+  data: { [x: string]: any },
+  ns: any[],
+  initVal?: any
+) {
+  let val = getChild(data, ns) ?? setChild(data, ns, initVal)
+  return val
 }
 
 export function formatVal(val: string | number) {
