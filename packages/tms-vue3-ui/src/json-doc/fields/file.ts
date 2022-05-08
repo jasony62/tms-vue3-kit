@@ -7,16 +7,9 @@ export class FieldFile extends Field {
   limit?: number
   size?: string
 
-  constructor(prop: SchemaProp, value: any) {
+  constructor(prop: SchemaProp) {
     super(prop)
     this.type = 'file'
-
-    /**设置默认值*/
-    this.value = Array.isArray(value)
-      ? value
-      : Array.isArray(this.value)
-      ? this.value
-      : []
 
     const { items } = prop
     if (items?.formatAttrs) {

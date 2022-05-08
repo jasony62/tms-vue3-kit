@@ -1,46 +1,7 @@
 import { h, VNode } from 'vue'
 import { SchemaIter, RawSchema, SchemaProp } from '@/json-schema/model'
 import { createField, Field } from './fields'
-import { LabelNode, FormNode, components, prepareFieldNode } from './nodes'
-
-function createLabelAndDesc(
-  ctx: FormContext,
-  field: Field,
-  fieldNode: any
-): VNode {
-  if (field.label) {
-    const labelNode = new LabelNode(ctx, field)
-    const labelNodes = []
-    if (components.label.option.native) {
-      labelNodes.push(
-        h(
-          'span',
-          {
-            'data-required-field': field.required ? 'true' : 'false',
-          },
-          field.label
-        )
-      )
-    }
-    labelNodes.push(fieldNode)
-    if (field.description) {
-      labelNodes.push(
-        h('small', { class: ['tvu-jdoc__input-desc'] }, field.description)
-      )
-    }
-
-    return labelNode.createElem(labelNodes)
-  } else {
-    const descNodes = []
-    descNodes.push(fieldNode)
-    if (field.description) {
-      descNodes.push(
-        h('small', { class: ['tvu-jdoc__input-desc'] }, field.description)
-      )
-    }
-    return h('div', { class: ['tvu-jdoc__node'] }, descNodes)
-  }
-}
+import { FieldWrap, FormNode, components, prepareFieldNode } from './nodes'
 
 function createWrapClass(labelAndDescNodes: VNode): VNode {
   // if (this.fieldWrapClass) {
@@ -58,11 +19,10 @@ function createWrapClass(labelAndDescNodes: VNode): VNode {
  * @param {object} field
  */
 function createFieldWrapNode(ctx: FormContext, field: Field): VNode {
-  const node = prepareFieldNode(ctx, field)
+  const fieldNode = prepareFieldNode(ctx, field)
 
-  const fieldNode = node.createElem()
-
-  const labelAndDesc = createLabelAndDesc(ctx, field, fieldNode)
+  const wrapNode = new FieldWrap(ctx, fieldNode)
+  const labelAndDesc = wrapNode.createElem()
 
   return createWrapClass(labelAndDesc)
 }
@@ -70,73 +30,68 @@ function createFieldWrapNode(ctx: FormContext, field: Field): VNode {
 /**创建叶节点*/
 function createLeafNode(ctx: FormContext, prop: any): VNode {
   /**创建和当前属性对应的field*/
-  const newField = createField(prop, {}, {})
+  const newField = createField(prop, {})
+
   // this.setModelValue(newField)
   return createFieldWrapNode(ctx, newField)
 }
 
 /**创建嵌套节点*/
 function createNestNode(ctx: FormContext, prop: any, children: VNode[]): VNode {
-  const newField = createField(prop, {}, {})
-  const node = prepareFieldNode(ctx, newField)
+  const newField = createField(prop, {})
+  const node = prepareFieldNode(ctx, newField, children)
 
-  if (prop.attrs.title) {
-    let title = h(
-      'div',
-      {
-        class: 'tvu-jdoc__nest-title',
-      },
-      prop.attrs.title
-    )
-    children.splice(0, 0, title)
-  }
+  const wrapNode = new FieldWrap(ctx, node)
+  const labelAndDesc = wrapNode.createElem()
 
-  if (
-    newField.type === 'file' &&
-    newField.attachment?.length &&
-    ctx.onFileDownload
-  ) {
-    let attachmentVNodes = []
-    attachmentVNodes.push(
-      h(
-        components.a.tag,
-        {
-          props: { underline: false },
-          attrs: { disabled: true },
-        },
-        '参考模板：'
-      )
-    )
-    newField.attachment.forEach((attach: any) => {
-      let element = h(
-        components.a.tag,
-        {
-          url: attach.url,
-          name: attach.name,
-          onClick: (event: any) => {
-            if (event.target.nodeType !== 1) return
-            let ele =
-              event.target.nodeName.toLowerCase() !== 'a'
-                ? event.target.parentNode
-                : event.target
-            let url = ele.getAttribute('url')
-            let name = ele.getAttribute('name')
-            ctx.onFileDownload?.(name, url)
-          },
-        },
-        attach.name
-      )
-      attachmentVNodes.push(element)
-    })
+  return createWrapClass(labelAndDesc)
 
-    children.push(
-      h('div', { class: ['tvu-jdoc__node__attachment'] }, attachmentVNodes)
-    )
-  }
+  // if (
+  //   newField.type === 'file' &&
+  //   newField.attachment?.length &&
+  //   ctx.onFileDownload
+  // ) {
+  //   let attachmentVNodes = []
+  //   attachmentVNodes.push(
+  //     h(
+  //       components.a.tag,
+  //       {
+  //         props: { underline: false },
+  //         attrs: { disabled: true },
+  //       },
+  //       '参考模板：'
+  //     )
+  //   )
+  //   newField.attachment.forEach((attach: any) => {
+  //     let element = h(
+  //       components.a.tag,
+  //       {
+  //         url: attach.url,
+  //         name: attach.name,
+  //         onClick: (event: any) => {
+  //           if (event.target.nodeType !== 1) return
+  //           let ele =
+  //             event.target.nodeName.toLowerCase() !== 'a'
+  //               ? event.target.parentNode
+  //               : event.target
+  //           let url = ele.getAttribute('url')
+  //           let name = ele.getAttribute('name')
+  //           ctx.onFileDownload?.(name, url)
+  //         },
+  //       },
+  //       attach.name
+  //     )
+  //     attachmentVNodes.push(element)
+  //   })
 
-  const fieldNode = node.createElem(children)
+  //   children.push(
+  //     h('div', { class: ['tvu-jdoc__node__attachment'] }, attachmentVNodes)
+  //   )
+  // }
 
-  return fieldNode
+  // const fieldNode = node.createElem(children)
+
+  // return fieldNode
 }
 
 function getFieldVisible(prop: SchemaProp, doc: any): boolean {
@@ -258,10 +213,12 @@ export function build(ctx: FormContext): VNode[] {
   let stack = new Stack(nodes, ctx)
 
   // 依次处理JSONSchema的属性
+
   let prop: SchemaProp
   for (prop of iter) {
     // 不处理根节点
     if (prop.name === iter.rootName) continue
+
     // 需要处理题目是否可见
     if (false === getFieldVisible(prop, editDoc)) {
       // 子字段也不能显示

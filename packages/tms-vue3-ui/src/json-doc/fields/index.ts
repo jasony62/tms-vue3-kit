@@ -11,12 +11,10 @@ import { FieldObject } from './object'
  *
  * @param prop JSONSchema属性
  * @param refs
- * @param value 初始值
  */
 function createField(
   prop: SchemaProp,
-  refs?: { [k: string]: RawSchema },
-  value?: any
+  refs?: { [k: string]: RawSchema }
 ): Field {
   let newField
   switch (prop.attrs.type) {
@@ -27,7 +25,7 @@ function createField(
       newField = ARRAY_KEYWORDS.some((kw) => prop.hasOwnProperty(kw))
         ? new FieldArray(prop)
         : prop.items?.format === 'file'
-        ? new FieldFile(prop, value)
+        ? new FieldFile(prop)
         : new FieldObject(prop, refs)
       break
     case 'object':

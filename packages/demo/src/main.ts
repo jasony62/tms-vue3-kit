@@ -13,7 +13,13 @@ import './index.css'
 const app = createApp(App)
 app.use(router)
 
-app.use(TmsAxiosPlugin).use(Frame).use(Flex).use(Card).use(Text).use(JsonSchema)
+app
+  .use(TmsAxiosPlugin)
+  .use(Frame)
+  .use(Flex)
+  .use(Card)
+  .use(Text)
+  .use(JsonSchema.install)
 
 // 注意不需要new，返回的不是Class，是工厂方法
 let name = 'tms-axios-1'

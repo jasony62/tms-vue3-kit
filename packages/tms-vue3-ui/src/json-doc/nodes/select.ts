@@ -14,7 +14,7 @@ export class Select extends Input {
 
     let opts = {
       name: fieldName,
-      class: ['tvu-jdoc__input'],
+      class: ['tvu-jdoc__field-input'],
       value: fieldValue,
       onChange: (event: any) => {
         const newValue = event && event.target ? event.target.value : event
@@ -26,7 +26,7 @@ export class Select extends Input {
   /**
    * select中的option节点
    */
-  children(): VNode[] {
+  protected children(): VNode[] {
     const children: VNode[] = []
     const { field } = this
     // 非必填时添加空选项

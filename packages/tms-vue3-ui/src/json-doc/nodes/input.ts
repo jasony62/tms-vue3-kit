@@ -46,7 +46,7 @@ export class Input extends FieldNode {
       name: fieldName,
       type,
       value: toRaw(fieldValue),
-      class: ['tvu-jdoc__input'],
+      class: ['tvu-jdoc__field-input'],
       onInput: (event: any) => {
         // const { schema, fields, editDoc, onAxios, setErrorMessage } = this.ctx
         const { schema, editDoc } = this.ctx
@@ -102,7 +102,7 @@ export class Input extends FieldNode {
    * 创建radiogroup|checkboxgroup下的子节点
    * @returns 返回子节点
    */
-  children(): VNode[] {
+  protected children(): VNode[] {
     const children: VNode[] = []
     if (/radio|checkbox/.test(this.field.type)) this.createItems(children)
     return children
@@ -111,7 +111,7 @@ export class Input extends FieldNode {
    * 加入当前节点的子节点
    * radiogroup/checkboxgroup
    */
-  createItems(children: VNode[]) {
+  private createItems(children: VNode[]) {
     const { field } = this
     const fieldValue = this.fieldValue()
 
@@ -135,7 +135,7 @@ export class Input extends FieldNode {
         // radio/checkbox
         let n1 = h(components[field.itemType].tag, props)
         // label
-        let n2 = h(components.label.tag, null, item.label)
+        let n2 = h(components.fieldLabel.tag, null, item.label)
         // wrap
         let n3 = h('div', [n1, n2])
         children.push(n3)

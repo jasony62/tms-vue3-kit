@@ -13,21 +13,11 @@ export class FileNode extends FieldNode {
 
     return options
   }
-  children(): VNode[] {
+
+  protected children(): VNode[] {
     const children = []
 
-    children.push(
-      h(
-        components.button.tag,
-        {
-          props: {
-            type: 'primary',
-            size: 'small',
-          },
-        },
-        '上传文件'
-      )
-    )
+    children.push(h(components.button.tag, {}, '上传文件'))
 
     return children
   }

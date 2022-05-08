@@ -4,16 +4,18 @@ export const SampleSchema = {
   description: '数组中是对象',
   type: 'object',
   properties: {
-    tel: {
-      title: '联系电话',
+    experiences: {
+      title: '经历',
       type: 'array',
       items: {
         type: 'object',
         properties: {
-          phoneNumber: {
+          time: {
+            title: '时间',
             type: 'string',
           },
-          category: {
+          content: {
+            title: '内容',
             type: 'string',
           },
         },

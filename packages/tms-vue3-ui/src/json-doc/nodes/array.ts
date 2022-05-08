@@ -1,16 +1,23 @@
+import { h, VNode } from 'vue'
+import { SchemaProp } from '@/json-schema/model'
 import { components, prepareFieldNode } from './index'
 import { FieldNode } from './field-node'
-import { h, VNode } from 'vue'
-import { SchemaProp } from '../../json-schema/model'
-import { createField } from '../fields'
+import { createField, Field } from '../fields'
 
-const itemAddVNode = (fieldValue: any[]) => {
+const itemAddVNode = (field: Field, fieldValue: any[]) => {
   return h(
     components.button.tag,
     {
       onClick: () => {
         if (Array.isArray(fieldValue)) {
-          fieldValue.push('')
+          switch (field.itemSchemaType) {
+            case 'string':
+              fieldValue.push('')
+              break
+            case 'object':
+              console.log('field.prop.items', field.scheamProp.items)
+              break
+          }
         }
       },
     },
@@ -34,20 +41,21 @@ export class ArrayNode extends FieldNode {
   options() {
     const { field } = this
     const options = {
-      type: field.type,
       name: field.name,
+      type: field.type,
       class: ['tvu-jdoc__nest'],
     }
 
     return options
   }
 
-  children(): VNode[] {
+  protected children(): VNode[] {
     const { ctx, field } = this
     const fieldValue = this.fieldValue()
 
     /**生成数组中已有项目的节点*/
     const itemVNodes: VNode[] = []
+
     if (Array.isArray(fieldValue) && fieldValue.length) {
       switch (field.itemSchemaType) {
         case 'string':
@@ -72,6 +80,39 @@ export class ArrayNode extends FieldNode {
     /**数组内容容器*/
     const items = h('div', { class: ['tvu-jdoc__node__items'] }, itemVNodes)
 
-    return [items, itemAddVNode(fieldValue)]
+    const children = [items, itemAddVNode(field, fieldValue)]
+
+    return children
+  }
+}
+
+export class ArrayObjectNode extends FieldNode {
+  options() {
+    const { field } = this
+    const options = {
+      type: field.type,
+      name: field.name,
+      class: ['tvu-jdoc__nest'],
+    }
+
+    return options
+  }
+
+  protected children(): VNode[] {
+    const { field } = this
+    const fieldValue = this.fieldValue()
+
+    /**生成数组中已有项目的节点*/
+    const itemVNodes: VNode[] = []
+    if (Array.isArray(fieldValue) && fieldValue.length) {
+      // 有数据时才会生成子节点
+    }
+
+    /**数组内容容器*/
+    const items = h('div', { class: ['tvu-jdoc__node__items'] }, itemVNodes)
+
+    const children = [items, itemAddVNode(field, fieldValue)]
+
+    return children
   }
 }

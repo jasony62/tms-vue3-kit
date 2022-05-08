@@ -20,6 +20,23 @@ export const CardSchema = {
         type: 'string',
       },
     },
+    experiences: {
+      title: '经历（对象类型数组）',
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          time: {
+            title: '时间',
+            type: 'string',
+          },
+          content: {
+            title: '内容',
+            type: 'string',
+          },
+        },
+      },
+    },
     gender: {
       title: '性别（单选框）',
       type: 'string',

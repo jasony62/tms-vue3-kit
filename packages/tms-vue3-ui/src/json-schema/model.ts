@@ -80,11 +80,13 @@ export class SchemaProp {
 
 export type SchemaItem = {
   type: string
+  properties?: any
   format?: string
   formatAttrs?: { [k: string]: any }
   $ref?: any
   enum?: any
 }
+
 export type SchemaEvtDepRule = {
   params: string[]
   url: string
@@ -201,6 +203,7 @@ function* _parseOne(
 
   /*处理子属性*/
   if (typeof properties === 'object') {
+    /**属性的子属性*/
     yield* _parseChildren(
       properties,
       newProp,
@@ -209,11 +212,13 @@ function* _parseOne(
       required
     )
   } else if (typeof items === 'object') {
+    /**数组*/
     newProp.items = { type: '' }
     let keys = Object.keys(items)
     for (let i = 0, key; i < keys.length; i++) {
       key = keys[i]
       if (key === 'properties') {
+        /**数组中的对象*/
         yield* _parseChildren(
           items.properties,
           newProp,

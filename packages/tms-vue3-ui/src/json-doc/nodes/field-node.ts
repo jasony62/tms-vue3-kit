@@ -152,8 +152,10 @@ export abstract class FieldNode extends Node {
   /**提供渲染函数的参数*/
   abstract options(attrsOrProps: any): any
 
-  /**字段节点的子节点*/
-  children(): VNode[] {
+  /**
+   * 当前节点的子节点数组
+   */
+  protected children(): VNode[] {
     return []
   }
 
@@ -162,7 +164,7 @@ export abstract class FieldNode extends Node {
    *
    * 这是1个模板方法
    */
-  createElem(children: (VNode | string)[]): VNode {
+  createElem(): VNode {
     const { field } = this
 
     // TODO 这里有问题，不是所有的值都需要
@@ -172,13 +174,10 @@ export abstract class FieldNode extends Node {
     const nodeOptions = this.options(attrOrProps)
 
     // 获得子节点的内容
-    let allChildren
-    if (!Array.isArray(children)) allChildren = this.children()
-    else {
-      allChildren = children.concat(this.children())
-    }
+    let children = this.children()
 
-    const node = h(this.rawArgs.tag, nodeOptions, allChildren)
+    // 生成节点
+    const node = h(this.rawArgs.tag, nodeOptions, children)
 
     return node
   }
