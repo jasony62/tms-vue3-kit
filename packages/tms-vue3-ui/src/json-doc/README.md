@@ -184,3 +184,5 @@ formNode.指定的名字
 creator
 
 creator.render
+
+支持 doc 瘦身

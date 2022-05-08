@@ -71,6 +71,15 @@ export class SchemaProp {
     let fullname = (this.path ? this.path + '.' : '') + this.name
     return fullname
   }
+  /**如果需要去掉路径中的[*]获得父属性名称*/
+  get parentFullname(): string {
+    return this.path.replace(/\[\*\]$/, '')
+  }
+
+  /**是否是数组中项目*/
+  get isArrayItem(): boolean {
+    return /\[\*\]$/.test(this.path)
+  }
 }
 
 export type SchemaItem = {
@@ -167,11 +176,16 @@ function* _parseOne(
     let key = keys[i]
     switch (key) {
       case 'properties':
-      case 'items':
       case 'dependencies':
       case 'eventDependencies':
       case 'required':
         break
+      case 'items':
+        newProp.items = { type: items.type }
+        Object.keys(items).forEach((key) => {
+          if (key === 'properties') return
+          Object.assign(newProp.items, { [key]: items[key] })
+        })
       case 'attachment':
         newProp.attachment = rawProp.attachment
         break
@@ -192,7 +206,6 @@ function* _parseOne(
   if (typeof required === 'boolean') {
     newProp.attrs.required = required
   }
-
   // 返回当前的属性
   yield newProp
 
@@ -206,25 +219,17 @@ function* _parseOne(
       eventDependencies,
       required
     )
-  } else if (typeof items === 'object') {
-    /**数组*/
-    newProp.items = { type: '' }
-    let keys = Object.keys(items)
-    for (let i = 0, key; i < keys.length; i++) {
-      key = keys[i]
-      if (key === 'properties') {
-        /**数组中的对象*/
-        yield* _parseChildren(
-          items.properties,
-          newProp,
-          dependencies,
-          eventDependencies,
-          required
-        )
-      } else {
-        Object.assign(newProp.items, { [key]: items[key] })
-      }
-    }
+  } else if (
+    typeof items === 'object' &&
+    typeof items.properties === 'object'
+  ) {
+    yield* _parseChildren(
+      items.properties,
+      newProp,
+      dependencies,
+      eventDependencies,
+      required
+    )
   }
 }
 /**

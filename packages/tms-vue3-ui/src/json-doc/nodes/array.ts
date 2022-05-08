@@ -3,9 +3,10 @@ import { SchemaProp } from '@/json-schema/model'
 import { components, prepareFieldNode } from './index'
 import { FieldNode } from './field-node'
 import { createField, Field } from '../fields'
+import { FormContext } from '../builder'
 
 const itemAddVNode = (field: Field, fieldValue: any[]) => {
-  return h(
+  let addVNode = h(
     components.button.tag,
     {
       onClick: () => {
@@ -15,7 +16,7 @@ const itemAddVNode = (field: Field, fieldValue: any[]) => {
               fieldValue.push('')
               break
             case 'object':
-              console.log('field.prop.items', field.scheamProp.items)
+              fieldValue.push({})
               break
           }
         }
@@ -23,7 +24,9 @@ const itemAddVNode = (field: Field, fieldValue: any[]) => {
     },
     '添加'
   )
+  return h('div', { class: ['tvu-jdoc__nest__actions'] }, addVNode)
 }
+
 const itemRemoveVNode = (fieldValue: any[], index: number) => {
   return h(
     components.button.tag,
@@ -36,13 +39,22 @@ const itemRemoveVNode = (fieldValue: any[], index: number) => {
     '删除'
   )
 }
-
+/**
+ * 数组中的项目是对象
+ */
 export class ArrayNode extends FieldNode {
+  private _children: (VNode | VNode[])[]
+
+  constructor(ctx: FormContext, field: Field, children?: (VNode | VNode[])[]) {
+    super(ctx, field)
+    this._children = children ?? []
+  }
+
   options() {
     const { field } = this
     const options = {
-      name: field.name,
       type: field.type,
+      name: field.name,
       class: ['tvu-jdoc__nest'],
     }
 
@@ -50,65 +62,40 @@ export class ArrayNode extends FieldNode {
   }
 
   protected children(): VNode[] {
-    const { ctx, field } = this
+    const { field } = this
     const fieldValue = this.fieldValue()
 
     /**生成数组中已有项目的节点*/
-    const itemVNodes: VNode[] = []
+    const itemNestVNodes: VNode[] = []
+    /**children是个二维数组，第1维是字段，第2纬是数组的项目*/
+    if (Array.isArray(this._children) && this._children.length) {
+      let fieldNum = this._children.length
+      let itemNum = Array.isArray(this._children[0])
+        ? this._children[0].length
+        : 0
 
-    if (Array.isArray(fieldValue) && fieldValue.length) {
-      switch (field.itemSchemaType) {
-        case 'string':
-          fieldValue.forEach((v, index) => {
-            // 数组下的子属性
-            let itemProp = new SchemaProp(`${field.fullname}[*]`, '', 'string')
-            let itemField = createField(itemProp, index)
-            const node = prepareFieldNode(ctx, itemField)
-            const wrap = h('div', { class: ['tvu-jdoc__node__item-wrap'] }, [
-              node.createElem(),
-              itemRemoveVNode(fieldValue, index),
-            ])
-            itemVNodes.push(wrap)
-          })
-          break
+      for (let i = 0; i < itemNum; i++) {
+        let itemVNodes = [] // 数组中1个item的虚节点
+        for (let j = 0; j < fieldNum; j++) {
+          let fieldVNodes = this._children[j] // 一类字段的虚节点
+          if (Array.isArray(fieldVNodes)) itemVNodes.push(fieldVNodes[i])
+        }
+        /**数组的一个项目*/
+        // 针对一个项目的操作
+        let itemActionsVNode = h(
+          'div',
+          { class: ['jdoc__nest__item__actions'] },
+          [itemRemoveVNode(fieldValue, i)]
+        )
+        let itemNestVNode = h('div', { class: ['tvu-jdoc__nest__item'] }, [
+          itemVNodes,
+          itemActionsVNode,
+        ])
+        itemNestVNodes.push(itemNestVNode)
       }
     }
 
-    /**数组内容容器*/
-    const items = h('div', { class: ['tvu-jdoc__node__items'] }, itemVNodes)
-
-    const children = [items, itemAddVNode(field, fieldValue)]
-
-    return children
-  }
-}
-
-export class ArrayObjectNode extends FieldNode {
-  options() {
-    const { field } = this
-    const options = {
-      type: field.type,
-      name: field.name,
-      class: ['tvu-jdoc__nest'],
-    }
-
-    return options
-  }
-
-  protected children(): VNode[] {
-    const { field } = this
-    const fieldValue = this.fieldValue()
-
-    /**生成数组中已有项目的节点*/
-    const itemVNodes: VNode[] = []
-    if (Array.isArray(fieldValue) && fieldValue.length) {
-      // 有数据时才会生成子节点
-    }
-
-    /**数组内容容器*/
-    const items = h('div', { class: ['tvu-jdoc__node__items'] }, itemVNodes)
-
-    const children = [items, itemAddVNode(field, fieldValue)]
+    const children = [...itemNestVNodes, itemAddVNode(field, fieldValue)]
 
     return children
   }

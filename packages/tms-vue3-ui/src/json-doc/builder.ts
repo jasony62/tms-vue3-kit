@@ -2,6 +2,7 @@ import { h, VNode } from 'vue'
 import { SchemaIter, RawSchema, SchemaProp } from '@/json-schema/model'
 import { createField, Field } from './fields'
 import { FieldWrap, FormNode, components, prepareFieldNode } from './nodes'
+import { getChild } from '@/utils'
 
 function createWrapClass(labelAndDescNodes: VNode): VNode {
   // if (this.fieldWrapClass) {
@@ -27,16 +28,31 @@ function createFieldWrapNode(ctx: FormContext, field: Field): VNode {
   return createWrapClass(labelAndDesc)
 }
 
-/**创建叶节点*/
-function createLeafNode(ctx: FormContext, prop: any): VNode {
+/**创建字段节点*/
+function createFieldNode(ctx: FormContext, prop: any): VNode | VNode[] {
   /**创建和当前属性对应的field*/
-  const newField = createField(prop)
-  // this.setModelValue(newField)
-  return createFieldWrapNode(ctx, newField)
+  if (prop.isArrayItem) {
+    let fieldValue = getChild(ctx.editDoc, prop.parentFullname)
+    if (Array.isArray(fieldValue) && fieldValue.length) {
+      return fieldValue.map((val, index) => {
+        const newField = createField(prop, index)
+        return createFieldWrapNode(ctx, newField)
+      })
+    } else {
+      return []
+    }
+  } else {
+    const newField = createField(prop)
+    return createFieldWrapNode(ctx, newField)
+  }
 }
 
 /**创建嵌套节点*/
-function createNestNode(ctx: FormContext, prop: any, children: VNode[]): VNode {
+function createNestNode(
+  ctx: FormContext,
+  prop: any,
+  children: (VNode | VNode[])[]
+): VNode {
   const newField = createField(prop)
   const node = prepareFieldNode(ctx, newField, children)
 
@@ -139,7 +155,7 @@ function getFieldVisible(prop: SchemaProp, doc: any): boolean {
 
 class Stack {
   nodes: VNode[]
-  data: { prop: SchemaProp; children: VNode[] }[]
+  data: { prop: SchemaProp; children: (VNode | VNode[])[] }[]
   ctx: FormContext
 
   constructor(nodes: VNode[], ctx: FormContext) {
@@ -158,9 +174,7 @@ class Stack {
 
   /**将创建的节点放入堆栈中的父字段*/
   addNode(prop: SchemaProp, node: VNode | VNode[]) {
-    if (this.last)
-      if (Array.isArray(node)) this.last.children.push(...node)
-      else this.last.children.push(node)
+    if (this.last) this.last.children.push(node)
   }
 
   /**如果子节点都准备完毕就出栈*/
@@ -205,14 +219,14 @@ class Stack {
 export function build(ctx: FormContext): VNode[] {
   const nodes: VNode[] = []
   const { schema, editDoc } = ctx
-  /***/
+
+  /**创建属性迭代器*/
   let iter = new SchemaIter(JSON.parse(JSON.stringify(schema)))
 
   // 用于记录处理过程的中间数据
   let stack = new Stack(nodes, ctx)
 
   // 依次处理JSONSchema的属性
-
   let prop: SchemaProp
   for (prop of iter) {
     // 不处理根节点
@@ -234,12 +248,25 @@ export function build(ctx: FormContext): VNode[] {
     } else if (prop.attrs.type === 'array') {
       // 创建嵌套节点，将当前节点入栈，等待子节点生成完
       stack.push(prop)
+      /**如果数组中的项目是简单类型，创建字段*/
+      if (prop.items?.type) {
+        if (!['object', 'array'].includes(prop.items?.type)) {
+          let itemProp = new SchemaProp(
+            `${prop.fullname}[*]`,
+            '',
+            prop.items?.type
+          )
+          let itemNode = createFieldNode(ctx, itemProp)
+          stack.addNode(prop, itemNode)
+        }
+      }
     } else {
       // 创建节点，放入堆栈，或结果
-      let node = createLeafNode(ctx, prop)
+      let node = createFieldNode(ctx, prop)
       if (prop.path === iter.rootName) {
         // 顶层属性，直接放入结果中
-        nodes.push(node)
+        if (Array.isArray(node)) nodes.push(...node)
+        else nodes.push(node)
       } else {
         stack.addNode(prop, node)
       }

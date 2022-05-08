@@ -6,7 +6,7 @@ import { VNode } from 'vue'
 export class ObjectNode extends FieldNode {
   private _children
 
-  constructor(ctx: FormContext, field: Field, children?: VNode[]) {
+  constructor(ctx: FormContext, field: Field, children?: (VNode | VNode[])[]) {
     super(ctx, field)
     this._children = children
   }
@@ -23,6 +23,14 @@ export class ObjectNode extends FieldNode {
   }
 
   protected children(): VNode[] {
-    return this._children ?? []
+    const children: VNode[] = []
+
+    this._children?.forEach((c) => {
+      // 应该不会出现这种情况
+      if (Array.isArray(c)) return
+      children.push(c)
+    })
+
+    return children
   }
 }

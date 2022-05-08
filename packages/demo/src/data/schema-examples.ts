@@ -3,7 +3,6 @@ export const CardSchema = {
   $schema: 'https://json-schema.org/draft/2020-12/schema',
   description: '基本示例',
   type: 'object',
-  required: ['familyName', 'givenName'],
   properties: {
     name: {
       title: '姓名',
@@ -180,7 +179,7 @@ export const CardSchema = {
     },
     files: {
       type: 'array',
-      title: '上传文件',
+      title: '证明文件',
       items: {
         type: 'object',
         format: 'file',

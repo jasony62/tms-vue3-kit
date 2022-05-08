@@ -1,4 +1,4 @@
-import { RawSchema, SchemaProp } from '@/json-schema/model'
+import { SchemaProp } from '@/json-schema/model'
 import { Field, ARRAY_KEYWORDS } from './field'
 import { FieldBoolean } from './boolean'
 import { FieldText } from './text'

@@ -5,7 +5,7 @@ describe('处理JSONSchema', () => {
   it('迭代JSONSchema属性', () => {
     const iter = new SchemaIter(SampleSchema)
     const props = Array.from(iter)
-    // expect(props).toHaveLength(4)
+    expect(props).toHaveLength(2)
     console.log('iter', Array.from(iter))
   })
 })

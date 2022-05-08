@@ -6,7 +6,7 @@ import { Textarea } from './textarea'
 import { Checkboxgroup } from './checkboxgroup'
 import { FileNode } from './file'
 import { DateTime } from './dateTime'
-import { ArrayNode, ArrayObjectNode } from './array'
+import { ArrayNode } from './array'
 import { ObjectNode } from './object'
 import { FieldWrap } from './fieldWrap'
 import { FormNode } from './form'
@@ -52,7 +52,7 @@ const components: { [k: string]: any } = {
 function prepareFieldNode(
   ctx: FormContext,
   field: Field,
-  children?: VNode[]
+  children?: (VNode | VNode[])[]
 ): FieldNode {
   switch (field.type) {
     case 'textarea':
@@ -66,9 +66,7 @@ function prepareFieldNode(
     case 'file':
       return new FileNode(ctx, field)
     case 'array':
-      if (field.itemSchemaType === 'object')
-        return new ArrayObjectNode(ctx, field)
-      else return new ArrayNode(ctx, field)
+      return new ArrayNode(ctx, field, children)
     case 'object':
       return new ObjectNode(ctx, field, children)
     default:

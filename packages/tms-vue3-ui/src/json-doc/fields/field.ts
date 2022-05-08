@@ -57,7 +57,7 @@ export abstract class Field {
   }
 
   get fullname() {
-    if (/\[\*\]$/.test(this._prop.path)) {
+    if (this._prop.isArrayItem) {
       return this._prop.path.replace(/\[\*\]$/, `[${this._index}]`) + this.name
     } else {
       return this._prop.fullname
