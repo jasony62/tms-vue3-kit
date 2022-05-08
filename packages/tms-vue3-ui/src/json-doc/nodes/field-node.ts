@@ -14,16 +14,11 @@ const defaultGroup = { tag: 'div', option }
  * @param {Object} field
  */
 function getRawCreateArgs(field: Field) {
-  // 如果schema中指定了组件类型，直接使用
-  const customComponent = field.component
-    ? { tag: field.component, option: {} }
-    : undefined
   // field对应的组件类型，指定or预制，有items的变成group组件
-  const args = field.component
-    ? customComponent
-    : field.items && field.type !== 'select'
-    ? components[`${field.type}group`] || defaultGroup
-    : components[field.type] || defaultInput
+  const args =
+    field.items && field.type !== 'select'
+      ? components[`${field.type}group`] || defaultGroup
+      : components[field.type] || defaultInput
 
   return args
 }
@@ -75,7 +70,7 @@ export abstract class FieldNode extends Node {
           field.items?.forEach((oOption) => {
             if (oOption.group === enumGroup.id) {
               let id = oOption.group + oOption.value
-              field.itemVisible[id] = false
+              if (field.itemVisible) field.itemVisible[id] = false
               /**选项不可见处理数据对象的值*/
               if (field.schemaType === 'string') {
                 if (doc[oKey] === oOption.value) {
@@ -97,7 +92,7 @@ export abstract class FieldNode extends Node {
           field.items?.forEach((oOption) => {
             if (oOption.group === enumGroup.id) {
               let id = oOption.group + oOption.value
-              field.itemVisible[id] = true
+              if (field.itemVisible) field.itemVisible[id] = true
             }
           })
         }

@@ -7,8 +7,8 @@ export class FieldFile extends Field {
   limit?: number
   size?: string
 
-  constructor(prop: SchemaProp) {
-    super(prop)
+  constructor(prop: SchemaProp, index = -1) {
+    super(prop, index)
     this.type = 'file'
 
     const { items } = prop

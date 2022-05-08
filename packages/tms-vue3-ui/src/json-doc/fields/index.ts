@@ -10,26 +10,23 @@ import { FieldObject } from './object'
  * 创建表单字段对象
  *
  * @param prop JSONSchema属性
- * @param refs
+ * @param index 如果字段是数组中的对象的字段，index为字段所属对象在数组中的索引
  */
-function createField(
-  prop: SchemaProp,
-  refs?: { [k: string]: RawSchema }
-): Field {
+function createField(prop: SchemaProp, index = -1): Field {
   let newField
   switch (prop.attrs.type) {
     case 'boolean':
-      newField = new FieldBoolean(prop)
+      newField = new FieldBoolean(prop, index)
       break
     case 'array':
       newField = ARRAY_KEYWORDS.some((kw) => prop.hasOwnProperty(kw))
-        ? new FieldArray(prop)
+        ? new FieldArray(prop, index)
         : prop.items?.format === 'file'
-        ? new FieldFile(prop)
-        : new FieldObject(prop, refs)
+        ? new FieldFile(prop, index)
+        : new FieldObject(prop, index)
       break
     case 'object':
-      newField = new FieldObject(prop, refs)
+      newField = new FieldObject(prop, index)
       break
     case 'integer':
     case 'number':
@@ -40,14 +37,14 @@ function createField(
             type: prop.attrs.type,
             enum: prop.attrs[keyword],
           }
-          newField = new FieldArray(prop)
+          newField = new FieldArray(prop, index)
           break
         }
       }
-      if (!newField) newField = new FieldText(prop)
+      if (!newField) newField = new FieldText(prop, index)
       break
     default:
-      newField = new FieldText(prop)
+      newField = new FieldText(prop, index)
   }
 
   return newField

@@ -30,15 +30,14 @@ function createFieldWrapNode(ctx: FormContext, field: Field): VNode {
 /**创建叶节点*/
 function createLeafNode(ctx: FormContext, prop: any): VNode {
   /**创建和当前属性对应的field*/
-  const newField = createField(prop, {})
-
+  const newField = createField(prop)
   // this.setModelValue(newField)
   return createFieldWrapNode(ctx, newField)
 }
 
 /**创建嵌套节点*/
 function createNestNode(ctx: FormContext, prop: any, children: VNode[]): VNode {
-  const newField = createField(prop, {})
+  const newField = createField(prop)
   const node = prepareFieldNode(ctx, newField, children)
 
   const wrapNode = new FieldWrap(ctx, node)

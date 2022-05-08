@@ -68,12 +68,7 @@ export class SchemaProp {
   }
 
   get fullname(): string {
-    let fullname
-    if (/^\[.*\]$/.test(this.name)) {
-      fullname = (this.path ? this.path : '') + this.name
-    } else {
-      fullname = (this.path ? this.path + '.' : '') + this.name
-    }
+    let fullname = (this.path ? this.path + '.' : '') + this.name
     return fullname
   }
 }

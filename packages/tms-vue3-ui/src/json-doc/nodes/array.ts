@@ -60,12 +60,9 @@ export class ArrayNode extends FieldNode {
       switch (field.itemSchemaType) {
         case 'string':
           fieldValue.forEach((v, index) => {
-            let itemProp = new SchemaProp(
-              field.fullname,
-              `[${index}]`,
-              'string'
-            )
-            let itemField = createField(itemProp)
+            // 数组下的子属性
+            let itemProp = new SchemaProp(`${field.fullname}[*]`, '', 'string')
+            let itemField = createField(itemProp, index)
             const node = prepareFieldNode(ctx, itemField)
             const wrap = h('div', { class: ['tvu-jdoc__node__item-wrap'] }, [
               node.createElem(),
