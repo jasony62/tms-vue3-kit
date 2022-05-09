@@ -45,12 +45,37 @@ const itemUploadVNode = (
         /**只能在数组中添加文件*/
         if ((fieldValue ?? true) || Array.isArray(fieldValue)) {
           let fullname = field.fullname
-          let data = 'base64' // 文件base64的值。这里需要实现通过input获得上传文件信息。
-          fileUpload({ fullname, data }).then((fileData: any) => {
-            // 设置初始值和添加项目必须在dom循环中完成，不能在promise外面初始化
-            fieldValue ??= initChild(ctx.editDoc, field.fullname, [])
-            fieldValue.push(fileData)
+          const inputNode = document.createElement('input');
+          inputNode.setAttribute('type', 'file');
+          // inputNode.setAttribute('style', 'display: none');
+          const accept = field.scheamProp.items?.formatAttrs.accept
+          const size = field.scheamProp.items?.formatAttrs.size
+          const limit = field.scheamProp.items?.formatAttrs.limit
+          if (limit && fieldValue && fieldValue.length >= limit) {
+            alert(`限制上传${limit}文件`)
+            return
+          }
+          if (accept){
+            inputNode.setAttribute('accept', accept)
+          }
+          document.body.appendChild(inputNode)
+          inputNode.addEventListener('change', async (e: Event) => {
+            const target = e.target as HTMLInputElement
+            if (target.files){
+              const file = target.files[0];
+              if (size && file.size / 1024 / 1024 > size) {
+                alert(`上传文件大小过大，超过${size}M`)
+                return
+              }
+              let data = await getFileBase64(file)
+              fileUpload({ fullname, data }).then((fileData: any) => {
+                // 设置初始值和添加项目必须在dom循环中完成，不能在promise外面初始化
+                fieldValue ??= initChild(ctx.editDoc, field.fullname, [])
+                fieldValue.push(fileData)
+              })
+            }
           })
+          inputNode.click();
         }
       },
     },
@@ -58,6 +83,15 @@ const itemUploadVNode = (
   )
   return h('div', { class: ['tvu-jdoc__nest__actions'] }, addVNode)
 }
+
+const getFileBase64 = (file: any) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = (error) => reject(error);
+  });
+};
 
 const itemRemoveVNode = (fieldValue: any[], index: number) => {
   return h(
