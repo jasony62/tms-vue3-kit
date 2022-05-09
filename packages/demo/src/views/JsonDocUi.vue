@@ -2,7 +2,7 @@
   <div class="flex flex-row">
     <div class="w-1/3 p-4">
       <json-doc ref="jsonDocEditor" :schema="CardSchema" :value="doc" :on-axios="onAxios"
-        :on-file-download="onFileDownload"></json-doc>
+        :on-file-download="onFileDownload" :on-file-upload="onFileUpload"></json-doc>
     </div>
     <div class="p-4">
       <div>
@@ -24,7 +24,7 @@ import { CardSchema } from '../data/schema-examples'
 const doc = {
   name: '张三',
   additionalName: ['alice', 'bob'],
-  experiences: [{ time: '2022', content: "开发" }, { time: "2021", content: "测试" }]
+  experiences: [{ time: '2022', content: "开发" }, { time: "2021", content: "测试" }],
 }
 const jsonDocEditor = ref<{ editing: () => string } | null>(null)
 
@@ -50,6 +50,17 @@ const onAxios = () => {
       })
     },
   }
+}
+/**
+ * 表单中文件上传方法
+ * @param params 
+ */
+const onFileUpload = (params: any) => {
+  console.log('params', params)
+  return new Promise(resolve => {
+    /**这里需要返回文件属性中items.properties中定义的内容*/
+    resolve({ name: 'onFileUpload返回文件名称', url: 'onFileUpload返回的文件地址' })
+  })
 }
 
 const onFileDownload = (name: string, url: string) => {

@@ -1,11 +1,9 @@
-import { RawSchema, SchemaProp } from '@/json-schema/model'
+import { SchemaProp } from '@/json-schema/model'
 import { Field } from './field'
 
 export class FieldObject extends Field {
   multiple: boolean
   itemSchema
-  // 子字段
-  children: Field[] = []
 
   constructor(prop: SchemaProp, index = -1) {
     super(prop, index)

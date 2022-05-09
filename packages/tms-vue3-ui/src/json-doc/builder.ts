@@ -346,6 +346,7 @@ export type FormContext = {
   editDoc: any
   schema: RawSchema
   onAxios?: Function
+  onFileUpload?: Function
   onFileDownload?: Function
 }
 

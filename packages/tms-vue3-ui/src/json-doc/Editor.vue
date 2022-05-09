@@ -37,7 +37,11 @@ export default {
      */
     onAxios: { type: Function },
     /**
-     * 
+     * 文件上传方法
+     */
+    onFileUpload: { type: Function },
+    /**
+     * 文件下载方法
      */
     onFileDownload: { type: Function }
   },
@@ -56,7 +60,8 @@ export default {
     const editDoc = reactive(deepClone(props.value))
 
     return () => {
-      const nodes = BuildEditor({ editDoc, schema: props.schema, onAxios: props.onAxios, onFileDownload: props.onFileDownload })
+      let { schema, onAxios, onFileUpload, onFileDownload } = props
+      const nodes = BuildEditor({ editDoc, schema, onAxios, onFileUpload, onFileDownload })
       return h('div', { class: ['tvu-jdoc__root'] }, nodes)
     }
   }

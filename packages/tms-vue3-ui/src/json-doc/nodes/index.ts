@@ -64,7 +64,7 @@ function prepareFieldNode(
     case 'checkboxgroup':
       return new Checkboxgroup(ctx, field)
     case 'file':
-      return new FileNode(ctx, field)
+      return new FileNode(ctx, field, children)
     case 'array':
       return new ArrayNode(ctx, field, children)
     case 'object':

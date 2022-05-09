@@ -1,15 +1,16 @@
 import { h, VNode } from 'vue'
-import { SchemaProp } from '@/json-schema/model'
-import { components, prepareFieldNode } from './index'
+import { components } from './index'
 import { FieldNode } from './field-node'
-import { createField, Field } from '../fields'
+import { Field } from '../fields'
 import { FormContext } from '../builder'
+import { initChild } from '@/utils'
 
-const itemAddVNode = (field: Field, fieldValue: any[]) => {
+const itemAddVNode = (ctx: FormContext, field: Field) => {
   let addVNode = h(
     components.button.tag,
     {
       onClick: () => {
+        const fieldValue = initChild(ctx.editDoc, field.fullname, [])
         if (Array.isArray(fieldValue)) {
           switch (field.itemSchemaType) {
             case 'string':
@@ -62,7 +63,7 @@ export class ArrayNode extends FieldNode {
   }
 
   protected children(): VNode[] {
-    const { field } = this
+    const { ctx, field } = this
     const fieldValue = this.fieldValue()
 
     /**生成数组中已有项目的节点*/
@@ -95,7 +96,7 @@ export class ArrayNode extends FieldNode {
       }
     }
 
-    const children = [...itemNestVNodes, itemAddVNode(field, fieldValue)]
+    const children = [...itemNestVNodes, itemAddVNode(ctx, field)]
 
     return children
   }
