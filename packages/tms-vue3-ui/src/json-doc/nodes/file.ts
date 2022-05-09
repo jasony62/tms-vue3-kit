@@ -45,24 +45,21 @@ const itemUploadVNode = (
         /**只能在数组中添加文件*/
         if ((fieldValue ?? true) || Array.isArray(fieldValue)) {
           let fullname = field.fullname
-          const inputNode = document.createElement('input');
-          inputNode.setAttribute('type', 'file');
-          // inputNode.setAttribute('style', 'display: none');
-          const accept = field.scheamProp.items?.formatAttrs.accept
-          const size = field.scheamProp.items?.formatAttrs.size
-          const limit = field.scheamProp.items?.formatAttrs.limit
-          if (limit && fieldValue && fieldValue.length >= limit) {
+          const elInput = document.createElement('input')
+          elInput.setAttribute('type', 'file')
+          const { accept, size, limit } = field.scheamProp.items?.formatAttrs
+          if (limit && fieldValue?.length >= limit) {
             alert(`限制上传${limit}文件`)
             return
           }
-          if (accept){
-            inputNode.setAttribute('accept', accept)
+          if (accept) {
+            elInput.setAttribute('accept', accept)
           }
-          document.body.appendChild(inputNode)
-          inputNode.addEventListener('change', async (e: Event) => {
+          document.body.appendChild(elInput)
+          elInput.addEventListener('change', async (e: Event) => {
             const target = e.target as HTMLInputElement
-            if (target.files){
-              const file = target.files[0];
+            if (target.files) {
+              const file = target.files[0]
               if (size && file.size / 1024 / 1024 > size) {
                 alert(`上传文件大小过大，超过${size}M`)
                 return
@@ -75,7 +72,7 @@ const itemUploadVNode = (
               })
             }
           })
-          inputNode.click();
+          elInput.click()
         }
       },
     },
@@ -86,12 +83,12 @@ const itemUploadVNode = (
 
 const getFileBase64 = (file: any) => {
   return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = (error) => reject(error);
-  });
-};
+    const reader = new FileReader()
+    reader.readAsDataURL(file)
+    reader.onload = () => resolve(reader.result)
+    reader.onerror = (error) => reject(error)
+  })
+}
 
 const itemRemoveVNode = (fieldValue: any[], index: number) => {
   return h(

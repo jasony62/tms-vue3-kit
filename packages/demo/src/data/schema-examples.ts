@@ -195,7 +195,7 @@ export const CardSchema = {
         },
         formatAttrs: {
           accept: 'png,jpeg',
-          size: '0.048',
+          size: '1',
           limit: 1,
         },
       },
