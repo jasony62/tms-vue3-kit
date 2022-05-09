@@ -60,53 +60,6 @@ function createNestNode(
   const labelAndDesc = wrapNode.createElem()
 
   return createWrapClass(labelAndDesc)
-
-  // if (
-  //   newField.type === 'file' &&
-  //   newField.attachment?.length &&
-  //   ctx.onFileDownload
-  // ) {
-  //   let attachmentVNodes = []
-  //   attachmentVNodes.push(
-  //     h(
-  //       components.a.tag,
-  //       {
-  //         props: { underline: false },
-  //         attrs: { disabled: true },
-  //       },
-  //       '参考模板：'
-  //     )
-  //   )
-  //   newField.attachment.forEach((attach: any) => {
-  //     let element = h(
-  //       components.a.tag,
-  //       {
-  //         url: attach.url,
-  //         name: attach.name,
-  //         onClick: (event: any) => {
-  //           if (event.target.nodeType !== 1) return
-  //           let ele =
-  //             event.target.nodeName.toLowerCase() !== 'a'
-  //               ? event.target.parentNode
-  //               : event.target
-  //           let url = ele.getAttribute('url')
-  //           let name = ele.getAttribute('name')
-  //           ctx.onFileDownload?.(name, url)
-  //         },
-  //       },
-  //       attach.name
-  //     )
-  //     attachmentVNodes.push(element)
-  //   })
-
-  //   children.push(
-  //     h('div', { class: ['tvu-jdoc__node__attachment'] }, attachmentVNodes)
-  //   )
-  // }
-
-  // const fieldNode = node.createElem(children)
-
-  // return fieldNode
 }
 
 function getFieldVisible(prop: SchemaProp, doc: any): boolean {

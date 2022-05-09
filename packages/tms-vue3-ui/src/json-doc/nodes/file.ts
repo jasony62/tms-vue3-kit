@@ -133,8 +133,38 @@ export class FileNode extends FieldNode {
     } else {
       newItemVNode = itemAddVNode(ctx, field)
     }
+    /**模板文件节点*/
+    let attaWrap
+    if (field.attachment?.length && typeof ctx.onFileDownload === 'function') {
+      let attaVNodes = []
+      attaVNodes.push(h(components.fieldLabel.tag, {}, '参考模板：'))
+      field.attachment.forEach((attach: any) => {
+        let element = h(
+          components.a.tag,
+          {
+            url: attach.url,
+            name: attach.name,
+            onClick: (event: any) => {
+              if (event.target.nodeType !== 1) return
+              let ele =
+                event.target.nodeName.toLowerCase() !== 'a'
+                  ? event.target.parentNode
+                  : event.target
+              let url = ele.getAttribute('url')
+              let name = ele.getAttribute('name')
+              ctx.onFileDownload?.(name, url)
+            },
+          },
+          attach.name
+        )
+        attaVNodes.push(element)
+      })
+      attaWrap = h('div', { class: ['tvu-jdoc__nest__attachment'] }, attaVNodes)
+    }
 
     const children = [...itemNestVNodes, newItemVNode]
+
+    if (attaWrap) children.push(attaWrap)
 
     return children
   }
