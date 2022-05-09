@@ -2,11 +2,12 @@
   <div ref="el" class="tvu-register__form" :class="{ 'tvu-register__form--modal': asDialog }">
     <div class="tvu-register__input" v-for="(item, index) in otherInputs" :key="index">
       <input :placeholder="item.placeholder" :type="item.type" v-model="submitData[item.key]" required />
+      <span v-if="item.type == 'password'" ref="passwordEle" @click="checkPassword(item.key)" :class="{'tvu-register__password--close':!passwordIcon[item.key],'tvu-register__password--open':passwordIcon[item.key]}"></span>
     </div>
     <div class="tvu-register__captcha" v-if="captchaInput">
       <input :placeholder="captchaInput.placeholder" v-model="submitData[captchaInput.key]" required />
       <div ref="elCaptcha" :style="{ width: '150px', height: '44px' }"></div>
-      <button @click="refresh">刷新</button>
+      <button @click="refresh"></button>
     </div>
     <div class="tvu-register__button">
       <button @click="register">注册</button>
@@ -19,9 +20,12 @@
   <div class="tvu-register__modal" v-if="asDialog"></div>
 </template>
 <script setup lang="ts">
-import { reactive, PropType, ref, nextTick, onMounted } from 'vue';
+import { reactive, PropType, ref, nextTick, onMounted,toRaw } from 'vue';
 import { SubmitDataItem, CaptchaResponse } from '@/types';
-
+interface passwordIcon {
+  password: Boolean,
+  password2: Boolean
+}
 // 支持通过属性传递需要数据和方法
 const props = defineProps({
   schema: Array as PropType<SubmitDataItem[]>,
@@ -45,7 +49,10 @@ let { schema, registerTip, fnRegister, fnCaptcha, onSuccess, onFail, asDialog, o
 
 // 用户要提交的数据
 const submitData = reactive({} as { [key: string]: string })
-
+// 密码节点
+const passwordEle = ref(null as unknown as Element)
+// 密码图标svg
+let passwordIcon = reactive({ password: false, password2: false } as passwordIcon);
 // 整理需要用户输入的数据，为了优化模板
 const otherInputs = ref([] as SubmitDataItem[])
 const captchaInput = ref()
@@ -71,7 +78,24 @@ const refresh = () => {
     })
   }
 }
-
+// 查看密码 passwordIcon
+const checkPassword = (key:string) => {
+  passwordIcon[key] = !passwordIcon[key]
+  const list = toRaw(passwordEle.value)
+  if(key == 'password'){
+    if(passwordIcon[key]){
+      list[0].previousSibling.type = 'text'
+    }else{
+      list[0].previousSibling.type = 'password'
+    }
+  } else {
+    if(passwordIcon[key]){
+      list[1].previousSibling.type = 'text'
+    }else{
+      list[1].previousSibling.type = 'password'
+    }
+  }
+}
 const register = () => {
   if (typeof fnRegister === 'function') {
     fnRegister(submitData).then((response: any) => {
