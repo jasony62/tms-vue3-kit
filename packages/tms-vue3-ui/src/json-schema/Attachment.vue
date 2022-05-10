@@ -24,7 +24,22 @@ const onRemoveFile = (file: { name: any; }) => {
   )
 }
 
-const onUploadFile = ({ file }) => {
+const onUploadFile = (file: File) => {
+  const {accept, size, limit} = schemaProp.items?.formatAttrs
+  const suffix = file.name.split('.')[1];
+  if (!accept.split(',').includes(suffix)){
+    alert(`仅支持${accept}格式文件`)
+    return
+  }
+  if (limit && schemaProp.attachment.length >= limit) {
+    alert(`限制上传${limit}文件`)
+    return
+  }
+  if (size && file.size / 1024 / 1024 > size) {
+    alert(`上传文件大小过大，超过${size}M`);
+    return
+  }
+  /*let data = await getFileBase64(file)*/
   if (!schemaProp.attachment) {
     schemaProp.attachment = []
   }
