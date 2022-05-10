@@ -3,10 +3,10 @@
     <div class="tvu-jse__dependencies__rule-group" v-for="(group, key) in dependencies.dependencyRules" :key="key">
       <div>规则组 - {{ key }}</div>
       <div class="tvu-jse__dependencies__rule" v-for="(rule, indexRule) in group.rules" :key="indexRule">
-        <tvu-form-item class="tvu-jse__input" label="属性">
+        <tvu-form-item class="tvu-jse__field" label="属性">
           <tvu-input v-model="rule.property"></tvu-input>
         </tvu-form-item>
-        <tvu-form-item class="tvu-jse__input" label="取值">
+        <tvu-form-item class="tvu-jse__field" label="取值">
           <tvu-input v-model="rule.value"></tvu-input>
         </tvu-form-item>
         <div>
@@ -15,7 +15,7 @@
       </div>
       <div class="tvu-jse__dependencies__rule-group-actions">
         <div class="tvu-jse__dependencies__rule">
-          <tvu-form-item class="tvu-jse__input" label="运算关系">
+          <tvu-form-item class="tvu-jse__field" label="运算关系">
             <tvu-select v-model="group.operator">
               <tvu-option label="满足任意条件" value="or"></tvu-option>
               <tvu-option label="满足全部条件" value="and"></tvu-option>
@@ -27,7 +27,7 @@
       </div>
     </div>
     <div class="tvu-jse__dependencies__rule">
-      <tvu-form-item class="tvu-jse__input" label="规则间运算关系">
+      <tvu-form-item class="tvu-jse__field" label="规则间运算关系">
         <tvu-select v-model="dependencies.operator">
           <tvu-option label="满足任意条件" value="or"></tvu-option>
           <tvu-option label="满足全部条件" value="and"></tvu-option>

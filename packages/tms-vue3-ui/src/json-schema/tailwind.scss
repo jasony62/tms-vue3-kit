@@ -1,16 +1,16 @@
 @import './index.scss';
-.tvu-jse__fields {
-  .tvu-jse__field {
+.tvu-jse__properties {
+  .tvu-jse__property {
     @apply p-2;
-    &.tvu-jse__field--active {
+    &.tvu-jse__property--active {
       @apply bg-gray-200;
     }
   }
 }
-.tvu-jse__field-form {
+.tvu-jse__property-fields {
   @apply p-4 rounded bg-white grid grid-cols-1 gap-y-4;
 
-  .tvu-jse__input {
+  .tvu-jse__field {
     input,
     select {
       @apply rounded p-2 border-2 border-gray-200;
@@ -76,7 +76,7 @@
   .tvu-jse__dependencies__rule {
     @apply flex flex-row gap-x-2;
 
-    .tvu-jse__input {
+    .tvu-jse__field {
       @apply flex flex-row;
 
       .tvu-jse__label {
