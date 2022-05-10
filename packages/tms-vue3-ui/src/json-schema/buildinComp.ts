@@ -1,4 +1,5 @@
 import { defineComponent, h } from 'vue'
+import {initChild} from "@/utils";
 /**
  * 依赖的组件
  */
@@ -25,8 +26,34 @@ const components = {
     },
   }),
   upload: defineComponent({
+    props: ['fileList', 'httpRequest', 'onRemove'],
     render() {
-      return h('input', {})
+      const divNode = this.fileList.map((i: any) => {
+        return h('div', {'class': 'tvu-jse'}, [
+            i.name,
+            h('button', {
+              onClick: () => {
+                this.onRemove(i)
+              }
+            }, '删除')
+        ])
+      })
+      return h('div', {}, [...divNode, h('div', {
+        onClick: () => {
+          const inputNode = document.createElement('input');
+          inputNode.setAttribute('type', 'file');
+          // inputNode.setAttribute('style', 'display: none');
+          document.body.appendChild(inputNode)
+          inputNode.addEventListener('change', async (e: Event) => {
+            const target = e.target as HTMLInputElement
+            if (target.files){
+              const file = target.files[0];
+              this.httpRequest(file)
+            }
+          })
+          inputNode.click();
+        }
+      }, this.$slots.default?.())])
     },
   }),
   checkbox: defineComponent({
