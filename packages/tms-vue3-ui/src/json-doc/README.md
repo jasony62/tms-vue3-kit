@@ -186,3 +186,5 @@ creator
 creator.render
 
 支持 doc 瘦身
+
+支持定制内置操作的名称，例如：上传文件，参考模板等。

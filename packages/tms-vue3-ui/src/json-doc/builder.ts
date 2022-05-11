@@ -298,8 +298,10 @@ let mapBuilders = new Map()
 export type FormContext = {
   editDoc: any
   schema: RawSchema
+  onMessage: Function
   onAxios?: Function
   onFileUpload?: Function
+  onFileSelect?: Function
   onFileDownload?: Function
 }
 
