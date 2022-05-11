@@ -13,30 +13,22 @@ export class Input extends FieldNode {
   updateModel(newValue: any) {
     const { field } = this
     const fieldName = field.fullname
-    // 去掉开头的$
-    const path = fieldName.split('.').slice(1)
-    const name = path.pop()
-    if (name) {
-      let updatedValue
-      /**设置对象的值*/
-      if (field.schemaType === 'json') {
-        try {
-          let jsonValue = JSON.parse(newValue)
-          updatedValue = jsonValue
-        } catch (e) {}
-      } else if (field instanceof FieldBoolean) {
-        updatedValue = !getChild(
-          this.ctx.editDoc,
-          fieldName.split('.').slice(1)
-        )
-      } else if (typeof newValue === 'string') {
-        updatedValue = newValue.trim()
-      } else {
-        updatedValue = newValue
-      }
-      /**修改底层数据*/
-      setChild(this.ctx.editDoc, fieldName.split('.').slice(1), updatedValue)
+    let updatedValue
+    /**设置对象的值*/
+    if (field.schemaType === 'json') {
+      try {
+        let jsonValue = JSON.parse(newValue)
+        updatedValue = jsonValue
+      } catch (e) {}
+    } else if (field instanceof FieldBoolean) {
+      updatedValue = !getChild(this.ctx.editDoc, fieldName)
+    } else if (typeof newValue === 'string') {
+      updatedValue = newValue.trim()
+    } else {
+      updatedValue = newValue
     }
+    /**修改底层数据*/
+    setChild(this.ctx.editDoc, fieldName, updatedValue)
   }
   /**
    *
@@ -54,49 +46,11 @@ export class Input extends FieldNode {
       name: fieldName,
       type,
       value: toRaw(fieldValue),
-      class: ['tvu-jdoc__input'],
+      class: ['tvu-jdoc__field-input'],
       onInput: (event: any) => {
-        // const { schema, fields, editDoc, onAxios, setErrorMessage } = this.ctx
         const { schema, editDoc } = this.ctx
         const newValue = event && event.target ? event.target.value : event
         this.updateModel(newValue)
-        // this.vm.$emit('input', editDoc)
-        // if (this.field.assocs) {
-        //   for (let i = 0; i < this.field.assocs.length; i++) {
-        //     let oDep, oRule
-        //     oDep = this.field.assocs[i]
-        //     oRule = schema.eventDependencies[oDep].rule
-        //     editDoc[oDep] = ''
-        //     let postData = {}
-        //     oRule.params.forEach((param) => {
-        //       postData[param] = {
-        //         feature: 'start',
-        //         keyword: editDoc[param],
-        //       }
-        //     })
-        //     onAxios()
-        //       .post(oRule.url, { filter: postData })
-        //       .then((rst) => {
-        //         const data = rst.data.result.docs || rst.data.result
-        //         if (oRule.type === 'v1') {
-        //           editDoc[oDep] = data[0][oDep] || data[oDep]
-        //         } else if (oRule.type === 'v2') {
-        //           let arr = []
-        //           data.forEach((item) => {
-        //             let value = item[oDep]
-        //             arr.push({ label: value, value: value })
-        //           })
-        //           fields[oDep].items = arr
-        //           if (data.length === 1) {
-        //             editDoc[oDep] = arr[0].value
-        //           }
-        //         }
-        //       })
-        //       .catch(() => {
-        //         setErrorMessage('数据解析错误')
-        //       })
-        //   }
-        // }
       },
     }
     /**设置核选框的值*/
@@ -110,7 +64,7 @@ export class Input extends FieldNode {
    * 创建radiogroup|checkboxgroup下的子节点
    * @returns 返回子节点
    */
-  children(): VNode[] {
+  protected children(): VNode[] {
     const children: VNode[] = []
     if (/radio|checkbox/.test(this.field.type)) this.createItems(children)
     return children
@@ -119,7 +73,7 @@ export class Input extends FieldNode {
    * 加入当前节点的子节点
    * radiogroup/checkboxgroup
    */
-  createItems(children: VNode[]) {
+  private createItems(children: VNode[]) {
     const { field } = this
     const fieldValue = this.fieldValue()
 
@@ -143,7 +97,7 @@ export class Input extends FieldNode {
         // radio/checkbox
         let n1 = h(components[field.itemType].tag, props)
         // label
-        let n2 = h(components.label.tag, null, item.label)
+        let n2 = h(components.fieldLabel.tag, null, item.label)
         // wrap
         let n3 = h('div', [n1, n2])
         children.push(n3)

@@ -1,46 +1,8 @@
 import { h, VNode } from 'vue'
 import { SchemaIter, RawSchema, SchemaProp } from '@/json-schema/model'
 import { createField, Field } from './fields'
-import { LabelNode, FormNode, components, prepareFieldNode } from './nodes'
-
-function createLabelAndDesc(
-  ctx: FormContext,
-  field: Field,
-  fieldNode: any
-): VNode {
-  if (field.label) {
-    const labelNode = new LabelNode(ctx, field)
-    const labelNodes = []
-    if (components.label.option.native) {
-      labelNodes.push(
-        h(
-          'span',
-          {
-            'data-required-field': field.required ? 'true' : 'false',
-          },
-          field.label
-        )
-      )
-    }
-    labelNodes.push(fieldNode)
-    if (field.description) {
-      labelNodes.push(
-        h('small', { class: ['tvu-jdoc__input-desc'] }, field.description)
-      )
-    }
-
-    return labelNode.createElem(labelNodes)
-  } else {
-    const descNodes = []
-    descNodes.push(fieldNode)
-    if (field.description) {
-      descNodes.push(
-        h('small', { class: ['tvu-jdoc__input-desc'] }, field.description)
-      )
-    }
-    return h('div', { class: ['tvu-jdoc__node'] }, descNodes)
-  }
-}
+import { FieldWrap, FormNode, components, prepareFieldNode } from './nodes'
+import { getChild } from '@/utils'
 
 function createWrapClass(labelAndDescNodes: VNode): VNode {
   // if (this.fieldWrapClass) {
@@ -58,92 +20,46 @@ function createWrapClass(labelAndDescNodes: VNode): VNode {
  * @param {object} field
  */
 function createFieldWrapNode(ctx: FormContext, field: Field): VNode {
-  const node = prepareFieldNode(ctx, field)
+  const fieldNode = prepareFieldNode(ctx, field)
 
-  const fieldNode = node.createElem()
-
-  const labelAndDesc = createLabelAndDesc(ctx, field, fieldNode)
+  const wrapNode = new FieldWrap(ctx, fieldNode)
+  const labelAndDesc = wrapNode.createElem()
 
   return createWrapClass(labelAndDesc)
 }
 
-/**创建叶节点*/
-function createLeafNode(ctx: FormContext, prop: any): VNode {
+/**创建字段节点*/
+function createFieldNode(ctx: FormContext, prop: any): VNode | VNode[] {
   /**创建和当前属性对应的field*/
-  const newField = createField(prop, {}, {})
-  // this.setModelValue(newField)
-  return createFieldWrapNode(ctx, newField)
+  if (prop.isArrayItem) {
+    let fieldValue = getChild(ctx.editDoc, prop.parentFullname)
+    if (Array.isArray(fieldValue) && fieldValue.length) {
+      return fieldValue.map((val, index) => {
+        const newField = createField(prop, index)
+        return createFieldWrapNode(ctx, newField)
+      })
+    } else {
+      return []
+    }
+  } else {
+    const newField = createField(prop)
+    return createFieldWrapNode(ctx, newField)
+  }
 }
 
 /**创建嵌套节点*/
-function createNestNode(ctx: FormContext, prop: any, children: VNode[]): VNode {
-  const newField = createField(prop, {}, {})
-  const node = prepareFieldNode(ctx, newField)
+function createNestNode(
+  ctx: FormContext,
+  prop: any,
+  children: (VNode | VNode[])[]
+): VNode {
+  const newField = createField(prop)
+  const node = prepareFieldNode(ctx, newField, children)
 
-  if (prop.attrs.title) {
-    let title = h(
-      'div',
-      {
-        class: 'tvu-jdoc__nest-title',
-      },
-      prop.attrs.title
-    )
-    children.splice(0, 0, title)
-  }
+  const wrapNode = new FieldWrap(ctx, node)
+  const labelAndDesc = wrapNode.createElem()
 
-  if (
-    newField.type === 'file' &&
-    newField.attachment?.length &&
-    ctx.onFileDownload
-  ) {
-    let attachmentVNodes = []
-    attachmentVNodes.push(
-      h(
-        components.a.tag,
-        {
-          props: { underline: false },
-          attrs: { disabled: true },
-        },
-        '参考模板：'
-      )
-    )
-    newField.attachment.forEach((attach: any) => {
-      let element = h(
-        components.a.tag,
-        {
-          url: attach.url,
-          name: attach.name,
-          onClick: (event: any) => {
-            if (event.target.nodeType !== 1) return
-            let ele =
-              event.target.nodeName.toLowerCase() !== 'a'
-                ? event.target.parentNode
-                : event.target
-            let url = ele.getAttribute('url')
-            let name = ele.getAttribute('name')
-            ctx.onFileDownload?.(name, url)
-          },
-        },
-        attach.name
-      )
-      attachmentVNodes.push(element)
-    })
-
-    children.push(
-      h('div', { class: ['tvu-jdoc__node__attachment'] }, attachmentVNodes)
-    )
-  }
-
-  const fieldNode = node.createElem(children)
-
-  return fieldNode
-  // return h(
-  //   'div',
-  //   {
-  //     class: 'tvu-jdoc__nest',
-  //   },
-  //   [title, fieldNode]
-  // )
+  return createWrapClass(labelAndDesc)
 }
 
 function getFieldVisible(prop: SchemaProp, doc: any): boolean {
@@ -192,7 +108,7 @@ function getFieldVisible(prop: SchemaProp, doc: any): boolean {
 
 class Stack {
   nodes: VNode[]
-  data: { prop: SchemaProp; children: VNode[] }[]
+  data: { prop: SchemaProp; children: (VNode | VNode[])[] }[]
   ctx: FormContext
 
   constructor(nodes: VNode[], ctx: FormContext) {
@@ -211,9 +127,7 @@ class Stack {
 
   /**将创建的节点放入堆栈中的父字段*/
   addNode(prop: SchemaProp, node: VNode | VNode[]) {
-    if (this.last)
-      if (Array.isArray(node)) this.last.children.push(...node)
-      else this.last.children.push(node)
+    if (this.last) this.last.children.push(node)
   }
 
   /**如果子节点都准备完毕就出栈*/
@@ -258,7 +172,8 @@ class Stack {
 export function build(ctx: FormContext): VNode[] {
   const nodes: VNode[] = []
   const { schema, editDoc } = ctx
-  /***/
+
+  /**创建属性迭代器*/
   let iter = new SchemaIter(JSON.parse(JSON.stringify(schema)))
 
   // 用于记录处理过程的中间数据
@@ -268,7 +183,8 @@ export function build(ctx: FormContext): VNode[] {
   let prop: SchemaProp
   for (prop of iter) {
     // 不处理根节点
-    if (prop.path === '') continue
+    if (prop.name === iter.rootName) continue
+
     // 需要处理题目是否可见
     if (false === getFieldVisible(prop, editDoc)) {
       // 子字段也不能显示
@@ -285,12 +201,25 @@ export function build(ctx: FormContext): VNode[] {
     } else if (prop.attrs.type === 'array') {
       // 创建嵌套节点，将当前节点入栈，等待子节点生成完
       stack.push(prop)
+      /**如果数组中的项目是简单类型，创建字段*/
+      if (prop.items?.type) {
+        if (!['object', 'array'].includes(prop.items?.type)) {
+          let itemProp = new SchemaProp(
+            `${prop.fullname}[*]`,
+            '',
+            prop.items?.type
+          )
+          let itemNode = createFieldNode(ctx, itemProp)
+          stack.addNode(prop, itemNode)
+        }
+      }
     } else {
       // 创建节点，放入堆栈，或结果
-      let node = createLeafNode(ctx, prop)
-      if (prop.path === '$') {
-        // 根属性的子属性，直接放入结果中
-        nodes.push(node)
+      let node = createFieldNode(ctx, prop)
+      if (prop.path === iter.rootName) {
+        // 顶层属性，直接放入结果中
+        if (Array.isArray(node)) nodes.push(...node)
+        else nodes.push(node)
       } else {
         stack.addNode(prop, node)
       }
@@ -369,7 +298,10 @@ let mapBuilders = new Map()
 export type FormContext = {
   editDoc: any
   schema: RawSchema
+  onMessage: Function
   onAxios?: Function
+  onFileUpload?: Function
+  onFileSelect?: Function
   onFileDownload?: Function
 }
 

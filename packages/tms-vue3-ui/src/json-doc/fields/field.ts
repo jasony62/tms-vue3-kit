@@ -14,23 +14,20 @@ type FieldItem = {
   group: string
 }
 /**
- *
+ * 编辑文档中的字段，与表单中的一个输入项对应。
  */
 export abstract class Field {
   value?: any
-  // disabled: boolean
-  // assocs
-  //this.name = schema.name ? schema.name : pathname
-  type: string = ''
+  type: string = '' // 字段的类型
+  _index: number // 如果字段是数组中的对象，index代表字段所属对象在数组中的饿索引
   private _prop: SchemaProp
   private _required: boolean
   private _visible: boolean
-  items?: FieldItem[]
+  items?: FieldItem[] // 字段的可选项。应该改个名字，避免和schema中的items混淆。
   itemType?: string
-  itemVisible?: any
-  component?: any
+  itemVisible?: { [k: string]: boolean } // 记录字段的选项是否可见
 
-  constructor(prop: SchemaProp) {
+  constructor(prop: SchemaProp, index = -1) {
     let { attrs } = prop
     /**设置默认值*/
     let { type, default: defVal, value } = attrs
@@ -39,7 +36,6 @@ export abstract class Field {
     } else {
       this.value = defVal ? defVal : value ? value : ''
     }
-    // this.component = schema.component
     // this.disabled = attrs.readonly || false
     // this.assocs = schema.assocs
     // if (attrs.type === 'json') {
@@ -49,6 +45,11 @@ export abstract class Field {
     this._prop = prop
     this._required = prop.attrs.required ?? false
     this._visible = false
+    this._index = index
+  }
+
+  get index() {
+    return this._index
   }
 
   get name() {
@@ -56,7 +57,11 @@ export abstract class Field {
   }
 
   get fullname() {
-    return this._prop.fullname
+    if (this._prop.isArrayItem) {
+      return this._prop.path.replace(/\[\*\]$/, `[${this._index}]`) + this.name
+    } else {
+      return this._prop.fullname
+    }
   }
 
   get label() {

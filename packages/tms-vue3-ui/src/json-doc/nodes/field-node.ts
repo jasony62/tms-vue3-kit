@@ -14,16 +14,11 @@ const defaultGroup = { tag: 'div', option }
  * @param {Object} field
  */
 function getRawCreateArgs(field: Field) {
-  // 如果schema中指定了组件类型，直接使用
-  const customComponent = field.component
-    ? { tag: field.component, option: {} }
-    : undefined
   // field对应的组件类型，指定or预制，有items的变成group组件
-  const args = field.component
-    ? customComponent
-    : field.items && field.type !== 'select'
-    ? components[`${field.type}group`] || defaultGroup
-    : components[field.type] || defaultInput
+  const args =
+    field.items && field.type !== 'select'
+      ? components[`${field.type}group`] || defaultGroup
+      : components[field.type] || defaultInput
 
   return args
 }
@@ -52,7 +47,7 @@ export abstract class FieldNode extends Node {
   fieldValue() {
     const { field } = this
     const fieldName = field.fullname
-    let fieldValue = getChild(this.ctx.editDoc, fieldName.split('.').slice(1))
+    let fieldValue = getChild(this.ctx.editDoc, fieldName)
     fieldValue ??= field.value
 
     return fieldValue
@@ -75,7 +70,7 @@ export abstract class FieldNode extends Node {
           field.items?.forEach((oOption) => {
             if (oOption.group === enumGroup.id) {
               let id = oOption.group + oOption.value
-              field.itemVisible[id] = false
+              if (field.itemVisible) field.itemVisible[id] = false
               /**选项不可见处理数据对象的值*/
               if (field.schemaType === 'string') {
                 if (doc[oKey] === oOption.value) {
@@ -97,7 +92,7 @@ export abstract class FieldNode extends Node {
           field.items?.forEach((oOption) => {
             if (oOption.group === enumGroup.id) {
               let id = oOption.group + oOption.value
-              field.itemVisible[id] = true
+              if (field.itemVisible) field.itemVisible[id] = true
             }
           })
         }
@@ -152,8 +147,10 @@ export abstract class FieldNode extends Node {
   /**提供渲染函数的参数*/
   abstract options(attrsOrProps: any): any
 
-  /**字段节点的子节点*/
-  children(): VNode[] {
+  /**
+   * 当前节点的子节点数组
+   */
+  protected children(): VNode[] {
     return []
   }
 
@@ -162,7 +159,7 @@ export abstract class FieldNode extends Node {
    *
    * 这是1个模板方法
    */
-  createElem(children: (VNode | string)[]): VNode {
+  createElem(): VNode {
     const { field } = this
 
     // TODO 这里有问题，不是所有的值都需要
@@ -172,13 +169,10 @@ export abstract class FieldNode extends Node {
     const nodeOptions = this.options(attrOrProps)
 
     // 获得子节点的内容
-    let allChildren
-    if (!Array.isArray(children)) allChildren = this.children()
-    else {
-      allChildren = children.concat(this.children())
-    }
+    let children = this.children()
 
-    const node = h(this.rawArgs.tag, nodeOptions, allChildren)
+    // 生成节点
+    const node = h(this.rawArgs.tag, nodeOptions, children)
 
     return node
   }

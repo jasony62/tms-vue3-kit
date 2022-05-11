@@ -1,41 +1,49 @@
 <template>
   <tvu-form-item label="上传模板">
-    <tvu-upload action="#" multiple :file-list="fieldAttrs.attachment" :http-request="onUploadFile"
-      :on-remove="onRemoveFile">
+    <tvu-upload action="#" multiple :file-list="schemaProp.attachment" :upload-file="onUploadFile"
+      :remove-file="onRemoveFile">
       <tvu-button>上传文件</tvu-button>
     </tvu-upload>
   </tvu-form-item>
 </template>
-<script lang="ts">
-import { PropType } from 'vue';
-import { SchemaFieldAttrs } from './utils';
-import { BuildinComponents } from "./buildinComp"
-export default {
-  components: BuildinComponents
-}
-</script>
 <script setup lang="ts">
+import { PropType } from 'vue';
+import { SchemaProp } from './model';
 
 const props = defineProps({
-  fieldAttrs: { type: Object as PropType<SchemaFieldAttrs>, required: true },
-  onUpload: { type: Function, required: true }
+  schemaProp: { type: Object as PropType<SchemaProp>, required: true },
+  onUpload: { type: Function }
 })
-const { fieldAttrs } = props
+const { schemaProp, onUpload } = props
 
-const onRemoveFile = (file) => {
-  let files = fieldAttrs.attachment
+const onRemoveFile = (file: { name: any; }) => {
+  let files = schemaProp.attachment
   files.splice(
-    files.indexOf(files.find((ele) => ele.name === file.name)),
+    files.indexOf(files.find((ele: { name: any; }) => ele.name === file.name)),
     1
   )
 }
 
-const onUploadFile = ({ file }) => {
-  if (!fieldAttrs.attachment) {
-    fieldAttrs.attachment = []
+const onUploadFile = (file: File) => {
+  const { accept, size, limit } = schemaProp.items?.formatAttrs
+  const suffix = file.name.split('.').pop()
+  if (!accept.split(',').includes(suffix)) {
+    alert(`不支持文件${file.name}的格式，仅支持${accept}`)
+    return
   }
-  props.onUpload(file).then((result) => {
-    fieldAttrs.attachment.push(result)
+  if (limit && schemaProp.attachment.length >= limit) {
+    alert(`只允许上传${limit}个文件`)
+    return
+  }
+  if (size && file.size / 1024 / 1024 > size) {
+    alert(`上传文件大小过大，超过${size}M`);
+    return
+  }
+  if (!schemaProp.attachment) {
+    schemaProp.attachment = []
+  }
+  onUpload?.(file).then((result: any) => {
+    schemaProp.attachment.push(result)
   })
 }
 </script>

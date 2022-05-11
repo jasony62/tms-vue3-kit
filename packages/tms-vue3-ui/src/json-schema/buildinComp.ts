@@ -25,8 +25,44 @@ const components = {
     },
   }),
   upload: defineComponent({
+    props: ['fileList', 'uploadFile', 'removeFile'],
     render() {
-      return h('input', {})
+      const divNode = this.fileList?.map((i: any) => {
+        return h('div', { class: 'tvu-jse' }, [
+          i.name,
+          h(
+            'button',
+            {
+              onClick: () => {
+                this.removeFile(i)
+              },
+            },
+            '删除'
+          ),
+        ])
+      })
+      return h('div', {}, [
+        ...divNode,
+        h(
+          'div',
+          {
+            onClick: () => {
+              const elInput = document.createElement('input')
+              elInput.setAttribute('type', 'file')
+              document.body.appendChild(elInput)
+              elInput.addEventListener('change', async (e: Event) => {
+                const target = e.target as HTMLInputElement
+                if (target.files) {
+                  const file = target.files[0]
+                  this.uploadFile(file)
+                }
+              })
+              elInput.click()
+            },
+          },
+          this.$slots.default?.()
+        ),
+      ])
     },
   }),
   checkbox: defineComponent({

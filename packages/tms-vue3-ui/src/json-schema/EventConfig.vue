@@ -15,11 +15,7 @@
 </template>
 
 <script lang="ts">
-import { BuildinComponents } from "./buildinComp"
-
 export default {
-  name: 'tvu-jse-event-config',
-  components: BuildinComponents,
   props: {
     rule: { type: Object, required: true }
   },

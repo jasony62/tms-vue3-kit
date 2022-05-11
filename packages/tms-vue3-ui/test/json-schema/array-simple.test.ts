@@ -1,10 +1,11 @@
-import { SampleSchema } from '../data/schema4'
+import { SampleSchema } from '../data/schema-array-simple'
 import { SchemaIter } from '../../src/json-schema/model'
 
 describe('处理JSONSchema', () => {
   it('迭代JSONSchema属性', () => {
-    // console.log(JSON.stringify(SampleSchema, null, 2))
     const iter = new SchemaIter(SampleSchema)
+    const props = Array.from(iter)
+    expect(props).toHaveLength(2)
     console.log('iter', Array.from(iter))
   })
 })

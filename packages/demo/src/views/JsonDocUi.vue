@@ -1,8 +1,14 @@
 <template>
   <div class="flex flex-row">
     <div class="w-1/3 p-4">
-      <json-doc ref="jsonDocEditor" :schema="CardSchema" :value="doc" :on-axios="onAxios"
-        :on-file-download="onFileDownload"></json-doc>
+      <json-doc
+        ref="jsonDocEditor"
+        :schema="CardSchema"
+        :value="doc"
+        :on-axios="onAxios"
+        :on-file-download="onFileDownload"
+        :on-file-upload="onFileUpload"
+      ></json-doc>
     </div>
     <div class="p-4">
       <div>
@@ -18,12 +24,16 @@
 <script setup lang="ts">
 import { JsonDoc } from 'tms-vue3-ui'
 import 'tms-vue3-ui/dist/es/json-doc/style/tailwind.scss'
-import { ref } from 'vue';
+import { ref } from 'vue'
 import { CardSchema } from '../data/schema-examples'
 
 const doc = {
   name: '张三',
-  additionalName: ['alice', 'bob']
+  additionalName: ['alice', 'bob'],
+  experiences: [
+    { time: '2022', content: '开发' },
+    { time: '2021', content: '测试' },
+  ],
 }
 const jsonDocEditor = ref<{ editing: () => string } | null>(null)
 
@@ -41,14 +51,41 @@ const onAxios = () => {
             result.data.result.city = '北京'
           else if (filter?.areaCode?.keyword === '029')
             result.data.result.city = '西安'
-          else
-            result.data.result.city = ''
+          else result.data.result.city = ''
         }
         console.log('axios.result', result)
         resolve(result)
       })
     },
   }
+}
+/**
+ * 从外部选择文件的方法
+ * @param params
+ */
+const onFileSelect = (params: any) => {
+  console.log('params', params)
+  return new Promise((resolve) => {
+    /**这里需要返回文件属性中items.properties中定义的内容*/
+    resolve({
+      name: 'onFileSelect返回文件名称',
+      url: 'onFileSelect返回的文件地址',
+    })
+  })
+}
+/**
+ * 表单中文件上传方法
+ * @param params
+ */
+const onFileUpload = (params: any) => {
+  console.log('params', params)
+  return new Promise((resolve) => {
+    /**这里需要返回文件属性中items.properties中定义的内容*/
+    resolve({
+      name: 'onFileUpload返回文件名称',
+      url: 'onFileUpload返回的文件地址',
+    })
+  })
 }
 
 const onFileDownload = (name: string, url: string) => {
@@ -58,5 +95,4 @@ const onFileDownload = (name: string, url: string) => {
 const getResult = () => {
   jsonResult.value = JSON.stringify(jsonDocEditor.value?.editing(), null, 2)
 }
-
 </script>

@@ -1,7 +1,7 @@
 import { createApp } from 'vue'
 import App from './App.vue'
 import { TmsAxiosPlugin, TmsAxios } from 'tms-vue3'
-import { Frame, Flex, Card, Text } from 'tms-vue3-ui'
+import { Frame, Flex, Card, Text, JsonSchema } from 'tms-vue3-ui'
 import router from './router'
 import './index.css'
 
@@ -13,7 +13,13 @@ import './index.css'
 const app = createApp(App)
 app.use(router)
 
-app.use(TmsAxiosPlugin).use(Frame).use(Flex).use(Card).use(Text)
+app
+  .use(TmsAxiosPlugin)
+  .use(Frame)
+  .use(Flex)
+  .use(Card)
+  .use(Text)
+  .use(JsonSchema.install)
 
 // 注意不需要new，返回的不是Class，是工厂方法
 let name = 'tms-axios-1'

@@ -1,4 +1,4 @@
-import { SampleSchema } from '../data/schema7'
+import { SampleSchema } from '../data/schema-event'
 import { build } from '../../src/json-doc/builder'
 
 describe('通过API从外部获取值', () => {
@@ -14,7 +14,14 @@ describe('通过API从外部获取值', () => {
       }
     }
     const editDoc = {}
-    const nodes = build({ schema: SampleSchema, editDoc, onAxios })
+    const nodes = build({
+      schema: SampleSchema,
+      editDoc,
+      onMessage: (msg: string) => {
+        console.log(msg)
+      },
+      onAxios,
+    })
     // console.log(JSON.stringify(nodes, null, 2))
     setTimeout(() => {
       console.log('editDoc', editDoc)

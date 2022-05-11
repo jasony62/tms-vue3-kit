@@ -4,14 +4,14 @@
   .tvu-jdoc__form {
     @apply flex flex-col gap-y-4;
 
-    .tvu-jdoc__node {
+    .tvu-jdoc__field {
       @apply flex flex-col gap-y-2;
     }
 
     input,
     select,
     textarea {
-      &.tvu-jdoc__input {
+      &.tvu-jdoc__field-input {
         @apply rounded p-2 border-2 border-gray-200;
       }
     }

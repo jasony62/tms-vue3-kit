@@ -68,23 +68,29 @@ export class SchemaProp {
   }
 
   get fullname(): string {
-    let fullname
-    if (/^\[.*\]$/.test(this.name)) {
-      fullname = (this.path ? this.path : '') + this.name
-    } else {
-      fullname = (this.path ? this.path + '.' : '') + this.name
-    }
+    let fullname = (this.path ? this.path + '.' : '') + this.name
     return fullname
+  }
+  /**如果需要去掉路径中的[*]获得父属性名称*/
+  get parentFullname(): string {
+    return this.path.replace(/\[\*\]$/, '')
+  }
+
+  /**是否是数组中项目*/
+  get isArrayItem(): boolean {
+    return /\[\*\]$/.test(this.path)
   }
 }
 
 export type SchemaItem = {
   type: string
+  properties?: any
   format?: string
   formatAttrs?: { [k: string]: any }
   $ref?: any
   enum?: any
 }
+
 export type SchemaEvtDepRule = {
   params: string[]
   url: string
@@ -170,11 +176,16 @@ function* _parseOne(
     let key = keys[i]
     switch (key) {
       case 'properties':
-      case 'items':
       case 'dependencies':
       case 'eventDependencies':
       case 'required':
         break
+      case 'items':
+        newProp.items = { type: items.type }
+        Object.keys(items).forEach((key) => {
+          if (key === 'properties') return
+          Object.assign(newProp.items, { [key]: items[key] })
+        })
       case 'attachment':
         newProp.attachment = rawProp.attachment
         break
@@ -195,12 +206,12 @@ function* _parseOne(
   if (typeof required === 'boolean') {
     newProp.attrs.required = required
   }
-
   // 返回当前的属性
   yield newProp
 
   /*处理子属性*/
   if (typeof properties === 'object') {
+    /**属性的子属性*/
     yield* _parseChildren(
       properties,
       newProp,
@@ -208,40 +219,45 @@ function* _parseOne(
       eventDependencies,
       required
     )
-  } else if (typeof items === 'object') {
-    newProp.items = { type: '' }
-    let keys = Object.keys(items)
-    for (let i = 0, key; i < keys.length; i++) {
-      key = keys[i]
-      if (key === 'properties') {
-        yield* _parseChildren(
-          items.properties,
-          newProp,
-          dependencies,
-          eventDependencies,
-          required
-        )
-      } else {
-        Object.assign(newProp.items, { [key]: items[key] })
-      }
-    }
+  } else if (
+    typeof items === 'object' &&
+    typeof items.properties === 'object'
+  ) {
+    yield* _parseChildren(
+      items.properties,
+      newProp,
+      dependencies,
+      eventDependencies,
+      required
+    )
   }
 }
+/**
+ * 根节点默认名称
+ */
+export const DEFAULT_ROOT_NAME = ''
 
 /**
  * JSONSchema对象迭代器
  */
 export class SchemaIter {
   private _rawSchema
+  private _rootName
 
-  constructor(rawSchema: any) {
+  constructor(rawSchema: any, rootName = DEFAULT_ROOT_NAME) {
     this._rawSchema = rawSchema
+    this._rootName = rootName
   }
+
+  get rootName() {
+    return this._rootName
+  }
+
   /**
    * 迭代访问JSONSchema的属性
    */
   *[Symbol.iterator]() {
     // 从根属性开始遍历
-    yield* _parseOne('$', this._rawSchema)
+    yield* _parseOne(this._rootName, this._rawSchema)
   }
 }

@@ -1,7 +1,7 @@
 <template>
   <div class="tvu-jse__enum-config">
     <div class="tvu-jse__enum-groups">
-      <tvu-form-item class="tvu-jse__enum-group tvu-jse__input" v-for="(grp, i) in fieldAttrs.enumGroups" :key="i">
+      <tvu-form-item class="tvu-jse__enum-group tvu-jse__field" v-for="(grp, i) in fieldAttrs.enumGroups" :key="i">
         <tvu-input v-model="grp.id"></tvu-input>
         <tvu-input v-model="grp.label"></tvu-input>
         <tvu-input v-model="grp.assocEnum.property"></tvu-input>
@@ -18,7 +18,7 @@
         <div>选项显示内容</div>
         <div>选项所属分组</div>
       </div>
-      <tvu-form-item class="tvu-jse__enum-option tvu-jse__input" v-for="(opt, i) in fieldAttrs.enum" :key="i">
+      <tvu-form-item class="tvu-jse__enum-option tvu-jse__field" v-for="(opt, i) in fieldAttrs.enum" :key="i">
         <tvu-input v-model="opt.value"></tvu-input>
         <tvu-input v-model="opt.label"></tvu-input>
         <tvu-input v-model="opt.group"></tvu-input>
@@ -31,27 +31,21 @@
       <tvu-button @click="onAddEnumOption">新增选项</tvu-button>
     </div>
     <div class="tvu-jse__enum-range">
-      <tvu-form-item class="tvu-jse__input" label="至少选">
+      <tvu-form-item class="tvu-jse__field" label="至少选">
         <tvu-input-number v-model="fieldAttrs.minItems"></tvu-input-number>
       </tvu-form-item>
-      <tvu-form-item class="tvu-jse__input" label="最多选">
+      <tvu-form-item class="tvu-jse__field" label="最多选">
         <tvu-input-number v-model="fieldAttrs.maxItems"></tvu-input-number>
       </tvu-form-item>
     </div>
   </div>
 </template>
-<script lang="ts">
-import { BuildinComponents } from "./buildinComp"
-export default {
-  components: BuildinComponents
-}
-</script>
 <script setup lang="ts">
 import { PropType } from "vue";
-import { FieldAttrs, EnumOption, EnumGroup } from './utils'
+import { SchemaPropAttrs, EnumOption, EnumGroup } from './model'
 
 const props = defineProps({
-  fieldAttrs: { type: Object as PropType<FieldAttrs>, required: true }
+  fieldAttrs: { type: Object as PropType<SchemaPropAttrs>, required: true }
 })
 
 const { fieldAttrs } = props

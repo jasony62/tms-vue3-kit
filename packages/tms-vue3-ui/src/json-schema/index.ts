@@ -1,11 +1,16 @@
+import { App } from 'vue'
+import { BuildinComponents } from './buildinComp'
 import JsonSchema from './Editor.vue'
 
-// import { BuildinComponents } from './buildinComp'
-
-export function factory() {
-  /*指定使用的组件*/
-  // JsonSchema.components = BuildinComponents
-  return JsonSchema
+/**
+ * 全局注册
+ * @param app
+ */
+JsonSchema.install = (app: App) => {
+  Object.entries(BuildinComponents).forEach(([name, comp]) => {
+    app.component(name, comp)
+  })
+  app.component('tms-json-schema', JsonSchema)
 }
 
 export default JsonSchema

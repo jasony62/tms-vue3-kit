@@ -1,10 +1,22 @@
 <script lang="ts">
-import { h, PropType, reactive, toRaw } from 'vue'
-import { RawSchema } from '@/json-schema/model';
-import { deepClone } from '@/utils';
+import { defineComponent, h, PropType, reactive, toRaw } from 'vue'
+import { RawSchema } from '@/json-schema/model'
+import { deepClone } from '@/utils'
 import BuildEditor from './builder'
+import { Field } from './fields'
 
-export default {
+type FileSelectArgs = {
+  fullname: string // 文件对应的字段名称
+  fileld: Field
+}
+
+type FileUploadArgs = {
+  fullname: string // 文件对应的字段名称
+  data: string // base64编码的文件内容
+  field: Field
+}
+
+export default defineComponent({
   props: {
     /**
      * The JSON Schema object. Use the `v-if` directive to load asynchronous schema.
@@ -33,13 +45,34 @@ export default {
      */
     requireButtons: { type: Boolean, default: () => true },
     /**
-     * 通过动态数据 
+     * 接收处理内部消息提醒的方法
+     */
+    onMessage: {
+      type: Function,
+      default: (msg: string) => {
+        alert(msg)
+      },
+    },
+    /**
+     * 通过动态数据
      */
     onAxios: { type: Function },
     /**
-     * 
+     * 选择文件的方法
      */
-    onFileDownload: { type: Function }
+    onFileSelect: {
+      type: Function as PropType<(args: FileSelectArgs) => Promise<any>>,
+    },
+    /**
+     * 上传文件并返回文件信息的方法
+     */
+    onFileUpload: {
+      type: Function as PropType<(args: FileUploadArgs) => Promise<any>>,
+    },
+    /**
+     * 文件下载方法
+     */
+    onFileDownload: { type: Function },
   },
   setup(props: any, context: any) {
     /**
@@ -56,9 +89,25 @@ export default {
     const editDoc = reactive(deepClone(props.value))
 
     return () => {
-      const nodes = BuildEditor({ editDoc, schema: props.schema, onAxios: props.onAxios, onFileDownload: props.onFileDownload })
+      let {
+        schema,
+        onMessage,
+        onAxios,
+        onFileUpload,
+        onFileSelect,
+        onFileDownload,
+      } = props
+      const nodes = BuildEditor({
+        editDoc,
+        schema,
+        onMessage,
+        onAxios,
+        onFileUpload,
+        onFileSelect,
+        onFileDownload,
+      })
       return h('div', { class: ['tvu-jdoc__root'] }, nodes)
     }
-  }
-}
+  },
+})
 </script>

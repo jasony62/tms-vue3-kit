@@ -1,90 +1,88 @@
 <template>
   <div class="tvu-jse tvu-jse--layout-default">
     <!--属性列表部分-->
-    <div class="tvu-jse__fields">
-      <div class="tvu-jse__field" :class="f === data.currProp ? 'tvu-jse__field--active' : ''" v-for="f in nodes">
-        <div @click="onClickNode(f)">{{ f.path ? f.path + '.' : '' }}{{ f.name }}</div>
+    <div class="tvu-jse__properties">
+      <div class="tvu-jse__property" :class="p === data.currProp ? 'tvu-jse__property--active' : ''" v-for="p in nodes">
+        <div @click="onClickNode(p)">{{ p.fullname }}</div>
       </div>
     </div>
     <!--属性编辑部分-->
-    <div class="tvu-jse__field-editor">
-      <div class="tvu-jse__field-form">
-        <tvu-form-item class="tvu-jse__input" label="键值">
-          <tvu-input v-model="data.currProp.name"></tvu-input>
-        </tvu-form-item>
-        <tvu-form-item class="tvu-jse__input" label="类型">
-          <tvu-select v-model="data.currProp.attrs.type">
-            <tvu-option label="integer" value="integer"></tvu-option>
-            <tvu-option label="number" value="number"></tvu-option>
-            <tvu-option label="string" value="string"></tvu-option>
-            <tvu-option label="object" value="object"></tvu-option>
-            <tvu-option label="array" value="array"></tvu-option>
-            <tvu-option label="boolean" value="boolean"></tvu-option>
-            <tvu-option label="json" value="json"></tvu-option>
-            <tvu-option label="null" value="null"></tvu-option>
-          </tvu-select>
-        </tvu-form-item>
-        <tvu-form-item v-if="data.currProp.attrs.type === 'array'" class="tvu-jse__input" label="子对象类型">
-          <tvu-select v-model="data.currProp.items.type">
-            <tvu-option label="integer" value="integer"></tvu-option>
-            <tvu-option label="number" value="number"></tvu-option>
-            <tvu-option label="string" value="string"></tvu-option>
-            <tvu-option label="object" value="object"></tvu-option>
-            <tvu-option label="array" value="array"></tvu-option>
-            <tvu-option label="boolean" value="boolean"></tvu-option>
-            <tvu-option label="json" value="json"></tvu-option>
-            <tvu-option label="null" value="null"></tvu-option>
-          </tvu-select>
-        </tvu-form-item>
-        <tvu-form-item class="tvu-jse__input" label="子对象格式" v-if="formats">
-          <tvu-select v-model="data.currProp.attrs.format" placeholder="请选择格式">
-            <tvu-option v-for="format in formats" :key="format.value" :label="format.label" :value="format.value">
-            </tvu-option>
-          </tvu-select>
-        </tvu-form-item>
-        <tvu-form-item class="tvu-jse__input" label="格式" v-if="formats2">
-          <tvu-select v-model="data.currProp.items.format" placeholder="请选择格式">
-            <tvu-option v-for="format in formats2" :key="format.value" :label="format.label" :value="format.value">
-            </tvu-option>
-          </tvu-select>
-        </tvu-form-item>
-        <component :is="compFormatAttrs" v-bind.sync="data.currProp.items?.formatAttrs"></component>
-        <tvu-form-item class="tvu-jse__input" label="标题">
-          <tvu-input v-model="data.currProp.attrs.title" placeholder="标题"></tvu-input>
-        </tvu-form-item>
-        <tvu-form-item class="tvu-jse__input" label="描述">
-          <tvu-input v-model="data.currProp.attrs.description" placeholder="描述"></tvu-input>
-        </tvu-form-item>
-        <tvu-form-item label="必填">
-          <tvu-checkbox v-model="data.currProp.attrs.required"></tvu-checkbox>
-        </tvu-form-item>
-        <tvu-form-item label="可否分组">
-          <tvu-checkbox v-model="data.currProp.attrs.groupable"></tvu-checkbox>
-        </tvu-form-item>
-        <tvu-form-item label="设置选项">
-          <tvu-checkbox v-model="hasEnum" @change="onChangeHasEnum"></tvu-checkbox>
-        </tvu-form-item>
-        <div class="tvu-jse__enum" v-if="hasEnum">
-          <tvu-jse-enum-config :field-attrs="data.currProp.attrs"></tvu-jse-enum-config>
-        </div>
-        <tvu-form-item class="tvu-jse__input" label="默认值" v-if="!hasEnum">
-          <tvu-input v-model="data.currProp.attrs.default"></tvu-input>
-        </tvu-form-item>
-        <div v-if="onUpload && data.currProp.attrs.type === 'array' && data.currProp.items">
-          <tvu-jse-attachment :field-attrs="data.currProp.attrs" :on-upload="onUpload"></tvu-jse-attachment>
-        </div>
-        <tvu-jse-event-config v-if="data.currProp.eventDependency?.rule" :rule="data.currProp.eventDependency.rule">
-        </tvu-jse-event-config>
-        <div class="tvu-jse__form__extattrs">
-          <slot name="extattrs" :attrs="data.currProp.attrs">备用内容</slot>
-        </div>
-        <tvu-form-item class="tvu-jse__form__actions">
-          <tvu-button @click="onRemoveNode">删除属性</tvu-button>
-          <tvu-button @click="onAddNode" v-if="['object', 'array'].includes(data.currProp.attrs.type)">添加属性
-          </tvu-button>
-          <tvu-button @click="onPreview">预览</tvu-button>
-        </tvu-form-item>
+    <div class="tvu-jse__property-fields">
+      <tvu-form-item class="tvu-jse__field" label="键值">
+        <tvu-input v-model="data.currProp.name"></tvu-input>
+      </tvu-form-item>
+      <tvu-form-item class="tvu-jse__field" label="类型">
+        <tvu-select v-model="data.currProp.attrs.type">
+          <tvu-option label="integer" value="integer"></tvu-option>
+          <tvu-option label="number" value="number"></tvu-option>
+          <tvu-option label="string" value="string"></tvu-option>
+          <tvu-option label="object" value="object"></tvu-option>
+          <tvu-option label="array" value="array"></tvu-option>
+          <tvu-option label="boolean" value="boolean"></tvu-option>
+          <tvu-option label="json" value="json"></tvu-option>
+          <tvu-option label="null" value="null"></tvu-option>
+        </tvu-select>
+      </tvu-form-item>
+      <tvu-form-item v-if="data.currProp.attrs.type === 'array'" class="tvu-jse__field" label="子对象类型">
+        <tvu-select v-model="data.currProp.items.type">
+          <tvu-option label="integer" value="integer"></tvu-option>
+          <tvu-option label="number" value="number"></tvu-option>
+          <tvu-option label="string" value="string"></tvu-option>
+          <tvu-option label="object" value="object"></tvu-option>
+          <tvu-option label="array" value="array"></tvu-option>
+          <tvu-option label="boolean" value="boolean"></tvu-option>
+          <tvu-option label="json" value="json"></tvu-option>
+          <tvu-option label="null" value="null"></tvu-option>
+        </tvu-select>
+      </tvu-form-item>
+      <tvu-form-item class="tvu-jse__field" label="子对象格式" v-if="formats">
+        <tvu-select v-model="data.currProp.attrs.format" placeholder="请选择格式">
+          <tvu-option v-for="format in formats" :key="format.value" :label="format.label" :value="format.value">
+          </tvu-option>
+        </tvu-select>
+      </tvu-form-item>
+      <tvu-form-item class="tvu-jse__field" label="格式" v-if="formats2">
+        <tvu-select v-model="data.currProp.items.format" placeholder="请选择格式">
+          <tvu-option v-for="format in formats2" :key="format.value" :label="format.label" :value="format.value">
+          </tvu-option>
+        </tvu-select>
+      </tvu-form-item>
+      <component :is="compFormatAttrs" v-bind.sync="data.currProp.items?.formatAttrs"></component>
+      <tvu-form-item class="tvu-jse__field" label="标题">
+        <tvu-input v-model="data.currProp.attrs.title" placeholder="标题"></tvu-input>
+      </tvu-form-item>
+      <tvu-form-item class="tvu-jse__field" label="描述">
+        <tvu-input v-model="data.currProp.attrs.description" placeholder="描述"></tvu-input>
+      </tvu-form-item>
+      <tvu-form-item class="tvu-jse__field" label="必填">
+        <tvu-checkbox v-model="data.currProp.attrs.required"></tvu-checkbox>
+      </tvu-form-item>
+      <tvu-form-item class="tvu-jse__field" label="可否分组">
+        <tvu-checkbox v-model="data.currProp.attrs.groupable"></tvu-checkbox>
+      </tvu-form-item>
+      <tvu-form-item class="tvu-jse__field" label="设置选项">
+        <tvu-checkbox v-model="hasEnum" @change="onChangeHasEnum"></tvu-checkbox>
+      </tvu-form-item>
+      <div class="tvu-jse__field" v-if="hasEnum">
+        <tvu-jse-enum-config :field-attrs="data.currProp.attrs"></tvu-jse-enum-config>
       </div>
+      <tvu-form-item class="tvu-jse__field" label="默认值" v-if="!hasEnum">
+        <tvu-input v-model="data.currProp.attrs.default"></tvu-input>
+      </tvu-form-item>
+      <div class="tvu-jse__field"
+        v-if="onUpload && data.currProp.attrs.type === 'array' && data.currProp.items?.format === 'file'">
+        <tvu-jse-attachment :schema-prop="data.currProp" :on-upload="onUpload"></tvu-jse-attachment>
+      </div>
+      <tvu-jse-event-config v-if="data.currProp.eventDependency?.rule" :rule="data.currProp.eventDependency.rule">
+      </tvu-jse-event-config>
+      <div class="tvu-jse__extra_fields">
+        <slot name="extattrs" :attrs="data.currProp.attrs">备用内容</slot>
+      </div>
+      <tvu-form-item class="tvu-jse__field__actions">
+        <tvu-button @click="onRemoveNode">删除属性</tvu-button>
+        <tvu-button @click="onAddNode" v-if="['object', 'array'].includes(data.currProp.attrs.type)">添加属性
+        </tvu-button>
+      </tvu-form-item>
     </div>
     <!-- 开始：扩展定义 -->
     <div class="tvu-jse__extra">
@@ -95,8 +93,7 @@
   </div>
 </template>
 <script lang="ts">
-import { Type2Format, FlattenJSONSchema, SchemaProp } from './utils'
-import { BuildinComponents } from "./buildinComp"
+import { Type2Format, JSONSchemaBuilder, SchemaProp } from './builder'
 import File from './formats/File.vue'
 import TvuJseDependency from './Dependency.vue'
 import TvuJseEnumConfig from './EnumConfig.vue'
@@ -107,7 +104,6 @@ import { computed, onMounted, reactive, ref, toRaw } from 'vue'
 export default {
   name: 'tms-json-schema',
   components: {
-    ...BuildinComponents,
     TvuJseDependency,
     TvuJseEnumConfig,
     TvuJseEventConfig
@@ -120,20 +116,20 @@ const Format2Comp = {
   file: File
 }
 
-const props = defineProps({ schema: Object, onUpload: Function })
+const props = defineProps({ schema: Object, onUpload: Function, rootName: { type: String, default: '' } })
 
-const FJS = new FlattenJSONSchema()
+const builder = new JSONSchemaBuilder(props.rootName)
 const nodes = ref([] as SchemaProp[])
 const data = reactive({ currProp: { name: '', attrs: {} } as SchemaProp })
 const hasEnum = ref(false)
 
 // 获得当前的JSONSchema数据
-const outcome = () => {
-  return FJS.unflatten()
+const editing = () => {
+  return builder.unflatten()
 }
 
 // 允许在父组件中获取
-defineExpose({ outcome })
+defineExpose({ editing })
 
 const compFormatAttrs = computed(() => {
   const format = data.currProp.items?.format
@@ -197,9 +193,10 @@ const onChangeHasEnum = (bHasEnum: boolean) => {
     delete attrs.enumGroups
   }
 }
-const onClickNode = (field: SchemaProp) => {
-  data.currProp = field
-  if (Array.isArray(field.attrs.enum)) {
+
+const onClickNode = (prop: SchemaProp) => {
+  data.currProp = prop
+  if (Array.isArray(prop.attrs.enum) || Array.isArray(prop.attrs.oneOf) || Array.isArray(prop.attrs.anyOf)) {
     hasEnum.value = true
   } else {
     hasEnum.value = false
@@ -207,25 +204,21 @@ const onClickNode = (field: SchemaProp) => {
 }
 
 const onAddNode = () => {
-  let child = FJS.addProp(toRaw(data.currProp))
+  let child = builder.addProp(toRaw(data.currProp))
   data.currProp = child
 }
 
 const onRemoveNode = () => {
-  let prev = FJS.removeProp(toRaw(data.currProp))
+  let prev = builder.removeProp(toRaw(data.currProp))
   if (typeof prev === 'object') {
     data.currProp = prev
   }
 }
 
-const onPreview = () => {
-  console.log(outcome())
-}
-
 onMounted(() => {
-  FJS.flatten(JSON.parse(JSON.stringify(props.schema)))
-  nodes.value = FJS.props
-  data.currProp = FJS.props?.[0]
+  builder.flatten(JSON.parse(JSON.stringify(props.schema)))
+  nodes.value = builder.props
+  data.currProp = builder.props?.[0]
 })
 /**
  * 设置格式特定属性的编辑组件
