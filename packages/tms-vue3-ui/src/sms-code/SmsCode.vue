@@ -3,9 +3,14 @@
     <div class="tvu-sms-code__input" v-for="(item, index) in otherInputs" :key="index">
       <input :placeholder="item.placeholder" :type="item.type" v-model="submitData[item.key]" required />
     </div>
-    <div class="tvu-sms-code__code" v-if="codeInput">
+    <div class="tvu-captcha__code" v-if="captchaInput">
+      <input :placeholder="captchaInput.placeholder" v-model="submitData[captchaInput.key]" required />
+      <div ref="elCaptcha"></div>
+      <button @click="sendCaptcha"></button>
+    </div>
+    <div class="tvu-sms-code__code" v-if="codeInput"  :class="{ 'tvu-sms-code__form--modal': codeDialog }">
       <input :placeholder="codeInput.placeholder" v-model="submitData[codeInput.key]" required />
-      <button @click="sendCode">获取验证码</button>
+      <button @click="sendSmsCode">获取短信验证码</button>
     </div>
     <div class="tvu-sms-code__button">
       <button @click="verify">{{ actionText }}</button>
@@ -20,14 +25,14 @@
 
 <script setup lang="ts">
 import { reactive, PropType, ref, nextTick, onMounted } from 'vue';
-import { SubmitDataItem } from '@/types';
-
+import { SubmitDataItem,CaptchaResponse } from '@/types';
 // 支持通过属性传递需要数据和方法
 const props = defineProps({
   schema: Array as PropType<SubmitDataItem[]>,
   actionText: { default: '验证' },
   smsCodeTip: Object,
   fnSendCode: Function,
+  fnSendSmsCode:Function,
   fnVerify: Function,
   onSuccess: { type: Function, default: () => { } },
   onFail: { type: Function, default: () => { } },
@@ -37,41 +42,55 @@ const props = defineProps({
 
 // 组件的根节点
 const el = ref(null as unknown as Element)
-
+// 验证码节点
+const elCaptcha = ref(null as unknown as Element)
 // 使用通过属性传递的外部参数
-let { schema, smsCodeTip, fnVerify, fnSendCode, onSuccess, onFail, asDialog, onClose } = props
-
+let { schema, smsCodeTip, fnVerify, fnSendCode,fnSendSmsCode, onSuccess, onFail, asDialog, onClose } = props
 // 用户要提交的数据
 const submitData = reactive({} as { [key: string]: string })
 
 // 整理需要用户输入的数据，为了优化模板
 const otherInputs = ref([] as SubmitDataItem[])
 const codeInput = ref()
+const captchaInput = ref()
 if (schema && schema.length)
   schema.forEach((item: SubmitDataItem) => {
     if (item.type === 'smscode') {
       codeInput.value = item
+    }else if(item.type === 'captcha'){
+      captchaInput.value = item
     } else {
       otherInputs.value.push(item)
     }
   })
 
-const sendCode = () => {
-  if (typeof fnSendCode === 'function') {
-    fnSendCode().then((response: any) => {
+const sendSmsCode = () => {
+  if (typeof fnSendSmsCode === 'function') {
+    fnSendSmsCode(submitData).then((response: any) => {
       let { code, result } = response
       if (code !== 0) {
       }
     })
   }
 }
-
+const sendCaptcha = () => {
+  if (elCaptcha?.value && typeof fnSendCode === 'function') {
+    fnSendCode().then((response: CaptchaResponse) => {
+      let { code, captcha } = response
+      if (code !== 0) {
+        elCaptcha.value.innerHTML = '获取失败'
+      } else {
+        elCaptcha.value.innerHTML = captcha
+      }
+    })
+  }
+}
 const verify = () => {
   if (typeof fnVerify === 'function') {
     fnVerify(submitData).then((response: any) => {
       let { code, result, msg } = response
       if (code !== 0) {
-        sendCode()
+        sendSmsCode()
         // TODO 如何解决错误信息提示？
         return onFail(response)
       }
@@ -90,6 +109,6 @@ const close = () => {
 }
 
 onMounted(() => {
-  nextTick(() => sendCode())
+  nextTick(() => sendCaptcha())
 })
 </script>
