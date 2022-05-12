@@ -164,15 +164,17 @@ export const CardSchema = {
       },
     },
     org: {
-      title: '组织（对象）',
+      title: '组织（可扩展对象）',
       type: 'object',
       properties: {
-        organizationName: {
+        name: {
           title: '组织名称',
           type: 'string',
         },
-        organizationUnit: {
-          title: '单位名称',
+      },
+      patternProperties: {
+        '.*': {
+          title: '扩展属性',
           type: 'string',
         },
       },
