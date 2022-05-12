@@ -52,7 +52,6 @@ importers:
 
   packages/tms-vue3-ui:
     specifiers:
-      '@rollup/plugin-alias': ^3.1.9
       '@types/jest': ^27.4.1
       '@types/lodash': ^4.14.182
       '@types/node': ^17.0.24
@@ -73,7 +72,6 @@ importers:
       tms-vue3: link:../tms-vue3
       vue: registry.npmmirror.com/vue/3.2.33
     devDependencies:
-      '@rollup/plugin-alias': 3.1.9
       '@types/jest': 27.4.1
       '@types/lodash': 4.14.182
       '@types/node': registry.npmmirror.com/@types/node/17.0.24
@@ -82,7 +80,7 @@ importers:
       jest: 27.5.1
       rimraf: 3.0.2
       sass: registry.npmmirror.com/sass/1.50.1
-      ts-jest: 27.1.4_tgc6da2oqazvrn56dzwolsqo5i
+      ts-jest: 27.1.4_9985e1834e803358b7be1e6ce5ca0eea
       typescript: 4.6.3
       vite: registry.npmmirror.com/vite/2.9.5_sass@1.50.1
       vue-tsc: registry.npmmirror.com/vue-tsc/0.29.8_typescript@4.6.3
@@ -672,15 +670,6 @@ packages:
     dependencies:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.13.0
-    dev: true
-
-  /@rollup/plugin-alias/3.1.9:
-    resolution: {integrity: sha512-QI5fsEvm9bDzt32k39wpOwZhVzRcL5ydcffUHMyLVaVaLeC70I8TJZ17F1z1eMoLu4E/UOcH9BWVkKpIKdrfiw==}
-    engines: {node: '>=8.0.0'}
-    peerDependencies:
-      rollup: ^1.20.0||^2.0.0
-    dependencies:
-      slash: 3.0.0
     dev: true
 
   /@sinonjs/commons/1.8.3:
@@ -3600,7 +3589,7 @@ packages:
     engines: {node: '>=8'}
     dev: true
 
-  /ts-jest/27.1.4_tgc6da2oqazvrn56dzwolsqo5i:
+  /ts-jest/27.1.4_9985e1834e803358b7be1e6ce5ca0eea:
     resolution: {integrity: sha512-qjkZlVPWVctAezwsOD1OPzbZ+k7zA5z3oxII4dGdZo5ggX/PL7kvwTM0pXTr10fAtbiVpJaL3bWd502zAhpgSQ==}
     engines: {node: ^10.13.0 || ^12.13.0 || ^14.15.0 || >=15.0.0}
     hasBin: true
@@ -4963,12 +4952,6 @@ packages:
     version: 1.0.7
     dev: true
 
-  registry.npmmirror.com/picocolors/1.0.0:
-    resolution: {integrity: sha512-1fygroTLlHu66zi26VoTDv8yRgm0Fccecssto+MhsZ0D/DGW2sm8E8AjW7NU5VVTRt5GxbeZ5qBuJr+HyLYkjQ==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/picocolors/-/picocolors-1.0.0.tgz}
-    name: picocolors
-    version: 1.0.0
-    dev: true
-
   registry.npmmirror.com/picomatch/2.3.1:
     resolution: {integrity: sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/picomatch/-/picomatch-2.3.1.tgz}
     name: picomatch
@@ -5312,7 +5295,7 @@ packages:
         optional: true
     dependencies:
       esbuild: registry.npmmirror.com/esbuild/0.14.36
-      postcss: registry.npmmirror.com/postcss/8.4.12
+      postcss: 8.4.12
       resolve: registry.npmmirror.com/resolve/1.22.0
       rollup: registry.npmmirror.com/rollup/2.70.2
     optionalDependencies:
@@ -5525,7 +5508,7 @@ packages:
       typescript: '*'
     dependencies:
       '@volar/shared': registry.npmmirror.com/@volar/shared/0.29.8
-      typescript: 4.6.3
+      typescript: registry.npmmirror.com/typescript/4.6.3
       vscode-vue-languageservice: registry.npmmirror.com/vscode-vue-languageservice/0.29.8
     dev: true
 
