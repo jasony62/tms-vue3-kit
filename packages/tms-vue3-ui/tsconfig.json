@@ -17,7 +17,7 @@
     "outDir": "./dist/es",
     "baseUrl": "./",
     "paths": { "@/*": ["src/*"] },
-    "types": ["jest"]
+    "types": ["node", "jest"]
   },
   "include": [
     "src/**/*.ts",

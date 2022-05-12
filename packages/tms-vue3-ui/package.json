@@ -20,6 +20,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "debug": "^4.3.4",
     "lodash": "^4.17.21",
     "tms-vue3": "^0.0.4",
     "vue": "^3.2.25"

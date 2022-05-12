@@ -2,7 +2,10 @@ import { h, VNode } from 'vue'
 import { SchemaIter, RawSchema, SchemaProp } from '@/json-schema/model'
 import { createField, Field } from './fields'
 import { FieldWrap, FormNode, components, prepareFieldNode } from './nodes'
-import { getChild } from '@/utils'
+import { deepClone, getChild } from '@/utils'
+import { stat } from 'fs'
+
+const debug = require('debug')('json-doc')
 
 function createWrapClass(labelAndDescNodes: VNode): VNode {
   // if (this.fieldWrapClass) {
@@ -29,9 +32,48 @@ function createFieldWrapNode(ctx: FormContext, field: Field): VNode {
 }
 
 /**创建字段节点*/
-function createFieldNode(ctx: FormContext, prop: any): VNode | VNode[] {
+function createFieldNode(
+  ctx: FormContext,
+  prop: SchemaProp,
+  stack: Stack
+): VNode | VNode[] {
   /**创建和当前属性对应的field*/
-  if (prop.isArrayItem) {
+  if (prop.isPattern) {
+    debug(`属性【${prop.name}】是正则表达式定义的模板属性`)
+    /*需要根据数据对象的值决定是否生成字段和节点*/
+    const fieldValue = getChild(ctx.editDoc, prop.parentFullname)
+    let keys: string[] = []
+    if (typeof fieldValue === 'object') {
+      let re: RegExp
+      try {
+        re = eval(prop.name)
+      } catch (e) {
+        re = new RegExp(prop.name)
+      }
+      const last = stack.last
+      Object.keys(fieldValue).forEach((key) => {
+        // 检查字段是否为properties中定义的字段，是否符合正则表达式
+        if (last?.fieldNames.includes(key)) return
+        if (!re.test(key)) return
+        keys.push(key)
+      })
+    }
+    if (keys.length) {
+      debug(`属性【${prop.name}】需要创建${keys.length}个实属性`)
+      return keys.map((key) => {
+        let realProp = deepClone(prop)
+        realProp.name = key
+        const newField = createField(realProp)
+        stack.last?.fieldNames.push(newField.name)
+        debug(`属性【${prop.name}】创建实属性${key}并创建字段`)
+        return createFieldWrapNode(ctx, newField)
+      })
+    } else {
+      return []
+    }
+  } else if (prop.isArrayItem) {
+    debug(`属性【${prop.name}】所属对象是数组中的项目`)
+    /*需要根据数据对象的值决定是否生成字段和节点*/
     let fieldValue = getChild(ctx.editDoc, prop.parentFullname)
     if (Array.isArray(fieldValue) && fieldValue.length) {
       return fieldValue.map((val, index) => {
@@ -43,6 +85,7 @@ function createFieldNode(ctx: FormContext, prop: any): VNode | VNode[] {
     }
   } else {
     const newField = createField(prop)
+    stack.last?.fieldNames.push(newField.name)
     return createFieldWrapNode(ctx, newField)
   }
 }
@@ -108,7 +151,11 @@ function getFieldVisible(prop: SchemaProp, doc: any): boolean {
 
 class Stack {
   nodes: VNode[]
-  data: { prop: SchemaProp; children: (VNode | VNode[])[] }[]
+  data: {
+    prop: SchemaProp
+    fieldNames: string[]
+    children: (VNode | VNode[])[]
+  }[]
   ctx: FormContext
 
   constructor(nodes: VNode[], ctx: FormContext) {
@@ -118,7 +165,7 @@ class Stack {
   }
 
   push(prop: SchemaProp) {
-    this.data.push({ prop, children: [] })
+    this.data.push({ prop, fieldNames: [], children: [] })
   }
 
   pop() {
@@ -126,8 +173,11 @@ class Stack {
   }
 
   /**将创建的节点放入堆栈中的父字段*/
-  addNode(prop: SchemaProp, node: VNode | VNode[]) {
-    if (this.last) this.last.children.push(node)
+  addNode(node: VNode | VNode[]) {
+    const { last } = this
+    if (last) {
+      last.children.push(node)
+    }
   }
 
   /**如果子节点都准备完毕就出栈*/
@@ -154,7 +204,7 @@ class Stack {
       if (this.length === 0) {
         this.nodes.push(node)
       } else {
-        this.addNode(prop, node)
+        this.addNode(node)
       }
     }
   }
@@ -184,6 +234,7 @@ export function build(ctx: FormContext): VNode[] {
   for (prop of iter) {
     // 不处理根节点
     if (prop.name === iter.rootName) continue
+    debug(`开始处理属性【${prop.name}】`)
 
     // 需要处理题目是否可见
     if (false === getFieldVisible(prop, editDoc)) {
@@ -198,9 +249,11 @@ export function build(ctx: FormContext): VNode[] {
     if (prop.attrs.type === 'object') {
       // 创建嵌套节点，将当前节点入栈，等待子节点生成完
       stack.push(prop)
+      debug(`属性【${prop.name}:object】放入堆栈`)
     } else if (prop.attrs.type === 'array') {
       // 创建嵌套节点，将当前节点入栈，等待子节点生成完
       stack.push(prop)
+      debug(`属性【${prop.name}:array】放入堆栈`)
       /**如果数组中的项目是简单类型，创建字段*/
       if (prop.items?.type) {
         if (!['object', 'array'].includes(prop.items?.type)) {
@@ -209,19 +262,25 @@ export function build(ctx: FormContext): VNode[] {
             '',
             prop.items?.type
           )
-          let itemNode = createFieldNode(ctx, itemProp)
-          stack.addNode(prop, itemNode)
+          let itemNode = createFieldNode(ctx, itemProp, stack)
+          stack.addNode(itemNode)
         }
       }
     } else {
-      // 创建节点，放入堆栈，或结果
-      let node = createFieldNode(ctx, prop)
+      // 创建节点，放入堆栈，或最终结果
+      let node = createFieldNode(ctx, prop, stack)
+      debug(`属性【${prop.name}】创建节点`)
       if (prop.path === iter.rootName) {
-        // 顶层属性，直接放入结果中
+        // 顶层属性，直接放入最终结果中
         if (Array.isArray(node)) nodes.push(...node)
         else nodes.push(node)
       } else {
-        stack.addNode(prop, node)
+        if (prop.isPattern && Array.isArray(node)) {
+          node.forEach((n) => stack.addNode(n))
+        } else {
+          stack.addNode(node)
+        }
+        debug(`属性【${prop.name}】创建的节点放入堆栈`)
       }
     }
   }

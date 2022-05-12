@@ -14,7 +14,7 @@ export const SampleSchema = {
         },
       },
       patternProperties: {
-        '.*': {
+        '^\\w+$': {
           title: '扩展属性',
           type: 'string',
         },
