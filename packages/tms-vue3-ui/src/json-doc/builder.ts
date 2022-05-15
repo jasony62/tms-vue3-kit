@@ -189,12 +189,10 @@ type StackField = {
 }
 
 class Stack {
-  nodes: VNode[]
   pendings: StackField[] // 等待处理的字段
   ctx: FormContext
 
-  constructor(nodes: VNode[], ctx: FormContext) {
-    this.nodes = nodes
+  constructor(ctx: FormContext) {
     this.pendings = []
     this.ctx = ctx
   }
@@ -268,18 +266,14 @@ class Stack {
   shrink() {
     debug('执行堆栈收缩')
     let pending
-    while ((pending = this.pendings.pop())) {
+    while (this.pendings.length > 1 && (pending = this.pendings.pop())) {
       let { field, children } = pending
       let vnode = createNestNode(this.ctx, field, children)
-      if (this.length === 0) {
-        this.nodes.push(vnode)
+      let parent = this.fieldParent(field)
+      if (parent) {
+        this.addNode({ field, vnode }, parent)
       } else {
-        let parent = this.fieldParent(field)
-        if (parent) {
-          this.addNode({ field, vnode }, parent)
-        } else {
-          debug(`字段【${field.fullname}】【${field.path}】没有找到父字段`)
-        }
+        debug(`字段【${field.fullname}】【${field.path}】没有找到父字段`)
       }
     }
   }
@@ -290,34 +284,32 @@ class Stack {
 }
 
 export function build(ctx: FormContext): VNode[] {
-  const nodes: VNode[] = [] // 表单节点
   const { schema, editDoc } = ctx
 
   /**创建属性迭代器*/
   let iter = new SchemaIter(JSON.parse(JSON.stringify(schema)))
 
   // 用于记录处理过程的中间数据
-  let stack = new Stack(nodes, ctx)
+  let stack = new Stack(ctx)
 
   // 依次处理JSONSchema的属性
   let prop: SchemaProp
   for (prop of iter) {
-    // 不需要处理根节点
-    if (prop.name === iter.rootName) continue
+    /**处理根节点*/
+    if (prop.name === iter.rootName) {
+      const rootField = createField(prop)
+      stack.push(rootField)
+      debug(`属性【${prop.fullname}】生成根字段，放入堆栈`)
+      continue
+    }
+
     debug(`属性【${prop.fullname}】开始处理`)
 
-    // 当前属性的父字段。如果是父属性是可选属性，可能有多个父字段
-    let parentFields: StackField[]
-    if (prop.path === iter.rootName) {
-      // 顶层属性不会有父字段
-      parentFields = []
-    } else {
-      // 如果是子属性，检查其依赖的父属性是否存在，若不存在，跳过
-      parentFields = stack.propParent(prop)
-      if (parentFields.length === 0) {
-        debug(`属性【${prop.fullname}】父字段不存在，跳过`)
-        continue
-      }
+    // 当前属性的父字段。如果是父属性是可选属性，可能有多个父字段。
+    const parentFields = stack.propParent(prop)
+    if (parentFields.length === 0) {
+      debug(`属性【${prop.fullname}】父字段不存在，跳过`)
+      continue
     }
 
     // 需要处理题目是否可见
@@ -327,97 +319,80 @@ export function build(ctx: FormContext): VNode[] {
       continue
     }
 
-    // 新的顶层数据，收缩堆栈数据
-    if (parentFields.length === 0) stack.shrink()
-
     if (prop.attrs.type === 'object') {
       if (prop.isPattern) {
-        // 根据数据生成实属性。一个模式可能生成多个实属性。
-        if (parentFields.length) {
-          parentFields.forEach((pending) => {
-            let fields = createOptionalFields(ctx, prop, pending)
-            debug(`属性【${prop.fullname}:object】创建${fields.length}个字段`)
-            if (fields.length) {
-              fields.forEach((field) => {
-                stack.push(field)
-                debug(
-                  `属性【${prop.fullname}:object】字段【${field.fullname}】放入堆栈`
-                )
-              })
-            }
-          })
-        } else {
-          // 顶层节点是可选属性
-        }
-      } else {
-        // 创建嵌套节点，将当前节点入栈，等待子节点生成完
-        if (parentFields.length) {
-          parentFields.forEach((pending) => {
-            const newField = createField(prop)
-            newField.path = pending.field.fullname
-            stack.push(newField)
-            debug(`属性【${prop.fullname}:object】生成字段放入堆栈`)
-          })
-        } else {
-          const newField = createField(prop)
-          stack.push(newField)
-          debug(`属性【${prop.fullname}:object】生成字段放入堆栈`)
-        }
-      }
-    } else if (prop.attrs.type === 'array') {
-      // 创建嵌套节点，将当前节点入栈，等待子节点生成完
-      const newField = createField(prop)
-      const pending = stack.push(newField)
-      debug(
-        `属性【${prop.fullname}:array】生成字段【${newField.fullname}】放入堆栈`
-      )
-      /**如果数组中的项目是简单类型，生成字段*/
-      if (prop.items?.type) {
-        let { fullname, items } = prop
-        debug(`属性【${fullname}:array】生成数组项目【${items.type}】属性`)
-        let itemProp = new SchemaProp(`${fullname}[*]`, '', items.type)
-        const fields = createArrayItemFields(ctx, itemProp)
-        if (['object', 'array'].includes(items.type)) {
-          // 根据文档数据生成字段，放入堆栈
+        // 需要根据文档数据生成字段
+        parentFields.forEach((parent) => {
+          let fields = createOptionalFields(ctx, prop, parent)
+          debug(`属性【${prop.fullname}:object】生成${fields.length}个字段`)
           fields.forEach((field) => {
             stack.push(field)
+            debug(
+              `属性【${prop.fullname}:object】生成字段【${field.fullname}】放入父字段`
+            )
           })
-        } else {
-          // 简单类型，生成节点，放入父字段
-          fields.forEach((field) => {
-            const vnode = createFieldWrapNode(ctx, field)
-            stack.addNode({ field, vnode }, pending)
-          })
-        }
-      }
-    } else {
-      // 简单类型，用户输入字段，生成节点放入父字段或顶层节点
-      if (parentFields.length) {
-        // 有几个父字段，就生成几个字段节点
-        parentFields.forEach((pending) => {
-          let pair = createFieldNode(ctx, prop, pending)
-          debug(`属性【${prop.fullname}】生成的节点放入堆栈`)
-          if (Array.isArray(pair)) {
-            // 如果是可选属性有可能创建多个字段
-            pair.forEach((p) => stack.addNode(p, pending))
-          } else {
-            stack.addNode(pair, pending)
-          }
         })
       } else {
-        // 顶层属性，生成节点，放入最终结果
-        let pair = createFieldNode(ctx, prop)
-        debug(`属性【${prop.fullname}】生成顶层节点，放入最终结果`)
-        if (Array.isArray(pair)) nodes.push(...pair.map((p) => p.vnode))
-        else nodes.push(pair.vnode)
+        // 创建嵌套节点，将当前节点入栈，等待子节点生成完
+        parentFields.forEach((parent) => {
+          const field = createField(prop)
+          field.path = parent.field.fullname
+          stack.push(field)
+          debug(
+            `属性【${prop.fullname}:object】生成字段【${field.fullname}】放入父字段`
+          )
+        })
       }
+    } else if (prop.attrs.type === 'array') {
+      parentFields.forEach((parent) => {
+        // 创建嵌套节点，将当前节点入栈，等待子节点生成完
+        const newField = createField(prop)
+        const pending = stack.push(newField)
+        debug(
+          `属性【${prop.fullname}:array】生成字段【${newField.fullname}】放入父字段`
+        )
+        /**如果数组中的项目是简单类型，生成字段*/
+        if (prop.items?.type) {
+          let { fullname, items } = prop
+          debug(`属性【${fullname}:array】生成数组项目【${items.type}】属性`)
+          let itemProp = new SchemaProp(`${fullname}[*]`, '', items.type)
+          const fields = createArrayItemFields(ctx, itemProp)
+          if (['object', 'array'].includes(items.type)) {
+            // 根据文档数据生成字段，放入堆栈
+            fields.forEach((field) => {
+              stack.push(field)
+            })
+          } else {
+            // 简单类型，生成节点，放入父字段
+            fields.forEach((field) => {
+              const vnode = createFieldWrapNode(ctx, field)
+              stack.addNode({ field, vnode }, pending)
+            })
+          }
+        }
+      })
+    } else {
+      // 简单类型，生成用户输入字段，生成字段节点，放入父字段
+      parentFields.forEach((parent) => {
+        let pair = createFieldNode(ctx, prop, parent)
+        debug(`属性【${prop.fullname}】生成的节点放入父字段`)
+        if (Array.isArray(pair)) {
+          // 如果是可选属性有可能创建多个字段
+          pair.forEach((p) => stack.addNode(p, parent))
+        } else {
+          stack.addNode(pair, parent)
+        }
+      })
     }
   }
+
   stack.shrink()
 
-  if (stack.length > 0) throw Error('生成表单失败，有未解析的数据')
+  if (stack.length > 1) throw Error('生成表单失败，有未解析的数据')
 
-  return nodes
+  const root = stack.pop()
+
+  return root?.children ?? []
 }
 
 let _uid = 0

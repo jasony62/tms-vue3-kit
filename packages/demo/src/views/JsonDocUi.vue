@@ -25,7 +25,7 @@
 import { JsonDoc } from 'tms-vue3-ui'
 import 'tms-vue3-ui/dist/es/json-doc/style/tailwind.scss'
 import { ref } from 'vue'
-import { SampleSchema, SampleData } from '../data/schemas/array-simple'
+import { SampleSchema, SampleData } from '../data/schemas/object-map'
 
 const jsonDocEditor = ref<{ editing: () => string } | null>(null)
 
