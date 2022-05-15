@@ -1,6 +1,6 @@
 import { h, VNode } from 'vue'
 import { components } from './index'
-import { FieldNode } from './field-node'
+import { FieldNode } from './fieldNode'
 import { Field } from '../fields'
 import { FormContext } from '../builder'
 import { getChild, initChild } from '@/utils'
@@ -126,7 +126,7 @@ const itemRemoveVNode = (fieldValue: any[], index: number) => {
 export class FileNode extends FieldNode {
   private _children: (VNode | VNode[])[]
 
-  constructor(ctx: FormContext, field: Field, children?: (VNode | VNode[])[]) {
+  constructor(ctx: FormContext, field: Field, children?: VNode[]) {
     super(ctx, field)
     this._children = children ?? []
   }

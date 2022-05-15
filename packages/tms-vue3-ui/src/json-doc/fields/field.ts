@@ -20,6 +20,8 @@ export abstract class Field {
   value?: any
   type: string = '' // 字段的类型
   _index: number // 如果字段是数组中的对象，index代表字段所属对象在数组中的饿索引
+  _name: string // 固定属性的名称或可选属性的实际名称
+  _path: string // 父节点有可能是动态的
   private _prop: SchemaProp
   private _required: boolean
   private _visible: boolean
@@ -27,7 +29,7 @@ export abstract class Field {
   itemType?: string
   itemVisible?: { [k: string]: boolean } // 记录字段的选项是否可见
 
-  constructor(prop: SchemaProp, index = -1) {
+  constructor(prop: SchemaProp, index = -1, name = '') {
     let { attrs } = prop
     /**设置默认值*/
     let { type, default: defVal, value } = attrs
@@ -46,6 +48,8 @@ export abstract class Field {
     this._required = prop.attrs.required ?? false
     this._visible = false
     this._index = index
+    this._name = name || prop.name
+    this._path = prop.path
   }
 
   get index() {
@@ -53,14 +57,26 @@ export abstract class Field {
   }
 
   get name() {
-    return this._prop.name
+    return this._name
   }
 
+  set path(val) {
+    this._path = val
+  }
+
+  get path() {
+    return this._path
+  }
+
+  // 字段的名字与文档一致。如果属性是可选属性，字段的名字和是属性名字并不相等。
   get fullname() {
     if (this._prop.isArrayItem) {
-      return this._prop.path.replace(/\[\*\]$/, `[${this._index}]`) + this.name
+      let path = this.path.replace(/\[\*\]$/, `[${this._index}]`)
+      return this.name ? `${path}.${this.name}` : path
     } else {
-      return this._prop.fullname
+      if (!this.name) return this.path
+      let fullname = (this.path ? this.path + '.' : '') + this.name
+      return fullname
     }
   }
 
@@ -114,5 +130,15 @@ export abstract class Field {
 
   get attachment() {
     return this._prop.attachment
+  }
+
+  isChildOf(parent: Field): boolean {
+    if (
+      parent.fullname === this.path ||
+      parent.fullname + '[*]' === this.path
+    ) {
+      return true
+    }
+    return false
   }
 }

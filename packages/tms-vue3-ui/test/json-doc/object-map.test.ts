@@ -4,7 +4,13 @@ import { build } from '../../src/json-doc/builder'
 describe('通过API从外部获取值', () => {
   it('返回字段的值', () => {
     const editDoc = {
-      org: { name: '研发部', product: 'tms-vue3-kit', 'in valid': '123' },
+      org: {
+        name: '研发部',
+        strProduct: 'tms-vue3-kit',
+        'str in valid': '123',
+        objAbc: { label: 'aaa', value: '111' },
+        objXyz: { label: 'xxx', value: '999' },
+      },
     }
     const nodes = build({
       schema: SampleSchema,

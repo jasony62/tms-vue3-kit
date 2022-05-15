@@ -50,3 +50,13 @@ export const SampleSchema = {
     },
   },
 }
+
+export const SampleData = {
+  org: {
+    name: '研发部',
+    strProduct: 'tms-vue3-kit',
+    'str in valid': '123',
+    objAbc: { label: 'aaa', value: '111' },
+    objXyz: { label: 'xxx', value: '999' },
+  },
+}

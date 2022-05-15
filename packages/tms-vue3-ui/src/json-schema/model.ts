@@ -69,9 +69,12 @@ export class SchemaProp {
   }
 
   get fullname(): string {
+    // 数组中项目为简单类型是，属性没有名字
+    if (!this.name) return this.path
     let fullname = (this.path ? this.path + '.' : '') + this.name
     return fullname
   }
+
   /**如果需要去掉路径中的[*]获得父属性名称*/
   get parentFullname(): string {
     return this.path.replace(/\[\*\]$/, '')

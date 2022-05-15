@@ -1,4 +1,4 @@
-export const CardSchema = {
+export const SampleSchema = {
   $id: 'https://example.com/card.schema.json',
   $schema: 'https://json-schema.org/draft/2020-12/schema',
   description: '基本示例',
@@ -238,3 +238,5 @@ export const CardSchema = {
     },
   },
 }
+
+export const SampleData = {}
