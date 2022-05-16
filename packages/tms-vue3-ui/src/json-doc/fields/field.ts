@@ -70,7 +70,7 @@ export abstract class Field {
 
   // 字段的名字与文档一致。如果属性是可选属性，字段的名字和是属性名字并不相等。
   get fullname() {
-    if (this._prop.isArrayItem) {
+    if (this.index !== -1) {
       let path = this.path.replace(/\[\*\]$/, `[${this._index}]`)
       return this.name ? `${path}.${this.name}` : path
     } else {

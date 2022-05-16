@@ -12,7 +12,12 @@ import { FieldObject } from './object'
  * @param prop JSONSchema属性
  * @param index 如果字段是数组中的对象的字段，index为字段所属对象在数组中的索引
  */
-function createField(prop: SchemaProp, index = -1, name = ''): Field {
+function createField(
+  prop: SchemaProp,
+  parentField?: Field,
+  index = -1,
+  name = ''
+): Field {
   let newField
   switch (prop.attrs.type) {
     case 'boolean':
@@ -46,6 +51,8 @@ function createField(prop: SchemaProp, index = -1, name = ''): Field {
     default:
       newField = new FieldText(prop, index, name)
   }
+
+  if (parentField) newField.path = parentField.fullname
 
   return newField
 }
