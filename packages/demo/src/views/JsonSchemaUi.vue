@@ -33,7 +33,8 @@ const onUploadFile = (file: { name: any }) => {
 }
 
 const getResult = () => {
-  let value = JSON.stringify(schemaEditor.value?.editing(), null, 2)
-  alert(value)
+  // let value = JSON.stringify(schemaEditor.value?.editing(), null, 2)
+  // alert(value)
+  console.log('jsonschemaui', schemaEditor.value?.editing())
 }
 </script>
