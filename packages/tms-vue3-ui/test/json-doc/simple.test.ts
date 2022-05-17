@@ -1,16 +1,23 @@
 import { SampleSchema } from '../data/schema-simple'
 import { build } from '../../src/json-doc/builder'
 
-describe('通过API从外部获取值', () => {
-  it('返回字段的值', () => {
+describe('简单定义生成表单节点', () => {
+  it('构造表单节点', () => {
     const editDoc = {}
-    const nodes = build({
-      schema: SampleSchema,
-      editDoc,
-      onMessage: (msg: string) => {
-        console.log(msg)
+    const fieldNames: string[] = []
+    build(
+      {
+        schema: SampleSchema,
+        editDoc,
+        onMessage: (msg: string) => {
+          console.log(msg)
+        },
       },
-    })
-    // console.log(JSON.stringify(nodes, null, 2))
+      fieldNames
+    )
+    expect(fieldNames).toHaveLength(3)
+    expect(fieldNames[0]).toBe('additionalName[0]')
+    expect(fieldNames[1]).toBe('additionalName[1]')
+    expect(fieldNames[2]).toBe('additionalName')
   })
 })

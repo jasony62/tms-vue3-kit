@@ -71,7 +71,10 @@ export class SchemaProp {
   get fullname(): string {
     // 数组中项目为简单类型是，属性没有名字
     if (!this.name) return this.path
-    let fullname = (this.path ? this.path + '.' : '') + this.name
+    if (!this.path) return this.name
+
+    let fullname = this.path + (this.name === '[*]' ? '' : '.') + this.name
+
     return fullname
   }
 

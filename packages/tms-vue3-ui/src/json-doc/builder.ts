@@ -36,15 +36,18 @@ function createArrayItemFields(
   parentField: Field,
   prop: SchemaProp
 ): Field[] {
-  debug(`字段【${parentField.fullname}】生成数组项目的字段`)
+  debug(`字段【${parentField.fullname}】需要根据文档数据生成数组项目字段`)
   const fieldValue = getChild(ctx.editDoc, parentField.fullname)
   if (Array.isArray(fieldValue) && fieldValue.length) {
     let fields = fieldValue.map((val, index) => {
+      // 数组中的项目需要指定索引
       const field = createField(prop, parentField, index)
-      field.path = parentField.fullname + '[*]'
+      debug(
+        `字段【${parentField.fullname}】根据文档数据生成数组项目字段【${field.fullname}】`
+      )
       return field
     })
-    debug(`属性【${prop.fullname}】根据文档数据生成${fields.length}个字段`)
+    debug(`属性【${prop.fullname}】根据文档数据生成了${fields.length}个字段`)
     return fields
   }
 
@@ -62,24 +65,23 @@ function createArrayItemNode(
   /**如果数组中的项目是简单类型，生成字段*/
   if (prop.items?.type) {
     let { fullname, items } = prop
-    let itemProp = new SchemaProp(`${fullname}[*]`, '', items.type)
+    // 给数组属性的items生成1个模拟属性，用name=[*]表示
+    let itemProp = new SchemaProp(`${fullname}`, '[*]', items.type)
     const itemFields = createArrayItemFields(ctx, field, itemProp)
     debug(
-      `属性【${fullname}:array】生成数组项目【${items.type}】属性，生成【${itemFields.length}】个字段`
+      `属性【${fullname}】生成数组项目【${items.type}】属性，生成【${itemFields.length}】个字段`
     )
     if (['object', 'array'].includes(items.type)) {
       // 根据文档数据生成字段，放入堆栈
       itemFields.forEach((field) => {
         stack.newJoint(field)
-        debug(
-          `属性【${fullname}:array】生成字段【${field.fullname}】，放入堆栈`
-        )
+        debug(`属性【${fullname}】生成字段【${field.fullname}】，放入堆栈`)
       })
     } else {
       // 简单类型，生成节点，放入父字段
-      itemFields.forEach((field) => {
-        const vnode = createFieldWrapNode(ctx, field)
-        stack.addNode({ field, vnode }, joint)
+      itemFields.forEach((itemField) => {
+        const vnode = createFieldWrapNode(ctx, itemField)
+        stack.addNode({ field: itemField, vnode }, joint)
       })
     }
   }
@@ -234,12 +236,14 @@ type StackJoint = {
 }
 
 class Stack {
-  joints: StackJoint[] // 等待生成的连接节点
   ctx: FormContext
+  joints: StackJoint[] // 等待生成的连接节点
+  fieldNames: string[] // 按字段生成VNode的顺序记录字段名称，用于调试
 
-  constructor(ctx: FormContext) {
-    this.joints = []
+  constructor(ctx: FormContext, fieldNames?: string[]) {
     this.ctx = ctx
+    this.joints = []
+    this.fieldNames = fieldNames ?? []
   }
 
   /**新的连接字段*/
@@ -298,18 +302,18 @@ class Stack {
   /**将创建的节点放入堆栈中的父字段*/
   addNode(pair: FieldVNodePair, parent: StackJoint) {
     if (parent) {
-      pair.field.path = parent.field.fullname
       debug(
         `字段【${parent.field.fullname}】添加子节点【${pair.field.fullname}】`
       )
       parent.childNames.push(pair.field.name)
       parent.children.push(pair.vnode)
+      this.fieldNames.push(pair.field.fullname)
     }
   }
 
   /**堆栈中的所有字段生成节点*/
   shrink() {
-    debug('执行堆栈收缩，生成连接节点')
+    debug('执行堆栈收缩，生成连接字段节点')
     let joint
     while (this.joints.length > 1 && (joint = this.joints.pop())) {
       let { field, children } = joint
@@ -328,14 +332,14 @@ class Stack {
   }
 }
 
-export function build(ctx: FormContext): VNode[] {
+export function build(ctx: FormContext, fieldNames?: string[]): VNode[] {
   const { schema, editDoc } = ctx
 
   /**创建属性迭代器*/
   let iter = new SchemaIter(JSON.parse(JSON.stringify(schema)))
 
   // 用于记录处理过程的中间数据
-  let stack = new Stack(ctx)
+  let stack = new Stack(ctx, fieldNames)
 
   // 依次处理JSONSchema的属性
   let prop: SchemaProp

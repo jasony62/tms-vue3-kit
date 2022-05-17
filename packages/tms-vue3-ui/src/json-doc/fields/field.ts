@@ -38,12 +38,6 @@ export abstract class Field {
     } else {
       this.value = defVal ? defVal : value ? value : ''
     }
-    // this.disabled = attrs.readonly || false
-    // this.assocs = schema.assocs
-    // if (attrs.type === 'json') {
-    //   if (this.value === '') this.value = {}
-    //   this.value = JSON.stringify(this.value)
-    // }
     this._prop = prop
     this._required = prop.attrs.required ?? false
     this._visible = false
@@ -71,8 +65,9 @@ export abstract class Field {
   // 字段的名字与文档一致。如果属性是可选属性，字段的名字和是属性名字并不相等。
   get fullname() {
     if (this.index !== -1) {
+      // 数组中的项目
       let path = this.path.replace(/\[\*\]$/, `[${this._index}]`)
-      return this.name ? `${path}.${this.name}` : path
+      return this.name && this.name !== '[*]' ? `${path}.${this.name}` : path
     } else {
       if (!this.name) return this.path
       let fullname = (this.path ? this.path + '.' : '') + this.name

@@ -52,7 +52,13 @@ function createField(
       newField = new FieldText(prop, index, name)
   }
 
-  if (parentField) newField.path = parentField.fullname
+  if (parentField) {
+    newField.path = parentField.fullname
+    if (prop.name === '[*]') {
+      // 数组中的项目
+      newField.path += '[*]'
+    }
+  }
 
   return newField
 }
