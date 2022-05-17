@@ -1,5 +1,5 @@
 import { Node } from './node'
-import { FieldNode } from './field-node'
+import { FieldNode } from './fieldNode'
 import { Input } from './input'
 import { Select } from './select'
 import { Textarea } from './textarea'
@@ -52,7 +52,7 @@ const components: { [k: string]: any } = {
 function prepareFieldNode(
   ctx: FormContext,
   field: Field,
-  children?: (VNode | VNode[])[]
+  children?: VNode[]
 ): FieldNode {
   switch (field.type) {
     case 'textarea':

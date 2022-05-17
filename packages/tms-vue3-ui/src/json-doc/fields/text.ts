@@ -9,8 +9,8 @@ export class FieldText extends Field {
   maxlength?: number
   pattern?: string
 
-  constructor(prop: SchemaProp, index = -1) {
-    super(prop, index)
+  constructor(prop: SchemaProp, index = -1, name = '') {
+    super(prop, index, name)
     const { attrs } = prop
     /*确定字段的类型*/
     if (attrs.format) {

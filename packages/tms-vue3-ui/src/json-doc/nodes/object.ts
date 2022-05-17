@@ -1,4 +1,4 @@
-import { FieldNode } from './field-node'
+import { FieldNode } from './fieldNode'
 import { FormContext } from '../builder'
 import { Field } from '../fields'
 import { VNode } from 'vue'
@@ -6,7 +6,7 @@ import { VNode } from 'vue'
 export class ObjectNode extends FieldNode {
   private _children
 
-  constructor(ctx: FormContext, field: Field, children?: (VNode | VNode[])[]) {
+  constructor(ctx: FormContext, field: Field, children?: VNode[]) {
     super(ctx, field)
     this._children = children
   }
@@ -23,14 +23,6 @@ export class ObjectNode extends FieldNode {
   }
 
   protected children(): VNode[] {
-    const children: VNode[] = []
-
-    this._children?.forEach((c) => {
-      // 应该不会出现这种情况
-      if (Array.isArray(c)) return
-      children.push(c)
-    })
-
-    return children
+    return this._children ?? []
   }
 }

@@ -1,6 +1,6 @@
 import { h, toRaw, VNode } from 'vue'
 import { getChild, setChild } from '@/utils'
-import { FieldNode } from './field-node'
+import { FieldNode } from './fieldNode'
 import { components } from '.'
 import { FieldBoolean } from '../fields'
 /**
@@ -36,22 +36,26 @@ export class Input extends FieldNode {
    * @param {*} attrOrProps
    */
   options(attrOrProps: any) {
-    const fieldName = this.field.name
+    let { field } = this
+    const fieldName = field.fullname
     // 有些radio和checkbox是模拟的
     const fieldValue = this.fieldValue()
 
     let { type } = attrOrProps
+
+    const onInput = (event: any) => {
+      const newValue = event && event.target ? event.target.value : event
+      this.updateModel(newValue)
+    }
+
+    Object.assign(this, { token: fieldName })
 
     const inpOps: { [k: string]: any } = {
       name: fieldName,
       type,
       value: toRaw(fieldValue),
       class: ['tvu-jdoc__field-input'],
-      onInput: (event: any) => {
-        const { schema, editDoc } = this.ctx
-        const newValue = event && event.target ? event.target.value : event
-        this.updateModel(newValue)
-      },
+      onInput,
     }
     /**设置核选框的值*/
     if (this.field.type === 'checkbox' && typeof fieldValue === 'boolean') {

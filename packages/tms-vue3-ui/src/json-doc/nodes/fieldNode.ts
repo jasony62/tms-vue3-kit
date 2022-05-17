@@ -27,11 +27,11 @@ function getRawCreateArgs(field: Field) {
  * 表单中的模型属性节点包含value
  */
 export abstract class FieldNode extends Node {
-  field: Field
+  _field: Field
 
   constructor(ctx: FormContext, field: Field) {
     super(ctx, getRawCreateArgs(field))
-    this.field = field
+    this._field = field
     this.assocEnum()
     /**
      * 通过API自动更新数据
@@ -41,6 +41,11 @@ export abstract class FieldNode extends Node {
       this.outerValue()
     })
   }
+
+  get field() {
+    return this._field
+  }
+
   /**
    * 获得当前字段在数据对象中的值，或默认值
    */

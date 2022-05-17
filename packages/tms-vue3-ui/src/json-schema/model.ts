@@ -60,6 +60,7 @@ export class SchemaProp {
   dependencies?: PropDepRuleSet
   eventDependency?: { rule: PropEventRule }
   attachment?: any
+  isPattern = false
 
   constructor(path: string, name: string, type?: string) {
     this.path = path
@@ -68,9 +69,15 @@ export class SchemaProp {
   }
 
   get fullname(): string {
-    let fullname = (this.path ? this.path + '.' : '') + this.name
+    // 数组中项目为简单类型是，属性没有名字
+    if (!this.name) return this.path
+    if (!this.path) return this.name
+
+    let fullname = this.path + (this.name === '[*]' ? '' : '.') + this.name
+
     return fullname
   }
+
   /**如果需要去掉路径中的[*]获得父属性名称*/
   get parentFullname(): string {
     return this.path.replace(/\[\*\]$/, '')
@@ -124,6 +131,7 @@ export type RawSchema = {
   minLength?: number
   maxLength?: number
   pattern?: string
+  $defs?: { [k: string]: RawSchema }
 }
 
 /**依次处理子属性*/
@@ -132,7 +140,8 @@ function* _parseChildren(
   parent: SchemaProp,
   dependencies?: PropDep,
   eventDependencies?: { [k: string]: { rule: PropEventRule } },
-  requiredSet?: string[]
+  requiredSet?: string[],
+  isPatternProperty = false
 ) {
   let keys = Object.keys(properties)
   for (let i = 0, key; i < keys.length; i++) {
@@ -143,7 +152,8 @@ function* _parseChildren(
       parent,
       dependencies?.[key],
       eventDependencies?.[key],
-      requiredSet?.includes(key)
+      requiredSet?.includes(key),
+      isPatternProperty
     )
   }
 }
@@ -155,7 +165,8 @@ function* _parseOne(
   parent?: SchemaProp,
   depRuleSet?: PropDepRuleSet,
   evtRule?: { rule: PropEventRule },
-  mandatory?: boolean
+  mandatory?: boolean,
+  isPatternProperty = false
 ): any {
   let path = ''
   if (parent) {
@@ -168,14 +179,23 @@ function* _parseOne(
   if (depRuleSet) newProp.dependencies = depRuleSet
   if (evtRule) newProp.eventDependency = evtRule
   if (mandatory) newProp.attrs.required = mandatory
+  newProp.isPattern = isPatternProperty
 
-  let { properties, items, required, dependencies, eventDependencies } = rawProp
+  let {
+    properties,
+    patternProperties,
+    items,
+    required,
+    dependencies,
+    eventDependencies,
+  } = rawProp
 
   let keys = Object.keys(rawProp)
   for (let i = 0; i < keys.length; i++) {
     let key = keys[i]
     switch (key) {
       case 'properties':
+      case 'patternProperties':
       case 'dependencies':
       case 'eventDependencies':
       case 'required':
@@ -209,27 +229,40 @@ function* _parseOne(
   // 返回当前的属性
   yield newProp
 
-  /*处理子属性*/
-  if (typeof properties === 'object') {
-    /**属性的子属性*/
-    yield* _parseChildren(
-      properties,
-      newProp,
-      dependencies,
-      eventDependencies,
-      required
-    )
-  } else if (
-    typeof items === 'object' &&
-    typeof items.properties === 'object'
-  ) {
-    yield* _parseChildren(
-      items.properties,
-      newProp,
-      dependencies,
-      eventDependencies,
-      required
-    )
+  if (rawProp.type === 'object') {
+    /*处理对象属性下的子属性*/
+    if (typeof properties === 'object') {
+      /**属性的子属性*/
+      yield* _parseChildren(
+        properties,
+        newProp,
+        dependencies,
+        eventDependencies,
+        required
+      )
+    }
+    if (typeof patternProperties === 'object') {
+      /**属性的模板子属性*/
+      yield* _parseChildren(
+        patternProperties,
+        newProp,
+        dependencies,
+        eventDependencies,
+        required,
+        true
+      )
+    }
+  } else if (rawProp.type === 'array') {
+    // 处理数组属性下的子属性
+    if (typeof items === 'object' && typeof items.properties === 'object') {
+      yield* _parseChildren(
+        items.properties,
+        newProp,
+        dependencies,
+        eventDependencies,
+        required
+      )
+    }
   }
 }
 /**

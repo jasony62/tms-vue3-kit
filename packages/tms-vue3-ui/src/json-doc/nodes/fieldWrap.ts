@@ -1,6 +1,6 @@
 import { h, VNode } from 'vue'
 import { FormContext } from '../builder'
-import { FieldNode } from './field-node'
+import { FieldNode } from './fieldNode'
 import { Node, components } from './index'
 /**
  *

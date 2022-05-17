@@ -22,8 +22,8 @@ export class FieldArray extends Field {
   items: any[] = []
   itemGroups?
 
-  constructor(prop: SchemaProp, index = -1) {
-    super(prop, index)
+  constructor(prop: SchemaProp, index = -1, name = '') {
+    super(prop, index, name)
 
     const { attrs } = prop
     this.multiple = attrs.type === 'array'

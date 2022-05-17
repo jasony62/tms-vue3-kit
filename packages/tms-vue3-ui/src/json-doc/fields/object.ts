@@ -5,8 +5,8 @@ export class FieldObject extends Field {
   multiple: boolean
   itemSchema
 
-  constructor(prop: SchemaProp, index = -1) {
-    super(prop, index)
+  constructor(prop: SchemaProp, index = -1, name = '') {
+    super(prop, index, name)
     const { attrs, items } = prop
     this.multiple = attrs.type === 'array'
     this.type = attrs.type

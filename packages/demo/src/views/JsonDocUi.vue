@@ -3,8 +3,8 @@
     <div class="w-1/3 p-4">
       <json-doc
         ref="jsonDocEditor"
-        :schema="CardSchema"
-        :value="doc"
+        :schema="SampleSchema"
+        :value="SampleData"
         :on-axios="onAxios"
         :on-file-download="onFileDownload"
         :on-file-upload="onFileUpload"
@@ -25,16 +25,8 @@
 import { JsonDoc } from 'tms-vue3-ui'
 import 'tms-vue3-ui/dist/es/json-doc/style/tailwind.scss'
 import { ref } from 'vue'
-import { CardSchema } from '../data/schema-examples'
+import { SampleSchema, SampleData } from '../data/schemas/overall'
 
-const doc = {
-  name: '张三',
-  additionalName: ['alice', 'bob'],
-  experiences: [
-    { time: '2022', content: '开发' },
-    { time: '2021', content: '测试' },
-  ],
-}
 const jsonDocEditor = ref<{ editing: () => string } | null>(null)
 
 const jsonResult = ref('')

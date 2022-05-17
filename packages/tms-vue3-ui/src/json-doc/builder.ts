@@ -4,6 +4,8 @@ import { createField, Field } from './fields'
 import { FieldWrap, FormNode, components, prepareFieldNode } from './nodes'
 import { getChild } from '@/utils'
 
+const debug = require('debug')('json-doc')
+
 function createWrapClass(labelAndDescNodes: VNode): VNode {
   // if (this.fieldWrapClass) {
   //   return h(
@@ -28,33 +30,154 @@ function createFieldWrapNode(ctx: FormContext, field: Field): VNode {
   return createWrapClass(labelAndDesc)
 }
 
-/**创建字段节点*/
-function createFieldNode(ctx: FormContext, prop: any): VNode | VNode[] {
-  /**创建和当前属性对应的field*/
-  if (prop.isArrayItem) {
-    let fieldValue = getChild(ctx.editDoc, prop.parentFullname)
-    if (Array.isArray(fieldValue) && fieldValue.length) {
-      return fieldValue.map((val, index) => {
-        const newField = createField(prop, index)
-        return createFieldWrapNode(ctx, newField)
+/**根据文档数据生成数组项目的字段*/
+function createArrayItemFields(
+  ctx: FormContext,
+  parentField: Field,
+  prop: SchemaProp
+): Field[] {
+  debug(`字段【${parentField.fullname}】需要根据文档数据生成数组项目字段`)
+  const fieldValue = getChild(ctx.editDoc, parentField.fullname)
+  if (Array.isArray(fieldValue) && fieldValue.length) {
+    let fields = fieldValue.map((val, index) => {
+      // 数组中的项目需要指定索引
+      const field = createField(prop, parentField, index)
+      debug(
+        `字段【${parentField.fullname}】根据文档数据生成数组项目字段【${field.fullname}】`
+      )
+      return field
+    })
+    debug(`属性【${prop.fullname}】根据文档数据生成了${fields.length}个字段`)
+    return fields
+  }
+
+  return []
+}
+
+function createArrayItemNode(
+  stack: Stack,
+  field: Field,
+  prop: SchemaProp,
+  ctx: FormContext
+) {
+  const joint = stack.newJoint(field)
+  debug(`属性【${prop.fullname}】生成字段【${field.fullname}】放入堆栈`)
+  /**如果数组中的项目是简单类型，生成字段*/
+  if (prop.items?.type) {
+    let { fullname, items } = prop
+    // 给数组属性的items生成1个模拟属性，用name=[*]表示
+    let itemProp = new SchemaProp(`${fullname}`, '[*]', items.type)
+    const itemFields = createArrayItemFields(ctx, field, itemProp)
+    debug(
+      `属性【${fullname}】生成数组项目【${items.type}】属性，生成【${itemFields.length}】个字段`
+    )
+    if (['object', 'array'].includes(items.type)) {
+      // 根据文档数据生成字段，放入堆栈
+      itemFields.forEach((field) => {
+        stack.newJoint(field)
+        debug(`属性【${fullname}】生成字段【${field.fullname}】，放入堆栈`)
       })
     } else {
-      return []
+      // 简单类型，生成节点，放入父字段
+      itemFields.forEach((itemField) => {
+        const vnode = createFieldWrapNode(ctx, itemField)
+        stack.addNode({ field: itemField, vnode }, joint)
+      })
     }
-  } else {
-    const newField = createField(prop)
-    return createFieldWrapNode(ctx, newField)
   }
 }
 
-/**创建嵌套节点*/
-function createNestNode(
+/**根据文档数据生成可选属性的字段*/
+function createOptionalFields(
   ctx: FormContext,
-  prop: any,
-  children: (VNode | VNode[])[]
+  prop: SchemaProp,
+  joint: StackJoint
+): Field[] {
+  /*需要根据数据对象的值决定是否生成字段和节点*/
+  const fieldValue = getChild(ctx.editDoc, prop.parentFullname)
+  let keys: string[] = []
+  if (typeof fieldValue === 'object') {
+    let re: RegExp
+    try {
+      re = eval(prop.name)
+    } catch (e) {
+      re = new RegExp(prop.name)
+    }
+    Object.keys(fieldValue).forEach((key) => {
+      // 检查字段是否为properties中定义的字段，是否符合正则表达式
+      if (joint.childNames.includes(key)) {
+        debug(`属性【${prop.fullname}】忽略已存在文档数据【${key}】`)
+        return
+      }
+      if (!re.test(key)) {
+        debug(`属性【${prop.fullname}】忽略不匹配文档数据【${key}】`)
+        return
+      }
+      keys.push(key)
+    })
+  }
+  if (keys.length) {
+    debug(`属性【${prop.fullname}】需要创建【${keys.length}】个字段`)
+    let fields = keys.map((key) => {
+      const field = createField(prop, joint.field, -1, key)
+      debug(`属性【${prop.fullname}】生成字段【${field.fullname}】`)
+      return field
+    })
+    debug(`属性【${prop.fullname}】根据文档数据生成${fields.length}个字段`)
+    return fields
+  }
+
+  return []
+}
+
+type FieldVNodePair = {
+  field: Field
+  vnode: VNode
+}
+
+/**生成字段和节点*/
+function createOptionalFieldNode(
+  ctx: FormContext,
+  prop: SchemaProp,
+  joint: StackJoint
+): FieldVNodePair[] {
+  /**创建和当前属性对应的field*/
+  debug(
+    `属性【${prop.fullname}】是正则表达式定义的可选属性，需要根据文档数据生成字段`
+  )
+  const fields = createOptionalFields(ctx, prop, joint)
+  if (fields.length) {
+    const pairs = fields.map((field) => {
+      let vnode = createFieldWrapNode(ctx, field)
+      return { field, vnode }
+    })
+    debug(`属性【${prop.fullname}】根据文档数据生成${pairs.length}个字段节点`)
+    return pairs
+  }
+
+  return []
+}
+
+/**创建和当前属性对应的field*/
+function createFieldNode(
+  ctx: FormContext,
+  prop: SchemaProp,
+  joint: StackJoint
+): FieldVNodePair {
+  const field = createField(prop, joint.field)
+  const vnode = createFieldWrapNode(ctx, field)
+  debug(`属性【${prop.fullname}】生成字段【${field.fullname}】，生成节点`)
+
+  return { field, vnode }
+}
+
+/**创建连接节点*/
+function createJointNode(
+  ctx: FormContext,
+  field: Field,
+  children: VNode[]
 ): VNode {
-  const newField = createField(prop)
-  const node = prepareFieldNode(ctx, newField, children)
+  const node = prepareFieldNode(ctx, field, children)
 
   const wrapNode = new FieldWrap(ctx, node)
   const labelAndDesc = wrapNode.createElem()
@@ -106,84 +229,137 @@ function getFieldVisible(prop: SchemaProp, doc: any): boolean {
   return visible
 }
 
-class Stack {
-  nodes: VNode[]
-  data: { prop: SchemaProp; children: (VNode | VNode[])[] }[]
-  ctx: FormContext
+type StackJoint = {
+  field: Field
+  childNames: string[]
+  children: VNode[]
+}
 
-  constructor(nodes: VNode[], ctx: FormContext) {
-    this.nodes = nodes
-    this.data = []
+class Stack {
+  ctx: FormContext
+  joints: StackJoint[] // 等待生成的连接节点
+  fieldNames: string[] // 按字段生成VNode的顺序记录字段名称，用于调试
+
+  constructor(ctx: FormContext, fieldNames?: string[]) {
     this.ctx = ctx
+    this.joints = []
+    this.fieldNames = fieldNames ?? []
   }
 
-  push(prop: SchemaProp) {
-    this.data.push({ prop, children: [] })
+  /**新的连接字段*/
+  newJoint(field: Field) {
+    const joint = { field, childNames: [], children: [] }
+    this.joints.push(joint)
+    return joint
   }
 
   pop() {
-    return this.data.pop()
+    return this.joints.pop()
   }
 
-  /**将创建的节点放入堆栈中的父字段*/
-  addNode(prop: SchemaProp, node: VNode | VNode[]) {
-    if (this.last) this.last.children.push(node)
+  /**获得属性所有的父字段*/
+  propParent(childProp: SchemaProp): StackJoint[] {
+    const topJoints = []
+    for (let i = this.joints.length - 1; i >= 0; i--) {
+      let joint = this.joints[i]
+      let { field } = joint
+      let isParent = false
+      if (field.scheamProp.isPattern) {
+        // 可选属性
+        isParent = field.scheamProp.fullname === childProp.path
+      } else if (childProp.isArrayItem) {
+        isParent = `${field.scheamProp.fullname}` === childProp.path
+      } else {
+        if (childProp.path === field.fullname) {
+          isParent = true
+        } else if (childProp.path === field.scheamProp.fullname) {
+          isParent = true
+        }
+      }
+
+      if (isParent) {
+        topJoints.push(joint)
+        debug(
+          `属性【${childProp.fullname}】是【${field.fullname}】【${field.scheamProp.fullname}】的子属性`
+        )
+      }
+    }
+
+    return topJoints
   }
 
-  /**如果子节点都准备完毕就出栈*/
-  update(path: string) {
-    if (this.last) {
-      let lastProp = this.last.prop
-      if (lastProp.attrs.type === 'object') {
-        if (path !== lastProp.fullname) {
-          this.shrink()
-        }
-      } else if (lastProp.attrs.type === 'array') {
-        if (path !== lastProp.fullname + '[*]') {
-          this.shrink()
-        }
+  /**字段只会有1个或没有父字段*/
+  fieldParent(field: Field): StackJoint | undefined {
+    for (let i = 0; i < this.joints.length; i++) {
+      let joint = this.joints[i]
+      if (field.isChildOf(joint.field)) {
+        debug(`字段【${field.fullname}】是【${joint.field.fullname}】的子字段`)
+        return joint
       }
     }
   }
 
+  /**将创建的节点放入堆栈中的父字段*/
+  addNode(pair: FieldVNodePair, parent: StackJoint) {
+    if (parent) {
+      debug(
+        `字段【${parent.field.fullname}】添加子节点【${pair.field.fullname}】`
+      )
+      parent.childNames.push(pair.field.name)
+      parent.children.push(pair.vnode)
+      this.fieldNames.push(pair.field.fullname)
+    }
+  }
+
+  /**堆栈中的所有字段生成节点*/
   shrink() {
-    let pending
-    while ((pending = this.data.pop())) {
-      let { prop, children } = pending
-      let node = createNestNode(this.ctx, prop, children)
-      if (this.length === 0) {
-        this.nodes.push(node)
+    debug('执行堆栈收缩，生成连接字段节点')
+    let joint
+    while (this.joints.length > 1 && (joint = this.joints.pop())) {
+      let { field, children } = joint
+      let vnode = createJointNode(this.ctx, field, children)
+      let parent = this.fieldParent(field)
+      if (parent) {
+        this.addNode({ field, vnode }, parent)
       } else {
-        this.addNode(prop, node)
+        debug(`字段【${field.fullname}】【${field.path}】没有找到父字段`)
       }
     }
   }
 
   get length() {
-    return this.data.length
-  }
-
-  // 以后一个元素
-  get last() {
-    return this.length > 0 ? this.data[this.length - 1] : undefined
+    return this.joints.length
   }
 }
 
-export function build(ctx: FormContext): VNode[] {
-  const nodes: VNode[] = []
+export function build(ctx: FormContext, fieldNames?: string[]): VNode[] {
   const { schema, editDoc } = ctx
 
   /**创建属性迭代器*/
   let iter = new SchemaIter(JSON.parse(JSON.stringify(schema)))
 
   // 用于记录处理过程的中间数据
-  let stack = new Stack(nodes, ctx)
+  let stack = new Stack(ctx, fieldNames)
 
   // 依次处理JSONSchema的属性
   let prop: SchemaProp
   for (prop of iter) {
-    // 不处理根节点
-    if (prop.name === iter.rootName) continue
+    /**处理根节点*/
+    if (prop.name === iter.rootName) {
+      const rootField = createField(prop)
+      stack.newJoint(rootField)
+      debug(`属性【${prop.fullname}】生成根字段，放入堆栈`)
+      continue
+    }
+
+    debug(`属性【${prop.fullname}】开始处理`)
+
+    // 当前属性的父字段。如果是父属性是可选属性，可能有多个父字段。
+    const parentJoints = stack.propParent(prop)
+    if (parentJoints.length === 0) {
+      debug(`属性【${prop.fullname}】父字段不存在，跳过`)
+      continue
+    }
 
     // 需要处理题目是否可见
     if (false === getFieldVisible(prop, editDoc)) {
@@ -192,44 +368,66 @@ export function build(ctx: FormContext): VNode[] {
       continue
     }
 
-    // 更新堆栈数据，如果需要将数据出栈
-    stack.update(prop.path)
-
     if (prop.attrs.type === 'object') {
-      // 创建嵌套节点，将当前节点入栈，等待子节点生成完
-      stack.push(prop)
+      if (prop.isPattern) {
+        // 需要根据文档数据生成字段
+        parentJoints.forEach((joint) => {
+          let fields = createOptionalFields(ctx, prop, joint)
+          debug(`属性【${prop.fullname}】生成${fields.length}个字段`)
+          fields.forEach((field) => {
+            stack.newJoint(field)
+            debug(
+              `属性【${prop.fullname}】生成字段【${field.fullname}】放入堆栈`
+            )
+          })
+        })
+      } else {
+        parentJoints.forEach((joint) => {
+          const field = createField(prop, joint.field)
+          stack.newJoint(field)
+          debug(`属性【${prop.fullname}】生成字段【${field.fullname}】放入堆栈`)
+        })
+      }
     } else if (prop.attrs.type === 'array') {
-      // 创建嵌套节点，将当前节点入栈，等待子节点生成完
-      stack.push(prop)
-      /**如果数组中的项目是简单类型，创建字段*/
-      if (prop.items?.type) {
-        if (!['object', 'array'].includes(prop.items?.type)) {
-          let itemProp = new SchemaProp(
-            `${prop.fullname}[*]`,
-            '',
-            prop.items?.type
-          )
-          let itemNode = createFieldNode(ctx, itemProp)
-          stack.addNode(prop, itemNode)
-        }
+      if (prop.isPattern) {
+        parentJoints.forEach((parentJoint) => {
+          let fields = createOptionalFields(ctx, prop, parentJoint)
+          debug(`属性【${prop.fullname}】生成${fields.length}个可选字段`)
+          fields.forEach((field) => {
+            createArrayItemNode(stack, field, prop, ctx)
+          })
+        })
+      } else {
+        parentJoints.forEach((parentJoint) => {
+          const field = createField(prop, parentJoint.field)
+          createArrayItemNode(stack, field, prop, ctx)
+        })
       }
     } else {
-      // 创建节点，放入堆栈，或结果
-      let node = createFieldNode(ctx, prop)
-      if (prop.path === iter.rootName) {
-        // 顶层属性，直接放入结果中
-        if (Array.isArray(node)) nodes.push(...node)
-        else nodes.push(node)
+      // 简单类型，生成用户输入字段，生成字段节点，放入父连接字段
+      if (prop.isPattern) {
+        parentJoints.forEach((joint) => {
+          let pairs = createOptionalFieldNode(ctx, prop, joint)
+          debug(`属性【${prop.fullname}】生成${pairs.length}个可选字段`)
+          pairs.forEach((p) => stack.addNode(p, joint))
+        })
       } else {
-        stack.addNode(prop, node)
+        parentJoints.forEach((joint) => {
+          let pair = createFieldNode(ctx, prop, joint)
+          debug(`属性【${prop.fullname}】生成字段和节点放入父字段`)
+          stack.addNode(pair, joint)
+        })
       }
     }
   }
+
   stack.shrink()
 
-  if (stack.length > 0) throw Error('生成表单失败，有未解析的数据')
+  if (stack.length > 1) throw Error('生成表单失败，有未解析的数据')
 
-  return nodes
+  const root = stack.pop()
+
+  return root?.children ?? []
 }
 
 let _uid = 0
