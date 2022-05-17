@@ -38,8 +38,8 @@ const rollupOptions = {
 function getSubDir(dir) {
   let subDir
   if (dir !== baseEntryDir) {
-    let name = dir.replace(baseEntryDir + '/', '')
-    subDir = `/${name}`
+    let name = dir.replace(baseEntryDir +	path.sep, '')
+    subDir = `${path.sep}${name}`
   } else {
     subDir = ''
   }

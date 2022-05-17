@@ -34,7 +34,7 @@ pnpm build
 
 # demo
 
-在`packages/tms-vue3-ui`目录执行命令，运行服务
+在`packages/demo`目录执行命令，运行服务
 
 ```
 pnpm dev

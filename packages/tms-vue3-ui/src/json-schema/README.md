@@ -16,7 +16,7 @@
 
 属性的类型为`object`，支持`properties`和`patternProperties`。
 
-只有属性的类型为`array`，才会出现设置【子对象格式】和【设置选项】。
+只有属性的类型为`array`，才会出现设置【子对象格式】。
 
 【设置选项】要支持`enum`，`oneOf`和`anyOf`几种情况。
 
@@ -25,6 +25,8 @@
 属性的类型为`array`，子对象类型为`object`，有子属性时，不允许修改属性的类型。
 
 属性的类型为`array`，子对象类型不可以为`array`。
+
+属性的类型为`integer`、`number`、`string`、`array`，出现设置【设置选项】。
 
 ## 支持选项
 
