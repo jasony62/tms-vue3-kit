@@ -9,10 +9,11 @@
     <!--属性编辑部分-->
     <div class="tvu-jse__property-fields">
       <tvu-form-item class="tvu-jse__field" label="键值">
-        <tvu-input v-model="data.currProp.name"></tvu-input>
+        <tvu-input v-model="data.currProp.name"
+          :disabled="data.currProp.name === props.rootName && data.currProp.path === ''"></tvu-input>
       </tvu-form-item>
       <tvu-form-item class="tvu-jse__field" label="类型">
-        <tvu-select v-model="data.currProp.attrs.type">
+        <tvu-select v-model="data.currProp.attrs.type" :disabled="forbidden" @change="onChangeType">
           <tvu-option label="integer" value="integer"></tvu-option>
           <tvu-option label="number" value="number"></tvu-option>
           <tvu-option label="string" value="string"></tvu-option>
@@ -29,19 +30,18 @@
           <tvu-option label="number" value="number"></tvu-option>
           <tvu-option label="string" value="string"></tvu-option>
           <tvu-option label="object" value="object"></tvu-option>
-          <tvu-option label="array" value="array"></tvu-option>
           <tvu-option label="boolean" value="boolean"></tvu-option>
           <tvu-option label="json" value="json"></tvu-option>
           <tvu-option label="null" value="null"></tvu-option>
         </tvu-select>
       </tvu-form-item>
-      <tvu-form-item class="tvu-jse__field" label="子对象格式" v-if="formats">
+      <tvu-form-item class="tvu-jse__field" label="格式" v-if="formats">
         <tvu-select v-model="data.currProp.attrs.format" placeholder="请选择格式">
           <tvu-option v-for="format in formats" :key="format.value" :label="format.label" :value="format.value">
           </tvu-option>
         </tvu-select>
       </tvu-form-item>
-      <tvu-form-item class="tvu-jse__field" label="格式" v-if="formats2">
+      <tvu-form-item class="tvu-jse__field" label="子对象格式" v-if="formats2">
         <tvu-select v-model="data.currProp.items.format" placeholder="请选择格式">
           <tvu-option v-for="format in formats2" :key="format.value" :label="format.label" :value="format.value">
           </tvu-option>
@@ -60,7 +60,8 @@
       <tvu-form-item class="tvu-jse__field" label="可否分组">
         <tvu-checkbox v-model="data.currProp.attrs.groupable"></tvu-checkbox>
       </tvu-form-item>
-      <tvu-form-item class="tvu-jse__field" label="设置选项">
+      <tvu-form-item class="tvu-jse__field" label="设置选项"
+        v-if="['string', 'integer', 'number', 'array'].includes(data.currProp.attrs.type)">
         <tvu-checkbox v-model="hasEnum" @change="onChangeHasEnum"></tvu-checkbox>
       </tvu-form-item>
       <div class="tvu-jse__field" v-if="hasEnum">
@@ -154,6 +155,14 @@ const formats2 = computed(() => {
     : null
 })
 
+let forbidden = computed(() => {
+  const { type } = data.currProp.attrs
+  if (type === 'object' || (type === 'array' && data.currProp?.items?.type === 'object')) {
+    const idx = nodes.value.findIndex((node: SchemaProp) => node.parentFullname === data.currProp.fullname)
+    if (idx !== -1) return true
+  }
+  return false
+})
 // watch: {
 //   'form.schema.format': {
 //     handler: function (val) {
@@ -178,7 +187,17 @@ const formats2 = computed(() => {
 //     immediate: true,
 //   },
 // },
+const onChangeType = (event: any) => {
+  const type = event.target.value
+  if (type === 'array') {
+    data.currProp.items = { type: 'string' }
+  } else {
+    data.currProp.items = undefined
+  }  
+}
+
 const onChangeHasEnum = (bHasEnum: boolean) => {
+  // bhasEnum应该是个event,不是boolean?
   const { attrs } = data.currProp
   if (bHasEnum) {
     if (!Array.isArray(attrs.enum)) {
@@ -212,6 +231,10 @@ const onRemoveNode = () => {
   let prev = builder.removeProp(toRaw(data.currProp))
   if (typeof prev === 'object') {
     data.currProp = prev
+  } else if (typeof prev === 'boolean' && prev === false) {
+    alert('根节点不允许删除')
+  } else {
+    alert('删除属性遇到未知错误')
   }
 }
 

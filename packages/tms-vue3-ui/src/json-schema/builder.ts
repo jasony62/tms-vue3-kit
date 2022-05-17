@@ -85,6 +85,10 @@ export class JSONSchemaBuilder {
        * 在对象查找或创建父节点。子属性总是在父属性的properties字段中
        */
       let { path, name } = prop
+      if (!name) {
+        alert('键值不允许为空')
+        throw Error('键值不允许为空')
+      }
       // 将数组类型分为两次查找
       let pathsegs = path.replace('[*]', '.[*]').split('.')
       let parent = pathsegs.reduce((prev, seg) => {
