@@ -1,18 +1,30 @@
 import { SampleSchema } from '../data/schema-file'
 import { build } from '../../src/json-doc/builder'
 
-describe('通过API从外部获取值', () => {
-  it('返回字段的值', () => {
-    const editDoc = {}
+describe('对象包含数组，数组的项目是文件', () => {
+  it('生成表单节点', () => {
+    const editDoc = { files: [{}, {}] }
+    const fieldNames: string[] = []
     const onFileDownload = () => {}
-    const nodes = build({
-      schema: SampleSchema,
-      editDoc,
-      onMessage: (msg: string) => {
-        console.log(msg)
+    build(
+      {
+        schema: SampleSchema,
+        editDoc,
+        onMessage: (msg: string) => {
+          console.log(msg)
+        },
+        onFileDownload,
       },
-      onFileDownload,
-    })
-    console.log(JSON.stringify(nodes, null, 2))
+      fieldNames
+    )
+    // console.log(fieldNames)
+    expect(fieldNames).toHaveLength(7)
+    expect(fieldNames[0]).toBe('files[1].name')
+    expect(fieldNames[1]).toBe('files[0].name')
+    expect(fieldNames[2]).toBe('files[1].url')
+    expect(fieldNames[3]).toBe('files[0].url')
+    expect(fieldNames[4]).toBe('files[1]')
+    expect(fieldNames[5]).toBe('files[0]')
+    expect(fieldNames[6]).toBe('files')
   })
 })
