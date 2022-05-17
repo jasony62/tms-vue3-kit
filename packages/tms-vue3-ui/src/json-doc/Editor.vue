@@ -82,7 +82,6 @@ export default defineComponent({
       // if (isCheckValidity && !checkValidity()) return false
       return toRaw(editDoc)
     }
-
     context.expose({ editing })
 
     const defaultDoc = deepClone(props.value)
@@ -97,15 +96,20 @@ export default defineComponent({
         onFileSelect,
         onFileDownload,
       } = props
-      const nodes = BuildEditor({
-        editDoc,
-        schema,
-        onMessage,
-        onAxios,
-        onFileUpload,
-        onFileSelect,
-        onFileDownload,
-      })
+      const fieldNames: string[] = []
+      const nodes = BuildEditor(
+        {
+          editDoc,
+          schema,
+          onMessage,
+          onAxios,
+          onFileUpload,
+          onFileSelect,
+          onFileDownload,
+        },
+        fieldNames
+      )
+
       return h('div', { class: ['tvu-jdoc__root'] }, nodes)
     }
   },

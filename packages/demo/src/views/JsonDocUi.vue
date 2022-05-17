@@ -1,10 +1,21 @@
 <template>
+  <div>
+    <select v-model="caseName">
+      <option value="overall">整体示例</option>
+      <option value="array-simple">数组的项目简单类型</option>
+      <option value="array-object">数组的项目是对象</option>
+      <option value="object-map-object">对象有可选属性，属性类型是对象</option>
+      <option value="object-map-array">对象有可选属性，属性类型是数组</option>
+    </select>
+  </div>
   <div class="flex flex-row">
     <div class="w-1/3 p-4">
       <json-doc
+        v-if="loading === false"
         ref="jsonDocEditor"
-        :schema="SampleSchema"
-        :value="SampleData"
+        :key="caseName"
+        :schema="testObj.schema"
+        :value="testObj.data"
         :on-axios="onAxios"
         :on-file-download="onFileDownload"
         :on-file-upload="onFileUpload"
@@ -24,12 +35,38 @@
 <script setup lang="ts">
 import { JsonDoc } from 'tms-vue3-ui'
 import 'tms-vue3-ui/dist/es/json-doc/style/tailwind.scss'
-import { ref } from 'vue'
-import { SampleSchema, SampleData } from '../data/schemas/overall'
+import { onMounted, reactive, ref, watch } from 'vue'
+
+localStorage.debug = '*'
 
 const jsonDocEditor = ref<{ editing: () => string } | null>(null)
 
 const jsonResult = ref('')
+
+const caseName = ref('overall')
+
+const loading = ref(true)
+
+const testObj = reactive({ schema: {}, data: {} })
+
+function loadTestData() {
+  loading.value = true
+  return import(`../data/schemas/${caseName.value}`).then(
+    ({ SampleData, SampleSchema }) => {
+      testObj.schema = SampleSchema
+      testObj.data = SampleData
+      loading.value = false
+    }
+  )
+}
+
+onMounted(async () => {
+  await loadTestData()
+})
+
+watch(caseName, () => {
+  loadTestData()
+})
 
 const onAxios = () => {
   return {

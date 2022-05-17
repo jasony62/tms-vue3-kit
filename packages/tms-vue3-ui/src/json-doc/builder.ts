@@ -437,10 +437,12 @@ let _uid = 0
 class Builder {
   _uid: number
   ctx: any
+  fieldNames
 
-  constructor(ctx: FormContext) {
+  constructor(ctx: FormContext, fieldNames?: string[]) {
     this._uid = ++_uid
     this.ctx = ctx
+    this.fieldNames = fieldNames
   }
 
   /**根据schema生成表单 */
@@ -449,7 +451,7 @@ class Builder {
 
     const formNode = new FormNode(ctx)
 
-    const formSubNode = build(ctx)
+    const formSubNode = build(ctx, this.fieldNames)
 
     return formNode.createElem(formSubNode)
   }
@@ -507,12 +509,12 @@ export type FormContext = {
  * 渲染函数
  *
  * @param {*} ctx
- * @param {*} createElement
+ * @param {*} fieldNames
  */
-export default function (ctx: FormContext) {
+export default function (ctx: FormContext, fieldNames?: string[]) {
   let builder = mapBuilders.get(ctx)
   if (!builder) {
-    builder = new Builder(ctx)
+    builder = new Builder(ctx, fieldNames)
     mapBuilders.set(ctx, builder)
   }
   return builder.render()
