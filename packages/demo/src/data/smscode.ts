@@ -1,9 +1,19 @@
-function fnSendCode() {
-  return Promise.resolve({ code: 0 })
+
+import { CaptchaResponse } from 'tms-vue3-ui'
+
+import captcha from './captcha'
+
+function fnSendCode(): Promise<CaptchaResponse> {
+  return Promise.resolve({ code: 0, captcha })
+}
+function fnSendSmsCode(userData:{ [key: string]: string }): Promise<CaptchaResponse> {
+  let {mobile, pin} = userData
+  console.info('sms user data', {mobile, pin})
+  return Promise.resolve({ code: 0, captcha })
 }
 function fnVerify(userData: { [key: string]: string }) {
-  let { uname, password, pin } = userData
-  console.info('register user data', { uname, password, pin })
+  let {mobile, pin, code} = userData
+  console.info('sms user data', { mobile, pin, code })
   return Promise.resolve({
     code: 0,
     msg: '成功',
@@ -20,10 +30,15 @@ const schema = [
     placeholder: '请输入手机号',
   },
   {
+    key: 'pin',
+    type: 'captcha',
+    placeholder: '请输入验证码',
+  },
+  {
     key: 'code',
     type: 'smscode',
-    placeholder: '请出入验证码',
+    placeholder: '请输入验证码',
   },
 ]
 
-export { fnSendCode, fnVerify, schema }
+export { fnSendCode, fnVerify, schema,fnSendSmsCode }
