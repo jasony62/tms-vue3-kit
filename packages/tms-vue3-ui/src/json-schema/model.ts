@@ -60,7 +60,8 @@ export class SchemaProp {
   dependencies?: PropDepRuleSet
   eventDependency?: { rule: PropEventRule }
   attachment?: any
-  isPattern = false
+  hasPattern = false //  是否包含由正则表达式定义名称的子属性
+  isPattern = false //  是否是由正则表达式定义名称的子属性
 
   constructor(path: string, name: string, type?: string) {
     this.path = path
@@ -225,6 +226,10 @@ function* _parseOne(
   // 如果required是boolean值，作用于当前属性，如果是数组作用于子属性
   if (typeof required === 'boolean') {
     newProp.attrs.required = required
+  }
+  // 是否包含由正则表达式定义名称的子属性
+  if (rawProp.type === 'object' && typeof patternProperties === 'object') {
+    newProp.hasPattern = true
   }
   // 返回当前的属性
   yield newProp

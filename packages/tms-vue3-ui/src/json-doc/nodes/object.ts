@@ -14,14 +14,16 @@ export class ObjectNode extends FieldNode {
   options() {
     const { field } = this
     const options = {
-      name: field.name,
+      name: field.fullname,
       type: field.type,
       class: ['tvu-jdoc__nest'],
     }
 
     return options
   }
-
+  /**
+   * 如果对象中包含可选属性，需要提供添加删除属性，修改属性名称的操作。
+   */
   protected children(): VNode[] {
     return this._children ?? []
   }
