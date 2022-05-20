@@ -90,10 +90,14 @@ class DocProp {
     }
   }
 
+  set key(val: string | number) {
+    this._initialKey = val
+  }
+
   get key() {
     let { _initialKey } = this
     if (typeof _initialKey === 'number') {
-      let index = this._parent?._children.indexOf(this)
+      let index = this._parent ? this._parent._children.indexOf(this) : -1
       if (index === -1) {
         throw Error(
           `error ${this._initialKey}/${this._parent?._children.length}/${this._value}`
@@ -126,16 +130,20 @@ class DocProp {
   removeChild(key: string | number) {
     if (typeof key === 'number') {
       let child = this._children[key]
-      if (child._children.length)
+      if (child._children.length) {
+        console.log('ccccc', child)
         throw Error(`要删除的属性【${child.name}】包含子属性，不允许删除`)
+      }
 
       this._children.splice(key, 1)
       this.value.splice(key, 1)
     } else if (typeof key === 'string') {
       let child = this._children.find((c) => c.key === key)
       if (child) {
-        if (child._children.length)
+        if (child._children.length) {
+          console.log('dddd', child)
           throw Error(`要删除的属性【${child.name}】包含子属性，不允许删除`)
+        }
         this._children.splice(this._children.indexOf(child), 1)
         delete this.value[key]
       }
@@ -263,9 +271,12 @@ export class DocAsArray {
     let { _parent, key } = prop
 
     /**需要先删除子属性，再删除属性*/
-    prop._children.forEach((child) => {
+    let i = prop._children.length - 1
+    while (i >= 0) {
+      let child = prop._children[i]
       this.remove(child.name, false)
-    })
+      i--
+    }
 
     // 删除属性
     if (_parent && key !== undefined) _parent.removeChild(key)
@@ -311,5 +322,23 @@ export class DocAsArray {
     if (val !== undefined) return val
     this.appendAt('', defaultValue, name)
     return defaultValue
+  }
+  /**
+   * 修改属性名称
+   * @param oldFullname
+   * @param newKey
+   * @param needRender
+   */
+  rename(oldFullname: string, newKey: string, needRender = true) {
+    let { prop } = this.findByName(oldFullname)
+    if (!prop) throw Error(`指定的属性【${oldFullname}】不存在`)
+    let parent = prop._parent
+    if (parent) {
+      delete parent.value[prop.key]
+      parent.value[newKey] = prop.value
+    }
+    prop.key = newKey
+
+    if (needRender) this.renderCounter.value++
   }
 }

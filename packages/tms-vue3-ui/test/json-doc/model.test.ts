@@ -62,15 +62,44 @@ describe('文档迭代器', () => {
   //   //const obj = builder.build()
   //   //console.log(JSON.stringify(obj, null, 2))
   // })
-  it('操作数组对象，删除', () => {
+  // it('操作数组对象，删除', () => {
+  //   const doc = {
+  //     experiences: [{ time: '2001' }, { time: '2002' }],
+  //   }
+
+  //   const builder = new DocAsArray(doc)
+  //   builder.remove('experiences[0]')
+  //   console.log(JSON.stringify(builder._properties, null, 2))
+
+  //   //const obj = builder.build()
+  //   //console.log(JSON.stringify(obj, null, 2))
+  // })
+  it('修改用户定义属性名称', () => {
     const doc = {
-      experiences: [{ time: '2001' }, { time: '2002' }],
+      org: {
+        name: '研发部',
+        strProduct: 'tms-vue3-kit',
+        'str in valid': '123',
+        objAbc: {
+          label: 'aaa',
+          value: '111',
+          extra: { label: 'aaa_bbb', value: '111_222' },
+        },
+        objXyz: {
+          label: 'xxx',
+          value: '999',
+          extra: { label: 'xxx_yyy', value: '999_888' },
+        },
+      },
     }
 
     const builder = new DocAsArray(doc)
-    builder.remove('experiences[0]')
+    // builder.rename('org.strProduct', 'strProduct1')
+    // console.log(JSON.stringify(builder._properties, null, 2))
+    // builder.rename('org.strProduct1', 'strProduct12')
+    // console.log(JSON.stringify(builder._properties, null, 2))
+    builder.remove('org.objXyz.extra')
     console.log(JSON.stringify(builder._properties, null, 2))
-
     //const obj = builder.build()
     //console.log(JSON.stringify(obj, null, 2))
   })

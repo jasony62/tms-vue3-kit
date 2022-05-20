@@ -43,7 +43,7 @@ const jsonDocEditor = ref<{ editing: () => string } | null>(null)
 
 const jsonResult = ref('')
 
-const caseName = ref('array-simple')
+const caseName = ref('object-map-object')
 
 const loading = ref(true)
 

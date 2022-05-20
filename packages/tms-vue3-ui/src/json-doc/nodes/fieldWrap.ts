@@ -4,22 +4,37 @@ import { Field } from '../fields'
 import { FieldNode } from './fieldNode'
 import { Node, components } from './index'
 
-const fieldNameVNode = (field: Field) => {
-  return h('div', {}, field.name)
+/**用户指定的字段名称*/
+const fieldNameVNode = (ctx: FormContext, field: Field) => {
+  let inp = h('input', {
+    value: field.name,
+    onInput: (event: any) => {
+      const newName = event && event.target ? event.target.value : event
+      ctx.editDoc.rename(field.fullname, newName)
+    },
+  })
+
+  return h(
+    'div',
+    { name: field.scheamProp.name, class: ['tvu-jdoc__field-name'] },
+    [inp]
+  )
 }
 
-const fieldRemoveVNode = (field: Field) => {
+const fieldRemoveVNode = (ctx: FormContext, field: Field) => {
   return h(
     components.button.tag,
     {
       name: field.fullname,
-      onClick: () => {},
+      onClick: () => {
+        ctx.editDoc.remove(field.fullname)
+      },
     },
     '删除'
   )
 }
 /**
- *
+ * 输入字段的包裹字段，加入字段标题、说明和操作等节点。
  */
 export class FieldWrap extends Node {
   fieldNode
@@ -34,7 +49,7 @@ export class FieldWrap extends Node {
 
   protected children(): VNode[] {
     const children = []
-    const { field } = this
+    const { field, ctx } = this
     if (field.label) {
       children.push(
         h(
@@ -46,8 +61,10 @@ export class FieldWrap extends Node {
         )
       )
     }
+
+    /**如果属性名称是用户定义的，需要显示给用户，并且允许进行编辑*/
     if (field.scheamProp.isPattern) {
-      children.push(fieldNameVNode(field))
+      children.push(fieldNameVNode(ctx, field))
     }
 
     children.push(this.fieldNode.createElem())
@@ -63,7 +80,7 @@ export class FieldWrap extends Node {
     }
 
     if (field.scheamProp.isPattern) {
-      children.push(fieldRemoveVNode(field))
+      children.push(fieldRemoveVNode(ctx, field))
     }
 
     return children
