@@ -94,7 +94,11 @@ class DocProp {
     let { _initialKey } = this
     if (typeof _initialKey === 'number') {
       let index = this._parent?._children.indexOf(this)
-      if (index === -1) throw Error(`error ${index}/${this._value}`)
+      if (index === -1) {
+        throw Error(
+          `error ${this._initialKey}/${this._parent?._children.length}/${this._value}`
+        )
+      }
       return index
     }
 
@@ -121,16 +125,27 @@ class DocProp {
 
   removeChild(key: string | number) {
     if (typeof key === 'number') {
+      let child = this._children[key]
+      if (child._children.length)
+        throw Error(`要删除的属性【${child.name}】包含子属性，不允许删除`)
+
       this._children.splice(key, 1)
       this.value.splice(key, 1)
     } else if (typeof key === 'string') {
-      delete this.value[key]
+      let child = this._children.find((c) => c.key === key)
+      if (child) {
+        if (child._children.length)
+          throw Error(`要删除的属性【${child.name}】包含子属性，不允许删除`)
+        this._children.splice(this._children.indexOf(child), 1)
+        delete this.value[key]
+      }
     }
   }
 
   toJSON() {
     let { name, value } = this
-    return { name, value }
+    let children = this._children.length
+    return { name, value, children }
   }
 }
 
@@ -149,6 +164,7 @@ export class DocAsArray {
     let iter = new DocIter(rawDoc, rootName)
     let props = Array.from(iter)
     this._properties = props ?? []
+    this.renderCounter = { value: 0 }
   }
   /**
    *
@@ -239,16 +255,24 @@ export class DocAsArray {
    * @param name 指定的属性
    * @returns
    */
-  remove(name: string) {
+  remove(name: string, needRender = true) {
     let { index, prop } = this.findByName(name)
 
     if (prop === undefined) return undefined
 
     let { _parent, key } = prop
+
+    /**需要先删除子属性，再删除属性*/
+    prop._children.forEach((child) => {
+      this.remove(child.name, false)
+    })
+
+    // 删除属性
     if (_parent && key !== undefined) _parent.removeChild(key)
     this._properties.splice(index, 1)
-    // 需要考虑删除子节点的问题，或者有子属性就不允许删除
-    this.renderCounter.value++
+
+    // 触发重新渲染
+    if (needRender) this.renderCounter.value++
   }
   /**
    * 返回指定字段的值

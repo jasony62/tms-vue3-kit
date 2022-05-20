@@ -51,14 +51,26 @@ describe('文档迭代器', () => {
   //   const obj = builder.build()
   //   console.log(JSON.stringify(obj, null, 2))
   // })
+  // it('操作数组对象，删除', () => {
+  //   const doc = {
+  //     additionalName: ['alice', 'bob'],
+  //   }
+  //   const builder = new DocAsArray(doc)
+  //   builder.remove('additionalName[0]')
+
+  //   console.log(JSON.stringify(builder._properties, null, 2))
+  //   //const obj = builder.build()
+  //   //console.log(JSON.stringify(obj, null, 2))
+  // })
   it('操作数组对象，删除', () => {
     const doc = {
-      additionalName: ['alice', 'bob'],
+      experiences: [{ time: '2001' }, { time: '2002' }],
     }
-    const builder = new DocAsArray(doc)
-    builder.remove('additionalName[0]')
 
+    const builder = new DocAsArray(doc)
+    builder.remove('experiences[0]')
     console.log(JSON.stringify(builder._properties, null, 2))
+
     //const obj = builder.build()
     //console.log(JSON.stringify(obj, null, 2))
   })
