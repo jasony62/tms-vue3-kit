@@ -1,3 +1,4 @@
+import RandExp from 'randexp'
 import { h, VNode } from 'vue'
 import { FormContext } from '../builder'
 import { Field } from '../fields'
@@ -25,6 +26,33 @@ const fieldNameVNode = (ctx: FormContext, field: Field) => {
     'div',
     { name: field.scheamProp.name, class: ['tvu-jdoc__field-name'] },
     [inp]
+  )
+}
+
+const fieldInsertVNode = (ctx: FormContext, field: Field) => {
+  let { fullname } = field
+  return h(
+    components.button.tag,
+    {
+      name: fullname,
+      onClick: () => {
+        let randexp = new RandExp(new RegExp(field.scheamProp.name))
+        randexp.max = 8
+        let newKey = randexp.gen()
+        switch (field.scheamProp.attrs.type) {
+          case 'string':
+            ctx.editDoc.insertAt(fullname, '', newKey)
+            break
+          case 'object':
+            ctx.editDoc.insertAt(fullname, {}, newKey)
+            break
+          case 'array':
+            ctx.editDoc.insertAt(fullname, [], newKey)
+            break
+        }
+      },
+    },
+    '插入'
   )
 }
 
@@ -87,7 +115,14 @@ export class FieldWrap extends Node {
     }
 
     if (field.scheamProp.isPattern) {
-      children.push(fieldRemoveVNode(ctx, field))
+      let actions = h(
+        'div',
+        {
+          class: ['tvu-jdoc__field-actions'],
+        },
+        [fieldInsertVNode(ctx, field), fieldRemoveVNode(ctx, field)]
+      )
+      children.push(actions)
     }
 
     return children

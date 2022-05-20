@@ -71,7 +71,8 @@ class DocProp {
   constructor(
     parent: DocProp | undefined,
     keyOrIndex: string | number,
-    value: any
+    value: any,
+    propIndex?: number
   ) {
     this._parent = parent
     this._value = value
@@ -85,7 +86,9 @@ class DocProp {
       ) {
         parent._children.splice(keyOrIndex, 0, this)
       } else {
-        parent._children.push(this)
+        if (typeof propIndex === 'number')
+          parent._children.splice(propIndex, 0, this)
+        else parent._children.push(this)
       }
     }
   }
@@ -131,21 +134,16 @@ class DocProp {
     if (typeof key === 'number') {
       let child = this._children[key]
       if (child._children.length) {
-        console.log('ccccc', child)
         throw Error(`要删除的属性【${child.name}】包含子属性，不允许删除`)
       }
-
       this._children.splice(key, 1)
-      this.value.splice(key, 1)
     } else if (typeof key === 'string') {
       let child = this._children.find((c) => c.key === key)
       if (child) {
         if (child._children.length) {
-          console.log('dddd', child)
           throw Error(`要删除的属性【${child.name}】包含子属性，不允许删除`)
         }
         this._children.splice(this._children.indexOf(child), 1)
-        delete this.value[key]
       }
     }
   }
@@ -165,7 +163,7 @@ function nameToRegExp(name: string): string {
  * 将文档转换为数组表示
  */
 export class DocAsArray {
-  _properties: DocProp[]
+  _properties: DocProp[] // 文档的属性
   renderCounter: any // 用于出发渲染
 
   constructor(rawDoc: any = {}, rootName = DEFAULT_ROOT_NAME) {
@@ -174,6 +172,11 @@ export class DocAsArray {
     this._properties = props ?? []
     this.renderCounter = { value: 0 }
   }
+
+  get properties() {
+    return this._properties
+  }
+
   /**
    *
    * @param name
@@ -195,23 +198,29 @@ export class DocAsArray {
     return { index, prop }
   }
   /**
-   * 成对象
+   * 构造对象
    */
   build(): any {
     let obj = {}
     this._properties.forEach((prop) => {
-      _.set(obj, prop.name, prop.value)
+      let val = this.get(prop.name)
+      _.set(obj, prop.name, val)
     })
     return obj
   }
-
-  appendAt(name: string, value: any, keyOrIndex?: string | number) {
+  /**
+   * 给属性追加子属性
+   * @param name 属性的名称
+   * @param value 子属性的值
+   * @param key 子属性的名称
+   */
+  appendAt(name: string, value: any, key?: string, needRender = true) {
     if (!name) {
       /**添加根属性，没有父属性*/
-      if (typeof keyOrIndex === 'string') {
-        this._properties.push(new DocProp(undefined, keyOrIndex, value))
+      if (typeof key === 'string') {
+        this._properties.push(new DocProp(undefined, key, value))
       } else {
-        throw Error(`文档根属性不允许指定为数字类型【${keyOrIndex}】`)
+        throw Error(`文档根属性不允许指定为数字类型【${key}】`)
       }
     } else {
       let { index: parentIndex, prop: parent } = this.findByName(name)
@@ -219,7 +228,7 @@ export class DocAsArray {
 
       debug(`属性【${name}】存储位置【${parentIndex}】`)
 
-      if (typeof keyOrIndex === 'string') {
+      if (typeof key === 'string') {
         /**对象添加子属性*/
         let re = new RegExp(`^${nameToRegExp(name)}\\.(\\w+)$`)
         let lastChildIndex = parentIndex + 1
@@ -230,18 +239,14 @@ export class DocAsArray {
           }
           lastChildIndex++
         }
-        let prop = new DocProp(parent, keyOrIndex, value)
-        parent.value[keyOrIndex] = value
+        let prop = new DocProp(parent, key, value)
         this._properties.splice(lastChildIndex, 0, prop)
         debug(
           `属性【${name}】在【${lastChildIndex}】添加子字段【${prop.name}】`
         )
-      } else if ((keyOrIndex ?? true) || typeof keyOrIndex === 'number') {
+      } else if ((key ?? true) || typeof key === 'number') {
         /**数组添加项目*/
-        keyOrIndex ??= parent._children.length
-        if (keyOrIndex < 0 || keyOrIndex > parent._children.length) {
-          throw Error(`指定位置【${keyOrIndex}】超出数组【${name}】范围`)
-        }
+        let index = parent._children.length
         // let re = new RegExp(`^${nameToRegExp(name)}\\[(\\d+)\\]$`)
         // let lastChildIndex = parentIndex + 1
         // while (lastChildIndex < this._properties.length) {
@@ -249,14 +254,43 @@ export class DocAsArray {
         //   if (!re.test(next.name)) break
         //   lastChildIndex++
         // }
-        let prop = new DocProp(parent, keyOrIndex, value)
-        parent.value.push(value)
+        let prop = new DocProp(parent, index, value)
         this._properties.push(prop)
         debug(`属性【${name}】在位置添加子属性【${prop.name}】`)
       }
     }
 
-    this.renderCounter.value++
+    if (needRender) this.renderCounter.value++
+  }
+  /**
+   *
+   * @param name
+   * @param value
+   * @param key
+   */
+  insertAt(name: string, value: any, key?: string, needRender = true) {
+    let { prop } = this.findByName(name)
+    if (prop === undefined) throw Error(`指定的兄弟属性【${name}】不存在`)
+
+    let parent = prop._parent
+    if (!parent) throw Error(`指定的兄弟属性【${name}】不存在父属性`)
+
+    let siblings = parent._children
+    let index = siblings.indexOf(prop)
+    let newProp
+    if (Array.isArray(parent.value)) {
+      newProp = new DocProp(parent, index, value)
+    } else if (typeof parent.value === 'object' && typeof key === 'string') {
+      newProp = new DocProp(parent, key, value, index)
+    } else {
+      throw Error(
+        `指定的兄弟属性【${name}】的父属性的值不是对象或数组，无法插入新属性`
+      )
+    }
+
+    this._properties.push(newProp)
+
+    if (needRender) this.renderCounter.value++
   }
   /**
    * 删除指定属性
@@ -286,12 +320,22 @@ export class DocAsArray {
     if (needRender) this.renderCounter.value++
   }
   /**
-   * 返回指定字段的值
+   * 返回指定字段的值。如果指定的属性有子属性，使用子属性的值构造属性的值。
    * @param name
    * @returns
    */
   get(name: string): any {
     let { prop } = this.findByName(name)
+    if (prop?._children.length) {
+      if (Array.isArray(prop.value)) {
+        return prop._children.map((child) => child.value)
+      } else if (typeof prop.value === 'object') {
+        return prop._children.reduce(
+          (val, child) => Object.assign(val, { [child.key]: child.value }),
+          {}
+        )
+      }
+    }
     return prop?.value
   }
   /**

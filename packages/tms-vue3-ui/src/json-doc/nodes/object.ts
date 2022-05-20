@@ -29,6 +29,7 @@ const itemAddVNode = (ctx: FormContext, field: Field) => {
               ctx.editDoc.appendAt(field.fullname, {}, newKey)
               break
             case 'array':
+              ctx.editDoc.appendAt(field.fullname, [], newKey)
               break
           }
         },

@@ -5,10 +5,10 @@ export class Checkboxgroup extends Input {
    * 更新field对应的model数据
    */
   updateModel(newValue: any) {
-    const { field } = this
-    const fieldName = field.fullname
-    const name = field.name
-    if (name) {
+    const { field, ctx } = this
+    const fullname = field.fullname
+    const fieldName = field.name
+    if (fieldName) {
       if (
         field.items &&
         field.itemType &&
@@ -17,15 +17,15 @@ export class Checkboxgroup extends Input {
         newValue = Number(newValue)
       }
 
-      const { editDoc } = this.ctx
-      const fieldValue = editDoc.init(fieldName, [])
+      const { editDoc } = ctx
+      const fieldValue = editDoc.init(fullname, [])
 
       /**处理子节点*/
       const childIndex = fieldValue.indexOf(newValue)
       if (childIndex !== -1) {
-        editDoc.remove(`${fieldName}[${childIndex}]`)
+        editDoc.remove(`${fullname}[${childIndex}]`)
       } else {
-        editDoc.appendAt(fieldName, newValue, fieldValue.length - 1)
+        editDoc.appendAt(fullname, newValue)
       }
     }
   }

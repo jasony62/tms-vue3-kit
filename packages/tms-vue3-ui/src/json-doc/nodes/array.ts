@@ -17,8 +17,13 @@ const itemAddVNode = (ctx: FormContext, field: Field) => {
               ctx.editDoc.appendAt(field.fullname, '')
               break
             case 'object':
-              ctx.editDoc.appendAt(field.fullname, { time: '2003' })
+              ctx.editDoc.appendAt(field.fullname, {})
               break
+            case 'array':
+              ctx.editDoc.appendAt(field.fullname, [])
+              break
+            default:
+              ctx.editDoc.appendAt(field.fullname, undefined)
           }
         }
       },
@@ -26,6 +31,32 @@ const itemAddVNode = (ctx: FormContext, field: Field) => {
     '添加'
   )
   return h('div', { class: ['tvu-jdoc__nest__actions'] }, addVNode)
+}
+
+const itemInsertVNode = (ctx: FormContext, field: Field, index: number) => {
+  let fullname = `${field.fullname}[${index}]`
+  return h(
+    components.button.tag,
+    {
+      name: fullname,
+      onClick: () => {
+        switch (field.itemSchemaType) {
+          case 'string':
+            ctx.editDoc.insertAt(fullname, '')
+            break
+          case 'object':
+            ctx.editDoc.insertAt(fullname, {})
+            break
+          case 'array':
+            ctx.editDoc.insertAt(fullname, [])
+            break
+          default:
+            ctx.editDoc.insertAt(fullname, undefined)
+        }
+      },
+    },
+    '插入'
+  )
 }
 
 const itemRemoveVNode = (ctx: FormContext, field: Field, index: number) => {
@@ -74,7 +105,7 @@ export class ArrayNode extends FieldNode {
       let itemActionsVNode = h(
         'div',
         { class: ['jdoc__nest__item__actions'] },
-        [itemRemoveVNode(ctx, field, index)]
+        [itemInsertVNode(ctx, field, index), itemRemoveVNode(ctx, field, index)]
       )
       let itemNestVNode = h('div', { index, class: ['tvu-jdoc__nest__item'] }, [
         itemVNodes,
