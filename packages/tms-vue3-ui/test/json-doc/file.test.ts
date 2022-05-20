@@ -1,9 +1,11 @@
 import { SampleSchema } from '../data/schema-file'
-import { build } from '../../src/json-doc/builder'
+import { build } from '@/json-doc/builder'
+import { DocAsArray } from '@/json-doc/model'
 
 describe('对象包含数组，数组的项目是文件', () => {
   it('生成表单节点', () => {
-    const editDoc = { files: [{}, {}] }
+    const rawDoc = { files: [{}, {}] }
+    const editDoc = new DocAsArray(rawDoc)
     const fieldNames: string[] = []
     const onFileDownload = () => {}
     build(

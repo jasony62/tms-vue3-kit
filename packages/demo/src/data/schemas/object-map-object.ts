@@ -56,7 +56,15 @@ export const SampleData = {
     name: '研发部',
     strProduct: 'tms-vue3-kit',
     'str in valid': '123',
-    objAbc: { label: 'aaa', value: '111' },
-    objXyz: { label: 'xxx', value: '999' },
+    objAbc: {
+      label: 'aaa',
+      value: '111',
+      extra: { label: 'aaa_bbb', value: '111_222' },
+    },
+    objXyz: {
+      label: 'xxx',
+      value: '999',
+      extra: { label: 'xxx_yyy', value: '999_888' },
+    },
   },
 }

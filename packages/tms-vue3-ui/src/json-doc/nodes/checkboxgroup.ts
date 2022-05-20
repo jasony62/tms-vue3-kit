@@ -18,10 +18,16 @@ export class Checkboxgroup extends Input {
         newValue = Number(newValue)
       }
 
-      const formModel = initChild(this.ctx.editDoc, fieldName, [])
-      const index = formModel.indexOf(newValue)
-      if (index !== -1) formModel.splice(index, 1)
-      else formModel.push(newValue)
+      const { editDoc } = this.ctx
+      const fieldValue = editDoc.init(fieldName, [])
+
+      /**处理子节点*/
+      const childIndex = fieldValue.indexOf(newValue)
+      if (childIndex !== -1) {
+        editDoc.remove(`${fieldName}[${childIndex}]`)
+      } else {
+        editDoc.appendAt(fieldName, newValue, fieldValue.length - 1)
+      }
     }
   }
 }

@@ -1,15 +1,17 @@
 import { SampleSchema } from '../data/schema-object-map-array'
-import { build } from '../../src/json-doc/builder'
+import { build } from '@/json-doc/builder'
+import { DocAsArray } from '@/json-doc/model'
 
 describe('对象包含可选属性，可选属性为数组类型', () => {
   it('生成表单节点', () => {
-    const editDoc = {
+    const rawDoc = {
       org: {
         name: '研发部',
         arrAbc: [{ label: 'aaa', value: '111' }],
         arrXyz: [{ label: 'xxx', value: '999' }],
       },
     }
+    const editDoc = new DocAsArray(rawDoc)
     const fieldNames: string[] = []
     build(
       {

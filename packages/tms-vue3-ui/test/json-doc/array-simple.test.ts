@@ -1,9 +1,10 @@
 import { SampleSchema } from '../data/schema-array-simple'
-import { build } from '../../src/json-doc/builder'
+import { build } from '@/json-doc/builder'
+import { DocAsArray } from '@/json-doc/model'
 
 describe('定义包含数组，数组中项目为简单类型，生成表单节点', () => {
   it('生成表单节点', () => {
-    const editDoc = { additionalName: ['alice', 'bob'] }
+    const editDoc = new DocAsArray({ additionalName: ['alice', 'bob'] })
     const fieldNames: string[] = []
     build(
       {
@@ -15,13 +16,11 @@ describe('定义包含数组，数组中项目为简单类型，生成表单节�
       },
       fieldNames
     )
-    expect(fieldNames).toHaveLength(7)
-    expect(fieldNames[0]).toBe('experiences[1].time')
-    expect(fieldNames[1]).toBe('experiences[0].time')
-    expect(fieldNames[2]).toBe('experiences[1].content')
-    expect(fieldNames[3]).toBe('experiences[0].content')
-    expect(fieldNames[4]).toBe('experiences[1]')
-    expect(fieldNames[5]).toBe('experiences[0]')
-    expect(fieldNames[6]).toBe('experiences')
+    // console.log(fieldNames)
+    expect(fieldNames).toHaveLength(3)
+    let i = 0
+    expect(fieldNames[i++]).toBe('additionalName')
+    expect(fieldNames[i++]).toBe('additionalName[0]')
+    expect(fieldNames[i++]).toBe('additionalName[1]')
   })
 })

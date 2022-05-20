@@ -1,9 +1,10 @@
 import { SampleSchema } from '../data/schema-object-map'
-import { build } from '../../src/json-doc/builder'
+import { build } from '@/json-doc/builder'
+import { DocAsArray } from '@/json-doc/model'
 
 describe('对象包含可选属性，可选属性为对象类型', () => {
   it('生成表单节点', () => {
-    const editDoc = {
+    const rawDoc = {
       org: {
         name: '研发部',
         strProduct: 'tms-vue3-kit',
@@ -12,6 +13,7 @@ describe('对象包含可选属性，可选属性为对象类型', () => {
         objXyz: { label: 'xxx', value: '999' },
       },
     }
+    const editDoc = new DocAsArray(rawDoc)
     const fieldNames: string[] = []
     build(
       {
@@ -23,7 +25,7 @@ describe('对象包含可选属性，可选属性为对象类型', () => {
       },
       fieldNames
     )
-    // console.log(fieldNames)
+    console.log(fieldNames)
     expect(fieldNames).toHaveLength(15)
     expect(fieldNames[0]).toBe('org.name')
     expect(fieldNames[1]).toBe('org.strProduct')

@@ -1,9 +1,10 @@
 <script lang="ts">
-import { defineComponent, h, PropType, reactive, toRaw } from 'vue'
+import { defineComponent, h, PropType, ref } from 'vue'
 import { RawSchema } from '@/json-schema/model'
 import { deepClone } from '@/utils'
 import BuildEditor from './builder'
 import { Field } from './fields'
+import { DocAsArray } from './model'
 
 type FileSelectArgs = {
   fullname: string // 文件对应的字段名称
@@ -78,14 +79,14 @@ export default defineComponent({
     /**
      * 返回表单中正在编辑的数据
      */
-    const editing = (isCheckValidity = true): RawSchema => {
+    const editing = (isCheckValidity = true): any => {
       // if (isCheckValidity && !checkValidity()) return false
-      return toRaw(editDoc)
+      return editDoc.build()
     }
     context.expose({ editing })
 
-    const defaultDoc = deepClone(props.value)
-    const editDoc = reactive(deepClone(props.value))
+    const editDoc = new DocAsArray(deepClone(props.value))
+    editDoc.renderCounter = ref(0)
 
     return () => {
       let {
@@ -109,8 +110,15 @@ export default defineComponent({
         },
         fieldNames
       )
-
-      return h('div', { class: ['tvu-jdoc__root'] }, nodes)
+      console.log('render...')
+      return h(
+        'div',
+        {
+          'data-render-counter': editDoc.renderCounter.value,
+          class: ['tvu-jdoc__root'],
+        },
+        nodes
+      )
     }
   },
 })

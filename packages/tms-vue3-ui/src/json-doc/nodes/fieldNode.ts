@@ -1,5 +1,4 @@
 import { h, nextTick, VNode } from 'vue'
-import { getChild } from '@/utils'
 import { FormContext } from '../builder'
 import { Field } from '../fields'
 import { components, Node } from './index'
@@ -32,13 +31,13 @@ export abstract class FieldNode extends Node {
   constructor(ctx: FormContext, field: Field) {
     super(ctx, getRawCreateArgs(field))
     this._field = field
-    this.assocEnum()
+    this._assocEnum()
     /**
      * 通过API自动更新数据
      * 每次有数据更新都会调用，这样对性能有影响，是否可以缓存数据？
      */
     nextTick(() => {
-      this.outerValue()
+      this._outerValue()
     })
   }
 
@@ -52,7 +51,7 @@ export abstract class FieldNode extends Node {
   fieldValue() {
     const { field } = this
     const fieldName = field.fullname
-    let fieldValue = getChild(this.ctx.editDoc, fieldName)
+    let fieldValue = this.ctx.editDoc.get(fieldName)
     fieldValue ??= field.value
 
     return fieldValue
@@ -60,40 +59,40 @@ export abstract class FieldNode extends Node {
   /**
    * 根据依赖关系获得可用的选项
    */
-  private assocEnum() {
-    const { field } = this
-    const doc = this.ctx.editDoc
-    const oKey = field.fullname
+  private _assocEnum() {
+    const { field, ctx } = this
+    const doc = ctx.editDoc
+    const key = field.fullname
+    // 指定了选型分组
     if (field.enumGroups?.length && field.items?.length) {
       field.itemVisible = {}
       /**依次执行匹配规则*/
       field.enumGroups.forEach((enumGroup) => {
-        let { assocEnum } = enumGroup
+        let { assocEnum } = enumGroup // 分组依赖的选项
         if (!assocEnum?.property || !assocEnum?.value) return
-
-        if (doc[assocEnum.property] !== assocEnum.value) {
+        // 在文档中检查，依赖的属性值是否和指定的值一致
+        if (doc.get(assocEnum.property) !== assocEnum.value) {
+          // 分组条件不满足，将分组下的选项设置为不可见
           field.items?.forEach((oOption) => {
             if (oOption.group === enumGroup.id) {
               let id = oOption.group + oOption.value
               if (field.itemVisible) field.itemVisible[id] = false
-              /**选项不可见处理数据对象的值*/
+              /**选项不可见，清除数据对象中对应的值*/
+              let docVal = doc.get(key)
               if (field.schemaType === 'string') {
-                if (doc[oKey] === oOption.value) {
-                  doc[oKey] = doc[oKey] ? doc[oKey] : ''
-                }
+                // 字段是字符串
+                if (docVal === oOption.value) doc.set(key, '')
               } else {
-                if (
-                  doc[oKey] &&
-                  doc[oKey].includes(oOption.value)
-                  // id === false
-                ) {
-                  let index = doc[oKey].indexOf(oOption.value)
-                  doc[oKey].splice(index)
+                // 字段是数组
+                if (Array.isArray(docVal) && docVal.includes(oOption.value)) {
+                  let index = docVal.indexOf(oOption.value)
+                  docVal.splice(index, 1)
                 }
               }
             }
           })
         } else {
+          // 分组条件成立，将分组下的选项设置为可见
           field.items?.forEach((oOption) => {
             if (oOption.group === enumGroup.id) {
               let id = oOption.group + oOption.value
@@ -105,19 +104,18 @@ export abstract class FieldNode extends Node {
     }
   }
   /**
-   * 动态获取字段的值
+   * 从外部数据源获取字段的值
    */
-  private outerValue() {
+  private _outerValue() {
     const { editDoc, onAxios } = this.ctx
     const { field } = this
     if (!field.scheamProp.eventDependency) return
     /**构造查询参数*/
     const { rule } = field.scheamProp.eventDependency
     let postData = rule.params.reduce((c: any, p) => {
-      c[p] = { feature: 'start', keyword: editDoc[p] }
+      c[p] = { feature: 'start', keyword: editDoc.get(p) }
       return c
     }, {})
-
     /**获取数据*/
     const fieldName = field.name
     onAxios?.()
@@ -126,9 +124,8 @@ export abstract class FieldNode extends Node {
         const data = rst.data.result.docs ?? rst.data.result
         if (rule.type === 'v1') {
           /**返回的是值*/
-          editDoc[fieldName] = Array.isArray(data)
-            ? data?.[0][fieldName]
-            : data[fieldName]
+          let val = Array.isArray(data) ? data?.[0][fieldName] : data[fieldName]
+          this.onOuterValue(field, val)
         } else if (rule.type === 'v2') {
           /**返回的是选项*/
           let arr: any = []
@@ -137,17 +134,21 @@ export abstract class FieldNode extends Node {
               let value = item[fieldName]
               arr.push({ label: value, value: value })
             })
-            if (data.length === 1) {
-              editDoc[fieldName] = arr[0].value
-            }
           }
           field.items = arr
+          if (arr.length === 1) {
+            // 选项唯一时自动赋值
+            this.onOuterValue(field, arr[0].value)
+          }
         }
       })
       .catch(() => {
-        // setErrorMessage('数据解析错误')
+        this.ctx.onMessage('数据解析错误')
       })
   }
+
+  /**获得外部值时进行回调*/
+  protected onOuterValue(field: Field, val: any): void {}
 
   /**提供渲染函数的参数*/
   abstract options(attrsOrProps: any): any
@@ -177,8 +178,8 @@ export abstract class FieldNode extends Node {
     let children = this.children()
 
     // 生成节点
-    const node = h(this.rawArgs.tag, nodeOptions, children)
+    this._vnode = h(this.rawArgs.tag, nodeOptions, children)
 
-    return node
+    return this._vnode
   }
 }

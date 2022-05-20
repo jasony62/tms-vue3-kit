@@ -146,7 +146,7 @@ export const SampleSchema = {
       ],
     },
     city: {
-      title: '城市',
+      title: '城市（根据选择的区号通过API获取值）',
       type: 'string',
     },
     tel: {
@@ -239,4 +239,4 @@ export const SampleSchema = {
   },
 }
 
-export const SampleData = {}
+export const SampleData = { name: 'overall' }

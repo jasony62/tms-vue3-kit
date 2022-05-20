@@ -13,7 +13,7 @@ export class Select extends Input {
     const fieldValue = this.fieldValue()
 
     let opts = {
-      name: fieldName,
+      name: field.fullname,
       class: ['tvu-jdoc__field-input'],
       value: fieldValue,
       onChange: (event: any) => {
