@@ -50,6 +50,7 @@ export type SchemaPropAttrs = {
   default?: any
   groupable?: boolean
   value?: any
+  initialName?: string // 正则表达式定义属性的初始名称
 }
 
 export class SchemaProp {
@@ -60,8 +61,8 @@ export class SchemaProp {
   dependencies?: PropDepRuleSet
   eventDependency?: { rule: PropEventRule }
   attachment?: any
-  hasPattern = false //  是否包含由正则表达式定义名称的子属性
   isPattern = false //  是否是由正则表达式定义名称的子属性
+  patternChildren: SchemaProp[] | undefined
 
   constructor(path: string, name: string, type?: string) {
     this.path = path
@@ -181,6 +182,7 @@ function* _parseOne(
   if (evtRule) newProp.eventDependency = evtRule
   if (mandatory) newProp.attrs.required = mandatory
   newProp.isPattern = isPatternProperty
+  if (isPatternProperty) parent?.patternChildren?.push(newProp)
 
   let {
     properties,
@@ -217,6 +219,7 @@ function* _parseOne(
       case 'enum':
       case 'enumGroups':
       case 'default':
+      case 'initialName':
         Object.assign(newProp.attrs, { [key]: rawProp[key] })
         break
       default:
@@ -229,7 +232,7 @@ function* _parseOne(
   }
   // 是否包含由正则表达式定义名称的子属性
   if (rawProp.type === 'object' && typeof patternProperties === 'object') {
-    newProp.hasPattern = true
+    newProp.patternChildren = []
   }
   // 返回当前的属性
   yield newProp

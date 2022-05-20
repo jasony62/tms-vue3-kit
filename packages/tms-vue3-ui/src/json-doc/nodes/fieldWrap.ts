@@ -10,6 +10,13 @@ const fieldNameVNode = (ctx: FormContext, field: Field) => {
     value: field.name,
     onInput: (event: any) => {
       const newName = event && event.target ? event.target.value : event
+      if (field.scheamProp.isPattern) {
+        // 如果是正则表达式定义的属性名，检查名称是否符合要求
+        if (!new RegExp(field.scheamProp.name).test(newName)) {
+          if (inp.el) inp.el.value = field.name
+          return
+        }
+      }
       ctx.editDoc.rename(field.fullname, newName)
     },
   })

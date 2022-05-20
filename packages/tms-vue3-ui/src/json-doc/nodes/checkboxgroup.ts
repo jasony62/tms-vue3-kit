@@ -1,4 +1,3 @@
-import { initChild } from '@/utils'
 import { Input } from './input'
 
 export class Checkboxgroup extends Input {

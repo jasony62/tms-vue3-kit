@@ -3,7 +3,6 @@ import { components } from './index'
 import { FieldNode } from './fieldNode'
 import { Field } from '../fields'
 import { FormContext } from '../builder'
-import { getChild, initChild } from '@/utils'
 /**
  * 选择本地文件并上传
  */

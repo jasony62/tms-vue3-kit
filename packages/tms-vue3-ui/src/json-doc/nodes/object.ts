@@ -3,19 +3,40 @@ import { FormContext } from '../builder'
 import { Field } from '../fields'
 import { h, VNode } from 'vue'
 import { components } from '.'
+import RandExp from 'randexp'
 
+/**
+ * 添加子属性操作
+ * @param ctx
+ * @param field
+ * @returns
+ */
 const itemAddVNode = (ctx: FormContext, field: Field) => {
-  let addVNode = h(
-    components.button.tag,
-    {
-      name: field.fullname,
-      onClick: () => {
-        // const fieldValue = ctx.editDoc.get(field.fullname, {})
+  let addVNodes = field.scheamProp.patternChildren?.map((childProp) =>
+    h(
+      components.button.tag,
+      {
+        name: childProp.fullname,
+        onClick: () => {
+          let randexp = new RandExp(new RegExp(childProp.name))
+          randexp.max = 8
+          let newKey = randexp.gen()
+          switch (childProp.attrs.type) {
+            case 'string':
+              ctx.editDoc.appendAt(field.fullname, '', newKey)
+              break
+            case 'object':
+              ctx.editDoc.appendAt(field.fullname, {}, newKey)
+              break
+            case 'array':
+              break
+          }
+        },
       },
-    },
-    '添加'
+      `添加-${childProp.attrs.title ?? childProp.name}`
+    )
   )
-  return h('div', { class: ['tvu-jdoc__nest__actions'] }, addVNode)
+  return h('div', { class: ['tvu-jdoc__nest__actions'] }, addVNodes)
 }
 
 export class ObjectNode extends FieldNode {
@@ -41,10 +62,9 @@ export class ObjectNode extends FieldNode {
    */
   protected children(): VNode[] {
     const { ctx, field } = this
-    const hasPattern = field.scheamProp.hasPattern
     const vnodes = this._children ? [...this._children] : []
 
-    if (hasPattern) {
+    if (field.scheamProp.patternChildren?.length) {
       vnodes.push(itemAddVNode(ctx, field))
     }
 

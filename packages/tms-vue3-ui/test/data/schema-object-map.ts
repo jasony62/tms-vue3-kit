@@ -17,10 +17,12 @@ export const SampleSchema = {
         '^str\\w+$': {
           title: '扩展属性简单类型',
           type: 'string',
+          initialName: 'strNewProp',
         },
         '^obj\\w+$': {
           title: '扩展属性对象类型',
           type: 'object',
+          initialName: 'objNewProp',
           properties: {
             label: {
               title: '标题',
