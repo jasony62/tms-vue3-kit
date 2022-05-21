@@ -67,6 +67,7 @@ if (schema && schema.length)
 
 /** 刷新验证码*/
 const refresh = () => {
+  submitData[captchaInput.value.key] = ''
   if (elCaptcha?.value && typeof fnCaptcha === 'function') {
     fnCaptcha().then((response: CaptchaResponse) => {
       let { code, captcha } = response
@@ -97,6 +98,11 @@ const checkPassword = (key:string) => {
   }
 }
 const register = () => {
+  const keys = schema.map(item=> {return item['key']})
+  const missFields = keys.filter((field) => {
+    return !submitData[field]
+  })
+  if(missFields.length){return onFail({msg:'缺少必填信息'})}
   if (typeof fnRegister === 'function') {
     fnRegister(submitData).then((response: any) => {
       let { code, msg } = response

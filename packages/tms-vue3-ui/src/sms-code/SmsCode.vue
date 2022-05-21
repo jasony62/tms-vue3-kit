@@ -8,7 +8,7 @@
       <div ref="elCaptcha"></div>
       <button @click="sendCaptcha"></button>
     </div>
-    <div class="tvu-sms-code__code" v-if="codeInput"  :class="{ 'tvu-sms-code__form--modal': codeDialog }">
+    <div class="tvu-sms-code__code" v-if="codeInput" >
       <input :placeholder="codeInput.placeholder" v-model="submitData[codeInput.key]" required />
       <button @click="sendSmsCode"></button>
     </div>
@@ -65,15 +65,19 @@ if (schema && schema.length)
   })
 
 const sendSmsCode = () => {
+  submitData[codeInput.value.key] = ''
   if (typeof fnSendSmsCode === 'function') {
     fnSendSmsCode(submitData).then((response: any) => {
       let { code, result } = response
       if (code !== 0) {
+        return onFail(response)
       }
     })
   }
 }
 const sendCaptcha = () => {
+  submitData[captchaInput.value.key] = ''
+  submitData[codeInput.value.key] = ''
   if (elCaptcha?.value && typeof fnSendCode === 'function') {
     fnSendCode().then((response: CaptchaResponse) => {
       let { code, captcha } = response
@@ -86,11 +90,16 @@ const sendCaptcha = () => {
   }
 }
 const verify = () => {
+  const keys = schema.map(item=> {return item['key']})
+  const missFields = keys.filter((field) => {
+    return !submitData[field]
+  })
+  if(missFields.length){return onFail({msg:'缺少必填信息'})}
   if (typeof fnVerify === 'function') {
     fnVerify(submitData).then((response: any) => {
       let { code, result, msg } = response
       if (code !== 0) {
-        sendSmsCode()
+        sendCaptcha()
         // TODO 如何解决错误信息提示？
         return onFail(response)
       }
