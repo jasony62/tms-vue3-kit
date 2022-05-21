@@ -10,7 +10,7 @@
     </div>
     <div class="tvu-sms-code__code" v-if="codeInput"  :class="{ 'tvu-sms-code__form--modal': codeDialog }">
       <input :placeholder="codeInput.placeholder" v-model="submitData[codeInput.key]" required />
-      <button @click="sendSmsCode">获取短信验证码</button>
+      <button @click="sendSmsCode"></button>
     </div>
     <div class="tvu-sms-code__button">
       <button @click="verify">{{ actionText }}</button>
