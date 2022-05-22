@@ -105,19 +105,13 @@ schema?.forEach((item: SubmitDataItem) => {
   }
 })
 
-/** 刷新验证码*/
+/**刷新验证码*/
 const refreshCaptcha = () => {
   submitData[captchaInput.value.key] = ''
   if (elCaptcha?.value && typeof fnCaptcha === 'function') {
     fnCaptcha().then((response: CaptchaResponse) => {
-      let { code, captcha, msg } = response
-      if (code !== 0) {
-        errorTipInfo.value = msg || '获取验证码失败'
-        elCaptcha.value.innerHTML = '获取失败'
-      } else {
-        errorTipInfo.value = ''
-        elCaptcha.value.innerHTML = captcha
-      }
+      let { code, captcha } = response
+      elCaptcha.value.innerHTML = code !== 0 ? '获取失败' : captcha
     })
   }
 }
@@ -146,7 +140,6 @@ const login = () => {
         let { code, msg } = response
         if (code !== 0) {
           refreshCaptcha()
-          // TODO 需要解决错误信息提示？
           errorTipInfo.value = msg || '登录失败'
           return onFail(response)
         }

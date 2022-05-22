@@ -1,4 +1,3 @@
-
 import { CaptchaResponse } from 'tms-vue3-ui'
 
 import captcha from './captcha'
@@ -6,13 +5,15 @@ import captcha from './captcha'
 function fnSendCode(): Promise<CaptchaResponse> {
   return Promise.resolve({ code: 0, captcha })
 }
-function fnSendSmsCode(userData:{ [key: string]: string }): Promise<CaptchaResponse> {
-  let {mobile, pin} = userData
-  console.info('sms user data', {mobile, pin})
+function fnSendSmsCode(userData: {
+  [key: string]: string
+}): Promise<CaptchaResponse> {
+  let { mobile, pin } = userData
+  console.info('sms user data', { mobile, pin })
   return Promise.resolve({ code: 0, captcha })
 }
 function fnVerify(userData: { [key: string]: string }) {
-  let {mobile, pin, code} = userData
+  let { mobile, pin, code } = userData
   console.info('sms user data', { mobile, pin, code })
   return Promise.resolve({
     code: 0,
@@ -41,4 +42,4 @@ const schema = [
   },
 ]
 
-export { fnSendCode, fnVerify, schema,fnSendSmsCode }
+export { fnSendCode, fnVerify, schema, fnSendSmsCode }
