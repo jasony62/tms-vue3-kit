@@ -6,14 +6,14 @@
     <div class="tvu-captcha__code" v-if="captchaInput">
       <input :placeholder="captchaInput.placeholder" v-model="submitData[captchaInput.key]" required />
       <div ref="elCaptcha"></div>
-      <button @click="sendCaptcha"></button>
+      <button @click="sendCaptcha()"></button>
     </div>
     <div class="tvu-sms-code__code" v-if="codeInput" >
       <input :placeholder="codeInput.placeholder" v-model="submitData[codeInput.key]" required />
-      <button @click="sendSmsCode"></button>
+      <button ref="elSmsCode" :disabled="codeDisabled" @click="sendSmsCode">获取短信验证码</button>
     </div>
     <div class="tvu-sms-code__button">
-      <button @click="verify">{{ actionText }}</button>
+      <button  @click="verify">{{ actionText }}</button>
     </div>
     <div v-if="asDialog" class="tvu-sms-code__button">
       <button @click="close">关闭</button>
@@ -44,6 +44,9 @@ const props = defineProps({
 const el = ref(null as unknown as Element)
 // 验证码节点
 const elCaptcha = ref(null as unknown as Element)
+// 发送短信按钮节点
+const elSmsCode = ref(null as unknown as Element)
+
 // 使用通过属性传递的外部参数
 let { schema, smsCodeTip, fnVerify, fnSendCode,fnSendSmsCode, onSuccess, onFail, asDialog, onClose } = props
 // 用户要提交的数据
@@ -53,6 +56,7 @@ const submitData = reactive({} as { [key: string]: string })
 const otherInputs = ref([] as SubmitDataItem[])
 const codeInput = ref()
 const captchaInput = ref()
+const codeDisabled = ref(false)
 if (schema && schema.length)
   schema.forEach((item: SubmitDataItem) => {
     if (item.type === 'smscode') {
@@ -66,6 +70,20 @@ if (schema && schema.length)
 
 const sendSmsCode = () => {
   submitData[codeInput.value.key] = ''
+  codeDisabled.value = true
+  let time = 60;
+  let timer = setInterval(function () {
+    // 判断剩余秒数
+    if (time == 0) {
+      // 清除定时器和复原按钮
+      clearInterval(timer);
+      codeDisabled.value = false;
+      elSmsCode.value.innerHTML = "获取短信验证码";
+    } else {
+      elSmsCode.value.innerHTML = time + "秒后重发";
+      time--;
+    }
+  }, 1000);
   if (typeof fnSendSmsCode === 'function') {
     fnSendSmsCode(submitData).then((response: any) => {
       let { code, result } = response
