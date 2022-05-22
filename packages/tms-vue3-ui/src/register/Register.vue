@@ -6,7 +6,7 @@
     </div>
     <div class="tvu-register__captcha" v-if="captchaInput">
       <input :placeholder="captchaInput.placeholder" v-model="submitData[captchaInput.key]" required />
-      <div ref="elCaptcha" :style="{ width: '150px', height: '44px' }"></div>
+      <div ref="elCaptcha"></div>
       <button @click="refresh"></button>
     </div>
     <div class="tvu-register__button">
@@ -67,6 +67,7 @@ if (schema && schema.length)
 
 /** 刷新验证码*/
 const refresh = () => {
+  submitData[captchaInput.value.key] = ''
   if (elCaptcha?.value && typeof fnCaptcha === 'function') {
     fnCaptcha().then((response: CaptchaResponse) => {
       let { code, captcha } = response
@@ -97,6 +98,11 @@ const checkPassword = (key:string) => {
   }
 }
 const register = () => {
+  const keys = schema.map(item=> {return item['key']})
+  const missFields = keys.filter((field) => {
+    return !submitData[field]
+  })
+  if(missFields.length){return onFail({msg:'缺少必填信息'})}
   if (typeof fnRegister === 'function') {
     fnRegister(submitData).then((response: any) => {
       let { code, msg } = response
