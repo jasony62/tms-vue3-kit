@@ -12,6 +12,7 @@
       <input :placeholder="codeInput.placeholder" v-model="submitData[codeInput.key]" required />
       <button ref="elSmsCode" :disabled="codeDisabled" @click="sendSmsCode">获取短信验证码</button>
     </div>
+    <div class="tvu-sms-code__error--tip" v-if="errorTip&&errorTipInfo"><i></i>{{ errorTipInfo || 'error' }}</div>
     <div class="tvu-sms-code__button">
       <button  @click="verify">{{ actionText }}</button>
     </div>
@@ -31,6 +32,7 @@ const props = defineProps({
   schema: Array as PropType<SubmitDataItem[]>,
   actionText: { default: '验证' },
   smsCodeTip: Object,
+  errorTip: { type: Boolean, default: false },
   fnSendCode: Function,
   fnSendSmsCode:Function,
   fnVerify: Function,
@@ -48,10 +50,10 @@ const elCaptcha = ref(null as unknown as Element)
 const elSmsCode = ref(null as unknown as Element)
 
 // 使用通过属性传递的外部参数
-let { schema, smsCodeTip, fnVerify, fnSendCode,fnSendSmsCode, onSuccess, onFail, asDialog, onClose } = props
+let { schema, smsCodeTip, fnVerify, fnSendCode,fnSendSmsCode, onSuccess, onFail,errorTip, asDialog, onClose } = props
 // 用户要提交的数据
 const submitData = reactive({} as { [key: string]: string })
-
+const errorTipInfo = ref()
 // 整理需要用户输入的数据，为了优化模板
 const otherInputs = ref([] as SubmitDataItem[])
 const codeInput = ref()
@@ -86,9 +88,12 @@ const sendSmsCode = () => {
   }, 1000);
   if (typeof fnSendSmsCode === 'function') {
     fnSendSmsCode(submitData).then((response: any) => {
-      let { code, result } = response
+      let { code, result, msg } = response
       if (code !== 0) {
+        errorTipInfo.value = msg || '获取短信验证码失败'
         return onFail(response)
+      }else{
+        errorTipInfo.value = ''
       }
     })
   }
@@ -98,10 +103,12 @@ const sendCaptcha = () => {
   submitData[codeInput.value.key] = ''
   if (elCaptcha?.value && typeof fnSendCode === 'function') {
     fnSendCode().then((response: CaptchaResponse) => {
-      let { code, captcha } = response
+      let { code, captcha, msg } = response
       if (code !== 0) {
+        errorTipInfo.value = msg || '获取图形验证码失败'
         elCaptcha.value.innerHTML = '获取失败'
       } else {
+        errorTipInfo.value = ''
         elCaptcha.value.innerHTML = captcha
       }
     })
@@ -112,15 +119,20 @@ const verify = () => {
   const missFields = keys.filter((field) => {
     return !submitData[field]
   })
-  if(missFields.length){return onFail({msg:'缺少必填信息'})}
+  if(missFields.length){
+    errorTipInfo.value = '缺少必填信息'
+    return onFail({msg:'缺少必填信息'})
+    }
   if (typeof fnVerify === 'function') {
     fnVerify(submitData).then((response: any) => {
       let { code, result, msg } = response
       if (code !== 0) {
         sendCaptcha()
         // TODO 如何解决错误信息提示？
+        errorTipInfo.value = msg || '登录失败'
         return onFail(response)
       }
+      errorTipInfo.value = ''
       onSuccess(result.access_token)
     })
   }

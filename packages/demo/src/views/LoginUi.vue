@@ -3,7 +3,7 @@
   <div>
     <p>页面引入组件方式使用登录框：</p>
     <div class="w-2/5">
-      <login :schema="schema" :fn-captcha="fnCaptcha" :fn-login="fnLogin" :on-success="fnSuccessLogin"
+      <login :schema="schema" :fn-captcha="fnCaptcha" :errorTip="true" :fn-login="fnLogin" :on-success="fnSuccessLogin"
         :on-fail="fnFailLogin">
       </login>
     </div>
