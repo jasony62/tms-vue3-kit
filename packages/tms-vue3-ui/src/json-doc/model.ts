@@ -1,5 +1,7 @@
 import _ from 'lodash'
-const debug = require('debug')('json-doc')
+import Debug from 'debug'
+
+const debug = Debug('json-doc')
 
 /**
  * 解析数组
