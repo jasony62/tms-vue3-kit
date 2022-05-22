@@ -3,7 +3,7 @@
   <div>
     <p>页面引入组件方式使用短信验证码框：</p>
     <div class="w-2/5">
-      <sms-code :schema="schema" action-text="登录"  :fn-send-code="fnSendCode" :fn-verify="fnVerify"
+      <sms-code :schema="schema" action-text="登录" :errorTip="true" :fn-send-code="fnSendCode" :fn-verify="fnVerify"
         :on-success="fnSuccessVerify" :fn-send-sms-code="fnSendSmsCode" :on-fail="fnFailVerify" >
       </sms-code>
     </div>

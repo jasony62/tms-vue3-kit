@@ -9,6 +9,7 @@
       <div ref="elCaptcha"></div>
       <button @click="refresh"></button>
     </div>
+    <div class="tvu-register__error--tip" v-if="errorTip&&errorTipInfo"><i></i>{{ errorTipInfo }}</div>
     <div class="tvu-register__button">
       <button @click="register">注册</button>
     </div>
@@ -30,6 +31,7 @@ interface passwordIcon {
 const props = defineProps({
   schema: Array as PropType<SubmitDataItem[]>,
   registerTip: Object,
+  errorTip: { type: Boolean, default: false },
   fnCaptcha: Function as PropType<() => Promise<CaptchaResponse>>,
   fnRegister: Function,
   onSuccess: { type: Function, default: () => { } },
@@ -45,7 +47,7 @@ const el = ref(null as unknown as Element)
 const elCaptcha = ref(null as unknown as Element)
 
 // 使用通过属性传递的外部参数
-let { schema, registerTip, fnRegister, fnCaptcha, onSuccess, onFail, asDialog, onClose } = props
+let { schema, registerTip, fnRegister, fnCaptcha, onSuccess, onFail,errorTip, asDialog, onClose } = props
 
 // 用户要提交的数据
 const submitData = reactive({} as { [key: string]: string })
@@ -53,6 +55,7 @@ const submitData = reactive({} as { [key: string]: string })
 const passwordEle = ref(null as unknown as Element)
 // 密码图标svg
 let passwordIcon = reactive({ password: false, password2: false } as passwordIcon);
+const errorTipInfo = ref()
 // 整理需要用户输入的数据，为了优化模板
 const otherInputs = ref([] as SubmitDataItem[])
 const captchaInput = ref()
@@ -70,10 +73,12 @@ const refresh = () => {
   submitData[captchaInput.value.key] = ''
   if (elCaptcha?.value && typeof fnCaptcha === 'function') {
     fnCaptcha().then((response: CaptchaResponse) => {
-      let { code, captcha } = response
+      let { code, captcha, msg } = response
       if (code !== 0) {
+        errorTipInfo.value = msg || '获取验证码失败'
         elCaptcha.value.innerHTML = '获取失败'
       } else {
+        errorTipInfo.value = ''
         elCaptcha.value.innerHTML = captcha
       }
     })
@@ -102,15 +107,20 @@ const register = () => {
   const missFields = keys.filter((field) => {
     return !submitData[field]
   })
-  if(missFields.length){return onFail({msg:'缺少必填信息'})}
+  if(missFields.length){
+    errorTipInfo.value = '缺少必填信息'
+    return onFail({msg:'缺少必填信息'})
+    }
   if (typeof fnRegister === 'function') {
     fnRegister(submitData).then((response: any) => {
       let { code, msg } = response
       if (code !== 0) {
         refresh()
         // TODO 如何解决错误信息提示？
+        errorTipInfo.value = msg || '登录失败'
         return onFail(response)
       }
+      errorTipInfo.value = ''
       onSuccess(response)
     })
   }
