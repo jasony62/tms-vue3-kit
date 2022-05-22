@@ -3,8 +3,9 @@ import { SchemaIter, RawSchema, SchemaProp } from '@/json-schema/model'
 import { createField, Field } from './fields'
 import { FieldWrap, FormNode, components, prepareFieldNode } from './nodes'
 import { DocAsArray } from './model'
+import Debug from 'debug'
 
-const debug = require('debug')('json-doc')
+const debug = Debug('json-doc')
 
 function createWrapClass(labelAndDescNodes: VNode): VNode {
   // if (this.fieldWrapClass) {
