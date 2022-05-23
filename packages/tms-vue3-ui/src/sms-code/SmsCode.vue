@@ -115,11 +115,11 @@ const sendCaptcha = () => {
   }
 }
 const verify = () => {
-  const keys = schema.map(item=> {return item['key']})
-  const missFields = keys.filter((field) => {
+  const keys = schema?.map(item=> {return item['key']})
+  const missFields = keys?.filter((field) => {
     return !submitData[field]
   })
-  if(missFields.length){
+  if(missFields?.length){
     errorTipInfo.value = '缺少必填信息'
     return onFail({msg:'缺少必填信息'})
     }
