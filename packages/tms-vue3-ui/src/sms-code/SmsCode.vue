@@ -1,36 +1,15 @@
 <template>
-  <div
-    ref="el"
-    class="tvu-sms-code__form"
-    :class="{ 'tvu-sms-code__form--modal': asDialog }"
-  >
-    <div
-      class="tvu-sms-code__input"
-      v-for="(item, index) in otherInputs"
-      :key="index"
-    >
-      <input
-        :placeholder="item.placeholder"
-        :type="item.type"
-        v-model="submitData[item.key]"
-        required
-      />
+  <div ref="el" class="tvu-sms-code__form" :class="{ 'tvu-sms-code__form--modal': asDialog }">
+    <div class="tvu-sms-code__input" v-for="(item, index) in otherInputs" :key="index">
+      <input :placeholder="item.placeholder" :type="item.type" v-model="submitData[item.key]" required />
     </div>
     <div class="tvu-captcha__code" v-if="captchaInput">
-      <input
-        :placeholder="captchaInput.placeholder"
-        v-model="submitData[captchaInput.key]"
-        required
-      />
+      <input :placeholder="captchaInput.placeholder" v-model="submitData[captchaInput.key]" required />
       <div ref="elCaptcha"></div>
       <button @click="genCaptcha()"></button>
     </div>
     <div class="tvu-sms-code__code" v-if="codeInput">
-      <input
-        :placeholder="codeInput.placeholder"
-        v-model="submitData[codeInput.key]"
-        required
-      />
+      <input :placeholder="codeInput.placeholder" v-model="submitData[codeInput.key]" required />
       <button ref="elSmsCode" :disabled="smscodeDisabled" @click="sendSmsCode">
         获取短信验证码
       </button>
@@ -63,8 +42,8 @@ const props = defineProps({
   fnSendCode: Function,
   fnSendSmsCode: Function,
   fnVerify: Function,
-  onSuccess: { type: Function, default: () => {} },
-  onFail: { type: Function, default: () => {} },
+  onSuccess: { type: Function, default: () => { } },
+  onFail: { type: Function, default: () => { } },
   asDialog: { type: Boolean, default: false },
   onClose: { type: Function },
   waitInputSmsCodeTime: { type: Number, default: 60 },
@@ -112,6 +91,7 @@ schema?.forEach((item: SubmitDataItem) => {
 
 /**发送短信验证码*/
 const sendSmsCode = () => {
+  errorTipInfo.value = ''
   if (typeof fnSendSmsCode === 'function' && codeInput.value) {
     submitData[codeInput.value.key] = ''
     /**倒计时等待用户输入验证码*/
@@ -135,8 +115,6 @@ const sendSmsCode = () => {
       if (code !== 0) {
         errorTipInfo.value = msg || '获取短信验证码失败'
         return onFail(response)
-      } else {
-        errorTipInfo.value = ''
       }
     })
   }
@@ -157,6 +135,7 @@ const genCaptcha = () => {
 }
 
 const verify = () => {
+  errorTipInfo.value = ''
   if (Array.isArray(schema) && schema.length) {
     const keys = schema.map((item) => item['key'])
     const missFields = keys.filter((field) => {
@@ -174,7 +153,6 @@ const verify = () => {
           errorTipInfo.value = msg || '验证失败'
           return onFail(response)
         }
-        errorTipInfo.value = ''
         onSuccess(response)
       })
     }

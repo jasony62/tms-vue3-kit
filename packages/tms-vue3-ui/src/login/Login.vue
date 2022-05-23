@@ -1,35 +1,14 @@
 <template>
-  <div
-    ref="el"
-    class="tvu-login__form"
-    :class="{ 'tvu-login__form--modal': asDialog }"
-  >
-    <div
-      class="tvu-login__input"
-      v-for="(item, index) in otherInputs"
-      :key="index"
-    >
-      <input
-        :placeholder="item.placeholder"
-        :type="inputElType[item.key]"
-        v-model="submitData[item.key]"
-        required
-      />
-      <span
-        v-if="item.type === 'password'"
-        @click="toggleInputType(item)"
-        :class="{
-          'tvu-login__password--close': inputElType[item.key] === 'password',
-          'tvu-login__password--open': inputElType[item.key] === 'text',
-        }"
-      ></span>
+  <div ref="el" class="tvu-login__form" :class="{ 'tvu-login__form--modal': asDialog }">
+    <div class="tvu-login__input" v-for="(item, index) in otherInputs" :key="index">
+      <input :placeholder="item.placeholder" :type="inputElType[item.key]" v-model="submitData[item.key]" required />
+      <span v-if="item.type === 'password'" @click="toggleInputType(item)" :class="{
+        'tvu-login__password--close': inputElType[item.key] === 'password',
+        'tvu-login__password--open': inputElType[item.key] === 'text',
+      }"></span>
     </div>
     <div class="tvu-login__captcha" v-if="captchaInput">
-      <input
-        :placeholder="captchaInput.placeholder"
-        v-model="submitData[captchaInput.key]"
-        required
-      />
+      <input :placeholder="captchaInput.placeholder" v-model="submitData[captchaInput.key]" required />
       <div ref="elCaptcha"></div>
       <button @click="refreshCaptcha"></button>
     </div>
@@ -59,8 +38,8 @@ const props = defineProps({
   fnLogin: Function as PropType<
     (data: { [key: string]: any }) => Promise<LoginResponse>
   >,
-  onSuccess: { type: Function, default: () => {} },
-  onFail: { type: Function, default: () => {} },
+  onSuccess: { type: Function, default: () => { } },
+  onFail: { type: Function, default: () => { } },
   asDialog: { type: Boolean, default: false },
   onClose: { type: Function },
 })
@@ -124,6 +103,7 @@ const toggleInputType = (item: { [k: string]: string }) => {
 
 /*执行登录操作*/
 const login = () => {
+  errorTipInfo.value = ''
   if (schema && schema.length) {
     const keys = schema.map((item) => {
       return item['key']
@@ -143,7 +123,6 @@ const login = () => {
           errorTipInfo.value = msg || '登录失败'
           return onFail(response)
         }
-        errorTipInfo.value = ''
         onSuccess(response)
       })
     }
