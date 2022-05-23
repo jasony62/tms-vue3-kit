@@ -104,11 +104,12 @@ const checkPassword = (key:string) => {
   }
 }
 const register = () => {
-  const keys = schema?.map(item=> {return item['key']})
-  const missFields = keys?.filter((field) => {
+  if (Array.isArray(schema) && schema.length) {
+  const keys = schema.map(item=> {return item['key']})
+  const missFields = keys.filter((field) => {
     return !submitData[field]
   })
-  if(missFields?.length){
+  if(missFields.length){
     errorTipInfo.value = '缺少必填信息'
     return onFail({msg:'缺少必填信息'})
     }
@@ -124,6 +125,7 @@ const register = () => {
       errorTipInfo.value = ''
       onSuccess(response)
     })
+  }
   }
 }
 
