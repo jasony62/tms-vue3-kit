@@ -24,8 +24,9 @@
 import { reactive, PropType, ref, nextTick, onMounted,toRaw } from 'vue';
 import { SubmitDataItem, CaptchaResponse } from '@/types';
 interface passwordIcon {
-  password: Boolean,
+  password: Boolean
   password2: Boolean
+  [key:string]:any
 }
 // 支持通过属性传递需要数据和方法
 const props = defineProps({
@@ -87,7 +88,7 @@ const refresh = () => {
 // 查看密码 passwordIcon
 const checkPassword = (key:string) => {
   passwordIcon[key] = !passwordIcon[key]
-  const list = toRaw(passwordEle.value)
+  const list:any = toRaw(passwordEle.value)
   if(key == 'password'){
     if(passwordIcon[key]){
       list[0].previousSibling.type = 'text'
@@ -103,11 +104,11 @@ const checkPassword = (key:string) => {
   }
 }
 const register = () => {
-  const keys = schema.map(item=> {return item['key']})
-  const missFields = keys.filter((field) => {
+  const keys = schema?.map(item=> {return item['key']})
+  const missFields = keys?.filter((field) => {
     return !submitData[field]
   })
-  if(missFields.length){
+  if(missFields?.length){
     errorTipInfo.value = '缺少必填信息'
     return onFail({msg:'缺少必填信息'})
     }
