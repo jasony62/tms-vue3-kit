@@ -48,24 +48,22 @@ const props = defineProps({
   fieldAttrs: { type: Object as PropType<SchemaPropAttrs>, required: true }
 })
 
-const { fieldAttrs } = props
-
 const onAddEnumGroup = () => {
   let newGroup = { id: `g${Date.now()}`, label: "newGroup", assocEnum: { property: '', value: '' } }
-  fieldAttrs?.enumGroups?.push(newGroup)
+  props.fieldAttrs?.enumGroups?.push(newGroup)
 }
 
 const onDelEnumGroup = (g: EnumGroup, i: number) => {
-  fieldAttrs?.enumGroups?.splice(i, 1)
+  props.fieldAttrs?.enumGroups?.splice(i, 1)
 }
 
 const onAddEnumOption = () => {
-  fieldAttrs?.enum?.push({
+  props.fieldAttrs?.enum?.push({
     label: '新选项',
     value: 'newKey',
   })
 }
 const onDelEnumOption = (v: EnumOption, i: number) => {
-  fieldAttrs?.enum?.splice(i, 1)
+  props.fieldAttrs?.enum?.splice(i, 1)
 }
 </script>

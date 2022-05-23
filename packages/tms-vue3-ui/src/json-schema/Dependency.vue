@@ -13,15 +13,15 @@
           <tvu-button @click="onDelRule(group.rules, indexRule, key + '')">删除规则</tvu-button>
         </div>
       </div>
+      <div class="tvu-jse__dependencies__rule">
+        <tvu-form-item class="tvu-jse__field" label="运算关系">
+          <tvu-select v-model="group.operator">
+            <tvu-option label="满足任意条件" value="or"></tvu-option>
+            <tvu-option label="满足全部条件" value="and"></tvu-option>
+          </tvu-select>
+        </tvu-form-item>
+      </div>
       <div class="tvu-jse__dependencies__rule-group-actions">
-        <div class="tvu-jse__dependencies__rule">
-          <tvu-form-item class="tvu-jse__field" label="运算关系">
-            <tvu-select v-model="group.operator">
-              <tvu-option label="满足任意条件" value="or"></tvu-option>
-              <tvu-option label="满足全部条件" value="and"></tvu-option>
-            </tvu-select>
-          </tvu-form-item>
-        </div>
         <tvu-button @click="onAddRule(group.rules)">添加规则</tvu-button>
         <tvu-button @click="onDelRuleGroup(key + '')">删除规则组</tvu-button>
       </div>
