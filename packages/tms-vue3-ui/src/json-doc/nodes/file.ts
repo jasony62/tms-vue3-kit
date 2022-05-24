@@ -3,7 +3,6 @@ import { components } from './index'
 import { FieldNode } from './fieldNode'
 import { Field } from '../fields'
 import { FormContext } from '../builder'
-import { getChild, initChild } from '@/utils'
 /**
  * 选择本地文件并上传
  */
@@ -36,8 +35,8 @@ const uploadLocalFile = (
       let data = await getFileBase64(file)
       fileUpload({ fullname, data, field }).then((fileData: any) => {
         // 设置初始值和添加项目必须在dom循环中完成，不能在promise外面初始化
-        fieldValue ??= initChild(ctx.editDoc, field.fullname, [])
-        fieldValue.push(fileData)
+        fieldValue ??= ctx.editDoc.init(field.fullname, [])
+        // fieldValue.push(fileData)
       })
     }
   })
@@ -55,10 +54,10 @@ const itemAddVNode = (ctx: FormContext, field: Field) => {
     components.button.tag,
     {
       onClick: () => {
-        const fieldValue = initChild(ctx.editDoc, field.fullname, [])
-        if (Array.isArray(fieldValue)) {
-          fieldValue.push({})
-        }
+        const fieldValue = ctx.editDoc.init(field.fullname, [])
+        // if (Array.isArray(fieldValue)) {
+        //   fieldValue.push({})
+        // }
       },
     },
     '添加'
@@ -77,13 +76,13 @@ const itemUploadVNode = (ctx: FormContext, field: Field) => {
     components.button.tag,
     {
       onClick: () => {
-        let fieldValue = getChild(ctx.editDoc, field.fullname)
+        let fieldValue = ctx.editDoc.get(field.fullname)
         /**只能在数组中添加文件*/
         if ((fieldValue ?? true) || Array.isArray(fieldValue)) {
           if (typeof ctx.onFileSelect === 'function') {
             ctx.onFileSelect(field.fullname, field).then((fileData: any) => {
               // 设置初始值和添加项目必须在dom循环中完成，不能在promise外面初始化
-              fieldValue ??= initChild(ctx.editDoc, field.fullname, [])
+              fieldValue ??= ctx.editDoc.init(field.fullname, [])
               fieldValue.push(fileData)
             })
           } else if (typeof ctx.onFileUpload === 'function') {

@@ -7,6 +7,7 @@ import { FormContext } from '../builder'
 export class Node {
   ctx: FormContext
   rawArgs
+  _vnode: VNode | undefined
 
   constructor(ctx: FormContext, rawArgs: { [k: string]: any }) {
     this.ctx = ctx
@@ -40,8 +41,8 @@ export class Node {
   createElem(children: (VNode | string)[] = []): VNode {
     const attrOrProps = this.attrOrProps()
 
-    const element = h(this.rawArgs.tag, attrOrProps, children)
+    this._vnode = h(this.rawArgs.tag, attrOrProps, children)
 
-    return element
+    return this._vnode
   }
 }

@@ -6,9 +6,10 @@
     </div>
     <div class="tvu-register__captcha" v-if="captchaInput">
       <input :placeholder="captchaInput.placeholder" v-model="submitData[captchaInput.key]" required />
-      <div ref="elCaptcha" :style="{ width: '150px', height: '44px' }"></div>
+      <div ref="elCaptcha"></div>
       <button @click="refresh"></button>
     </div>
+    <div class="tvu-register__error--tip" v-if="errorTip&&errorTipInfo"><i></i>{{ errorTipInfo }}</div>
     <div class="tvu-register__button">
       <button @click="register">注册</button>
     </div>
@@ -23,13 +24,15 @@
 import { reactive, PropType, ref, nextTick, onMounted,toRaw } from 'vue';
 import { SubmitDataItem, CaptchaResponse } from '@/types';
 interface passwordIcon {
-  password: Boolean,
+  password: Boolean
   password2: Boolean
+  [key:string]:any
 }
 // 支持通过属性传递需要数据和方法
 const props = defineProps({
   schema: Array as PropType<SubmitDataItem[]>,
   registerTip: Object,
+  errorTip: { type: Boolean, default: false },
   fnCaptcha: Function as PropType<() => Promise<CaptchaResponse>>,
   fnRegister: Function,
   onSuccess: { type: Function, default: () => { } },
@@ -45,7 +48,7 @@ const el = ref(null as unknown as Element)
 const elCaptcha = ref(null as unknown as Element)
 
 // 使用通过属性传递的外部参数
-let { schema, registerTip, fnRegister, fnCaptcha, onSuccess, onFail, asDialog, onClose } = props
+let { schema, registerTip, fnRegister, fnCaptcha, onSuccess, onFail,errorTip, asDialog, onClose } = props
 
 // 用户要提交的数据
 const submitData = reactive({} as { [key: string]: string })
@@ -53,6 +56,7 @@ const submitData = reactive({} as { [key: string]: string })
 const passwordEle = ref(null as unknown as Element)
 // 密码图标svg
 let passwordIcon = reactive({ password: false, password2: false } as passwordIcon);
+const errorTipInfo = ref()
 // 整理需要用户输入的数据，为了优化模板
 const otherInputs = ref([] as SubmitDataItem[])
 const captchaInput = ref()
@@ -67,12 +71,15 @@ if (schema && schema.length)
 
 /** 刷新验证码*/
 const refresh = () => {
+  submitData[captchaInput.value.key] = ''
   if (elCaptcha?.value && typeof fnCaptcha === 'function') {
     fnCaptcha().then((response: CaptchaResponse) => {
-      let { code, captcha } = response
+      let { code, captcha, msg } = response
       if (code !== 0) {
+        errorTipInfo.value = msg || '获取验证码失败'
         elCaptcha.value.innerHTML = '获取失败'
       } else {
+        errorTipInfo.value = ''
         elCaptcha.value.innerHTML = captcha
       }
     })
@@ -81,7 +88,7 @@ const refresh = () => {
 // 查看密码 passwordIcon
 const checkPassword = (key:string) => {
   passwordIcon[key] = !passwordIcon[key]
-  const list = toRaw(passwordEle.value)
+  const list:any = toRaw(passwordEle.value)
   if(key == 'password'){
     if(passwordIcon[key]){
       list[0].previousSibling.type = 'text'
@@ -97,16 +104,28 @@ const checkPassword = (key:string) => {
   }
 }
 const register = () => {
+  if (Array.isArray(schema) && schema.length) {
+  const keys = schema.map(item=> {return item['key']})
+  const missFields = keys.filter((field) => {
+    return !submitData[field]
+  })
+  if(missFields.length){
+    errorTipInfo.value = '缺少必填信息'
+    return onFail({msg:'缺少必填信息'})
+    }
   if (typeof fnRegister === 'function') {
     fnRegister(submitData).then((response: any) => {
       let { code, msg } = response
       if (code !== 0) {
         refresh()
         // TODO 如何解决错误信息提示？
+        errorTipInfo.value = msg || '登录失败'
         return onFail(response)
       }
+      errorTipInfo.value = ''
       onSuccess(response)
     })
+  }
   }
 }
 

@@ -17,10 +17,12 @@ export const SampleSchema = {
         '^str\\w+$': {
           title: '扩展属性简单类型',
           type: 'string',
+          initialName: 'strNewProp',
         },
         '^obj\\w+$': {
           title: '扩展属性对象类型',
           type: 'object',
+          initialName: 'objNewProp',
           properties: {
             label: {
               title: '标题',
@@ -56,7 +58,15 @@ export const SampleData = {
     name: '研发部',
     strProduct: 'tms-vue3-kit',
     'str in valid': '123',
-    objAbc: { label: 'aaa', value: '111' },
-    objXyz: { label: 'xxx', value: '999' },
+    objAbc: {
+      label: 'aaa',
+      value: '111',
+      extra: { label: 'aaa_bbb', value: '111_222' },
+    },
+    objXyz: {
+      label: 'xxx',
+      value: '999',
+      extra: { label: 'xxx_yyy', value: '999_888' },
+    },
   },
 }

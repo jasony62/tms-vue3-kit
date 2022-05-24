@@ -1,8 +1,7 @@
 import { h, toRaw, VNode } from 'vue'
-import { getChild, setChild } from '@/utils'
 import { FieldNode } from './fieldNode'
 import { components } from '.'
-import { FieldBoolean } from '../fields'
+import { Field, FieldBoolean } from '../fields'
 /**
  * text/radiogroup
  */
@@ -21,14 +20,15 @@ export class Input extends FieldNode {
         updatedValue = jsonValue
       } catch (e) {}
     } else if (field instanceof FieldBoolean) {
-      updatedValue = !getChild(this.ctx.editDoc, fieldName)
+      updatedValue = !this.ctx.editDoc.get(fieldName)
     } else if (typeof newValue === 'string') {
       updatedValue = newValue.trim()
     } else {
       updatedValue = newValue
     }
     /**修改底层数据*/
-    setChild(this.ctx.editDoc, fieldName, updatedValue)
+    this.ctx.editDoc.set(fieldName, updatedValue)
+    this.ctx.editDoc.renderCounter.value++
   }
   /**
    *
@@ -63,6 +63,15 @@ export class Input extends FieldNode {
     }
 
     return inpOps
+  }
+  /**获得外部时*/
+  protected onOuterValue(field: Field, val: any): void {
+    if (this._vnode?.el) {
+      let { el } = this._vnode
+      el.value = val
+      // 不需要触发渲染
+      this.ctx.editDoc.set(field.fullname, val, false)
+    }
   }
   /**
    * 创建radiogroup|checkboxgroup下的子节点

@@ -15,5 +15,11 @@
         @apply rounded p-2 border-2 border-gray-200;
       }
     }
+
+    .tvu-jdoc__field-name {
+      input {
+        @apply rounded p-2 border-2 border-gray-200;
+      }
+    }
   }
 }

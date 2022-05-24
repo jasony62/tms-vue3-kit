@@ -1,13 +1,19 @@
 <template>
   <div ref="el" class="tvu-login__form" :class="{ 'tvu-login__form--modal': asDialog }">
     <div class="tvu-login__input" v-for="(item, index) in otherInputs" :key="index">
-      <input :placeholder="item.placeholder" :type="item.type" v-model="submitData[item.key]" required />
-    <span v-if="item.type == 'password'" ref="passwordEle" @click="checkPassword()" :class="{'tvu-login__password--close':!passwordIcon,'tvu-login__password--open':passwordIcon}"></span>
+      <input :placeholder="item.placeholder" :type="inputElType[item.key]" v-model="submitData[item.key]" required />
+      <span v-if="item.type === 'password'" @click="toggleInputType(item)" :class="{
+        'tvu-login__password--close': inputElType[item.key] === 'password',
+        'tvu-login__password--open': inputElType[item.key] === 'text',
+      }"></span>
     </div>
     <div class="tvu-login__captcha" v-if="captchaInput">
       <input :placeholder="captchaInput.placeholder" v-model="submitData[captchaInput.key]" required />
       <div ref="elCaptcha"></div>
-      <button @click="refresh"></button>
+      <button @click="refreshCaptcha"></button>
+    </div>
+    <div class="tvu-login__error--tip" v-if="errorTip && errorTipInfo">
+      <i></i>{{ errorTipInfo }}
     </div>
     <div class="tvu-login__button">
       <button @click="login">登录</button>
@@ -20,15 +26,18 @@
   <div class="tvu-login__modal" v-if="asDialog"></div>
 </template>
 <script setup lang="ts">
-import { reactive, PropType, ref, nextTick, onMounted,watch,toRaw } from 'vue';
-import { SubmitDataItem, CaptchaResponse, LoginResponse } from '@/types';
+import { reactive, PropType, ref, nextTick, onMounted } from 'vue'
+import { SubmitDataItem, CaptchaResponse, LoginResponse } from '@/types'
 
 // 支持通过属性传递需要数据和方法
 const props = defineProps({
   schema: Array as PropType<SubmitDataItem[]>,
   loginTip: Object,
+  errorTip: { type: Boolean, default: true },
   fnCaptcha: Function as PropType<() => Promise<CaptchaResponse>>,
-  fnLogin: Function as PropType<(data: { [key: string]: any }) => Promise<LoginResponse>>,
+  fnLogin: Function as PropType<
+    (data: { [key: string]: any }) => Promise<LoginResponse>
+  >,
   onSuccess: { type: Function, default: () => { } },
   onFail: { type: Function, default: () => { } },
   asDialog: { type: Boolean, default: false },
@@ -41,63 +50,82 @@ const el = ref(null as unknown as Element)
 // 验证码节点
 const elCaptcha = ref(null as unknown as Element)
 
-// 密码节点
-const passwordEle = ref(null as unknown as Element)
-// 密码图标svg
-let passwordIcon = ref(true)
 // 使用通过属性传递的外部参数
-let { schema, loginTip, fnLogin, fnCaptcha, onSuccess, onFail, asDialog, onClose } = props
+let {
+  schema,
+  loginTip,
+  fnLogin,
+  fnCaptcha,
+  onSuccess,
+  onFail,
+  errorTip,
+  asDialog,
+  onClose,
+} = props
 
 // 用户提交的数据
 const submitData = reactive({} as { [key: string]: string })
+const errorTipInfo = ref()
 
 // 整理需要用户输入的数据，为了优化模板
 const otherInputs = ref([] as SubmitDataItem[])
-const captchaInput = ref()
-if (schema && schema.length)
-  schema.forEach((item: SubmitDataItem) => {
-    if (item.type === 'captcha') {
-      captchaInput.value = item
-    } else {
-      otherInputs.value.push(item)
-    }
-  })
 
-/** 刷新验证码*/
-const refresh = () => {
+// 为了支持密码框切换可见状态，记录输入框的type，password/text
+const inputElType = reactive({} as { [k: string]: string })
+
+const captchaInput = ref()
+
+schema?.forEach((item: SubmitDataItem) => {
+  if (item.type === 'captcha') {
+    captchaInput.value = item
+  } else {
+    inputElType[item.key] = item.type === 'password' ? 'password' : 'text'
+    otherInputs.value.push(item)
+  }
+})
+
+/**刷新验证码*/
+const refreshCaptcha = () => {
+  submitData[captchaInput.value.key] = ''
   if (elCaptcha?.value && typeof fnCaptcha === 'function') {
     fnCaptcha().then((response: CaptchaResponse) => {
       let { code, captcha } = response
-      if (code !== 0) {
-        elCaptcha.value.innerHTML = '获取失败'
-      } else {
-        elCaptcha.value.innerHTML = captcha
-      }
+      elCaptcha.value.innerHTML = code !== 0 ? '获取失败' : captcha
     })
   }
 }
+
 // 查看密码 passwordIcon
-const checkPassword = () => {
-  passwordIcon.value = !passwordIcon.value
-  const list = toRaw(passwordEle.value)
-  if(passwordIcon.value){
-    list[0].previousSibling.type = 'text'
-  }else{
-    list[0].previousSibling.type = 'password'
-  }
+const toggleInputType = (item: { [k: string]: string }) => {
+  inputElType[item.key] =
+    inputElType[item.key] === 'password' ? 'text' : 'password'
 }
+
 /*执行登录操作*/
 const login = () => {
-  if (typeof fnLogin === 'function') {
-    fnLogin(submitData).then((response: LoginResponse) => {
-      let { code, msg } = response
-      if (code !== 0) {
-        refresh()
-        // TODO 需要解决错误信息提示？
-        return onFail(response)
-      }
-      onSuccess(response)
+  errorTipInfo.value = ''
+  if (schema && schema.length) {
+    const keys = schema.map((item) => {
+      return item['key']
     })
+    const missFields = keys.filter((field) => {
+      return !submitData[field]
+    })
+    if (missFields.length) {
+      errorTipInfo.value = '缺少必填信息'
+      return onFail({ msg: '缺少必填信息' })
+    }
+    if (typeof fnLogin === 'function') {
+      fnLogin(submitData).then((response: LoginResponse) => {
+        let { code, msg } = response
+        if (code !== 0) {
+          refreshCaptcha()
+          errorTipInfo.value = msg || '登录失败'
+          return onFail(response)
+        }
+        onSuccess(response)
+      })
+    }
   }
 }
 /*关闭对话框*/
@@ -112,8 +140,7 @@ const close = () => {
 
 onMounted(() => {
   nextTick(() => {
-    refresh();
-    checkPassword()
-    })
+    refreshCaptcha()
+  })
 })
 </script>

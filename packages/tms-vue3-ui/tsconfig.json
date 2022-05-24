@@ -6,7 +6,7 @@
     "moduleResolution": "node",
     "strict": true,
     "jsx": "preserve",
-    "sourceMap": false,
+    "sourceMap": true,
     "declaration": true,
     "emitDeclarationOnly": true,
     "resolveJsonModule": true,
@@ -24,8 +24,7 @@
     "src/**/*.js",
     "src/**/*.d.ts",
     "src/**/*.tsx",
-    "src/**/*.vue",
-    "test/**/*.ts"
+    "src/**/*.vue"
   ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

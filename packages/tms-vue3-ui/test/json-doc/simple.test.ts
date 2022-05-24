@@ -1,9 +1,10 @@
 import { SampleSchema } from '../data/schema-simple'
-import { build } from '../../src/json-doc/builder'
+import { build } from '@/json-doc/builder'
+import { DocAsArray } from '@/json-doc/model'
 
 describe('简单定义生成表单节点', () => {
   it('构造表单节点', () => {
-    const editDoc = {}
+    const editDoc = new DocAsArray({})
     const fieldNames: string[] = []
     build(
       {
@@ -15,9 +16,12 @@ describe('简单定义生成表单节点', () => {
       },
       fieldNames
     )
-    expect(fieldNames).toHaveLength(3)
-    expect(fieldNames[0]).toBe('additionalName[0]')
-    expect(fieldNames[1]).toBe('additionalName[1]')
-    expect(fieldNames[2]).toBe('additionalName')
+    console.log(fieldNames)
+    expect(fieldNames).toHaveLength(5)
+    expect(fieldNames[0]).toBe('name')
+    expect(fieldNames[1]).toBe('agree')
+    expect(fieldNames[2]).toBe('tel.areaCode')
+    expect(fieldNames[3]).toBe('tel.phoneNumber')
+    expect(fieldNames[4]).toBe('tel')
   })
 })

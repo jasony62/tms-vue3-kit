@@ -201,40 +201,6 @@ export function deepClone(obj: any) {
   return JSON.parse(JSON.stringify(obj))
 }
 
-export function getExtendibleLeaf(
-  obj: { [x: string]: any },
-  n: string | number,
-  initIt: boolean
-) {
-  const v = obj[n]
-  if (v && typeof v === 'object' && !Array.isArray(v)) {
-    return v
-  }
-  if (initIt && v === undefined) {
-    obj[n] = {}
-    return obj[n]
-  }
-}
-
-export function getChild(data: { [x: string]: any }, ns: string): any {
-  let val = _.get(data, ns)
-  return val
-}
-
-export function setChild(data: { [k: string]: any }, ns: string, val: any) {
-  _.set(data, ns, val)
-  return val
-}
-
-export function initChild(
-  data: { [x: string]: any },
-  ns: string,
-  initVal?: any
-) {
-  let val = getChild(data, ns) ?? setChild(data, ns, initVal)
-  return val
-}
-
 export function formatVal(val: string | number) {
   return Number(val) < 10 ? '0' + val : '' + val
 }

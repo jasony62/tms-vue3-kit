@@ -14,7 +14,6 @@
     "vue-router": "4"
   },
   "devDependencies": {
-    "@originjs/vite-plugin-commonjs": "^1.0.3",
     "@vitejs/plugin-vue": "^2.3.1",
     "autoprefixer": "^10.4.4",
     "postcss": "^8.4.12",

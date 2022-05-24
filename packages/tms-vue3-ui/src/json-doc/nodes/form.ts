@@ -28,8 +28,8 @@ export class FormNode extends Node {
       // ...attrOrProps,
     }
 
-    const element = h(this.rawArgs.tag, nodeOptions, children)
+    this._vnode = h(this.rawArgs.tag, nodeOptions, children)
 
-    return element
+    return this._vnode
   }
 }
