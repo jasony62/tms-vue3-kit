@@ -50,6 +50,7 @@ export type SchemaPropAttrs = {
   default?: any
   groupable?: boolean
   value?: any
+  [k: string]: any
 }
 
 export class SchemaProp {
@@ -213,6 +214,8 @@ function* _parseOne(
       case 'title':
       case 'description':
       case 'format':
+      case 'oneOf':
+      case 'anyOf':
       case 'enum':
       case 'enumGroups':
       case 'default':
