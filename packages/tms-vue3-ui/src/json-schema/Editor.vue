@@ -60,12 +60,17 @@
       <tvu-form-item class="tvu-jse__field" label="可否分组">
         <tvu-checkbox v-model="data.currProp.attrs.groupable"></tvu-checkbox>
       </tvu-form-item>
-      <tvu-form-item class="tvu-jse__field" label="设置选项"
+      <tvu-form-item class="tvu-jse__field" label="选项格式"
         v-if="['string', 'integer', 'number', 'array'].includes(data.currProp.attrs.type)">
-        <tvu-checkbox v-model="hasEnum" @change="onChangeHasEnum"></tvu-checkbox>
+        <tvu-select v-model="hasEnum" @change="onChangeHasEnum">
+          <tvu-option label="无" value=""></tvu-option>
+          <tvu-option label="oneOf" value="oneOf"></tvu-option>
+          <tvu-option label="anyOf" value="anyOf"></tvu-option>
+          <tvu-option label="enum" value="enum"></tvu-option>
+        </tvu-select>
       </tvu-form-item>
       <div class="tvu-jse__field" v-if="hasEnum">
-        <tvu-jse-enum-config :field-attrs="data.currProp.attrs"></tvu-jse-enum-config>
+        <tvu-jse-enum-config :field-attrs="data.currProp.attrs" :field-attrs-type="hasEnum"></tvu-jse-enum-config>
       </div>
       <tvu-form-item class="tvu-jse__field" label="默认值" v-if="!hasEnum">
         <tvu-input v-model="data.currProp.attrs.default"></tvu-input>
@@ -122,7 +127,7 @@ const props = defineProps({ schema: Object, onUpload: Function, rootName: { type
 const builder = new JSONSchemaBuilder(props.rootName)
 const nodes = ref([] as SchemaProp[])
 const data = reactive({ currProp: { name: '', attrs: {} } as SchemaProp })
-const hasEnum = ref(false)
+const hasEnum = ref("")
 
 // 获得当前的JSONSchema数据
 const editing = () => {
@@ -196,29 +201,35 @@ const onChangeType = (event: any) => {
   }  
 }
 
-const onChangeHasEnum = (bHasEnum: boolean) => {
-  // bhasEnum应该是个event,不是boolean?
+const onChangeHasEnum = (event: any) => {
+  // bhasEnum应该是个event,不是boolean吧
   const { attrs } = data.currProp
-  if (bHasEnum) {
-    if (!Array.isArray(attrs.enum)) {
-      attrs.enum = [
+  const value = event.target.value
+  if (value) {
+    if (!Array.isArray(attrs[value])) {
+      attrs[value] = [
         { label: '选项1', value: 'a' },
         { label: '选项2', value: 'b' },
       ]
       data.currProp.attrs.enumGroups = []
     }
   } else {
-    delete attrs.enum
+    delete attrs[value]
     delete attrs.enumGroups
   }
+  console.log(data.currProp)
 }
 
 const onClickNode = (prop: SchemaProp) => {
   data.currProp = prop
-  if (Array.isArray(prop.attrs.enum) || Array.isArray(prop.attrs.oneOf) || Array.isArray(prop.attrs.anyOf)) {
-    hasEnum.value = true
+  if (Array.isArray(prop.attrs.enum)) {
+    hasEnum.value = 'enum'
+  } else if (Array.isArray(prop.attrs.oneOf)) {
+    hasEnum.value = 'oneOf'
+  } else if (Array.isArray(prop.attrs.anyOf)){
+    hasEnum.value = 'anyOf'
   } else {
-    hasEnum.value = false
+    hasEnum.value = ''
   }
 }
 
@@ -241,6 +252,8 @@ const onRemoveNode = () => {
 onMounted(() => {
   builder.flatten(JSON.parse(JSON.stringify(props.schema)))
   nodes.value = builder.props
+
+  console.log('editor', builder.props)
   data.currProp = builder.props?.[0]
 })
 /**

@@ -18,7 +18,7 @@
         <div>选项显示内容</div>
         <div>选项所属分组</div>
       </div>
-      <tvu-form-item class="tvu-jse__enum-option tvu-jse__field" v-for="(opt, i) in fieldAttrs.enum" :key="i">
+      <tvu-form-item class="tvu-jse__enum-option tvu-jse__field" v-for="(opt, i) in fieldAttrs[fieldAttrsType]" :key="i">
         <tvu-input v-model="opt.value"></tvu-input>
         <tvu-input v-model="opt.label"></tvu-input>
         <tvu-input v-model="opt.group"></tvu-input>
@@ -45,27 +45,29 @@ import { PropType } from "vue";
 import { SchemaPropAttrs, EnumOption, EnumGroup } from './model'
 
 const props = defineProps({
-  fieldAttrs: { type: Object as PropType<SchemaPropAttrs>, required: true }
+  fieldAttrs: { type: Object as PropType<SchemaPropAttrs>, required: true },
+  fieldAttrsType: { type: String, default: "oneOf", required: true }
 })
-
-const { fieldAttrs } = props
 
 const onAddEnumGroup = () => {
   let newGroup = { id: `g${Date.now()}`, label: "newGroup", assocEnum: { property: '', value: '' } }
-  fieldAttrs?.enumGroups?.push(newGroup)
+  if (!Array.isArray(props.fieldAttrs?.enumGroups)) {
+    props.fieldAttrs.enumGroups = []
+  }
+  props.fieldAttrs?.enumGroups?.push(newGroup)
 }
 
 const onDelEnumGroup = (g: EnumGroup, i: number) => {
-  fieldAttrs?.enumGroups?.splice(i, 1)
+  props.fieldAttrs?.enumGroups?.splice(i, 1)
 }
 
 const onAddEnumOption = () => {
-  fieldAttrs?.enum?.push({
+  props.fieldAttrs[props.fieldAttrsType]?.push({
     label: '新选项',
     value: 'newKey',
   })
 }
 const onDelEnumOption = (v: EnumOption, i: number) => {
-  fieldAttrs?.enum?.splice(i, 1)
+  props.fieldAttrs[props.fieldAttrsType]?.splice(i, 1)
 }
 </script>

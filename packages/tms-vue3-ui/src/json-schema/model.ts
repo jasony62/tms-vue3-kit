@@ -50,6 +50,7 @@ export type SchemaPropAttrs = {
   default?: any
   groupable?: boolean
   value?: any
+  [k: string]: any
   initialName?: string // 正则表达式定义属性的初始名称
 }
 
@@ -216,6 +217,8 @@ function* _parseOne(
       case 'title':
       case 'description':
       case 'format':
+      case 'oneOf':
+      case 'anyOf':
       case 'enum':
       case 'enumGroups':
       case 'default':
