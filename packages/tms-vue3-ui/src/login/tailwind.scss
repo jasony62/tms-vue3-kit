@@ -35,7 +35,7 @@
   }
 
   .tvu-login__captcha {
-    @apply flex;
+    @apply flex gap-x-2;
     input {
       @apply flex-grow flex-shrink;
       min-width: 6rem;
