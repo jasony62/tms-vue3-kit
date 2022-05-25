@@ -27,21 +27,21 @@ const components = {
   upload: defineComponent({
     props: ['fileList', 'uploadFile', 'removeFile'],
     render() {
-      const divNode = this.fileList?.map((i: any) => {
-        return h('div', { class: 'tvu-jse' }, [
-          i.name,
+      const divNode = this.fileList?.map((file: any) => {
+        return h('div', { class: 'tvu-jse__attachment' }, [
+          h('div', file.name),
           h(
             'button',
             {
               onClick: () => {
-                this.removeFile(i)
+                this.removeFile(file)
               },
             },
-            '删除'
+            '删除文件'
           ),
         ])
       })
-      return h('div', {}, [
+      return h('div', { class: ['tvu-jse__upload'] }, [
         ...divNode,
         h(
           'div',
@@ -90,7 +90,10 @@ const components = {
       } else {
         if (this.modelValue === true) inputProps.checked = true
       }
-      return h('div', {}, [h('input', inputProps), h('div', {}, this.label)])
+      return h('div', { class: ['tvu-jse__checkbox'] }, [
+        h('div', h('input', inputProps)),
+        h('div', {}, this.label),
+      ])
     },
   }),
   select: defineComponent({

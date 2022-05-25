@@ -173,8 +173,9 @@ export const SampleSchema = {
         },
       },
       patternProperties: {
-        '.*': {
-          title: '扩展属性',
+        '^\\w+$': {
+          title: '可选属性',
+          description: '属性名需符合正则表达式',
           type: 'string',
         },
       },

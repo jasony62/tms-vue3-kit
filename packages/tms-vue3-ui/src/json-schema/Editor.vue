@@ -24,7 +24,8 @@
           <tvu-option label="null" value="null"></tvu-option>
         </tvu-select>
       </tvu-form-item>
-      <tvu-form-item v-if="data.currProp.attrs.type === 'array'" class="tvu-jse__field" label="子对象类型">
+      <tvu-form-item v-if="data.currProp.attrs.type === 'array' && data.currProp.items" class="tvu-jse__field"
+        label="子对象类型">
         <tvu-select v-model="data.currProp.items.type">
           <tvu-option label="integer" value="integer"></tvu-option>
           <tvu-option label="number" value="number"></tvu-option>
@@ -41,7 +42,7 @@
           </tvu-option>
         </tvu-select>
       </tvu-form-item>
-      <tvu-form-item class="tvu-jse__field" label="子对象格式" v-if="formats2">
+      <tvu-form-item class="tvu-jse__field" label="子对象格式" v-if="formats2 && data.currProp.items">
         <tvu-select v-model="data.currProp.items.format" placeholder="请选择格式">
           <tvu-option v-for="format in formats2" :key="format.value" :label="format.label" :value="format.value">
           </tvu-option>
@@ -54,16 +55,16 @@
       <tvu-form-item class="tvu-jse__field" label="描述">
         <tvu-input v-model="data.currProp.attrs.description" placeholder="描述"></tvu-input>
       </tvu-form-item>
-      <tvu-form-item class="tvu-jse__field" label="必填">
-        <tvu-checkbox v-model="data.currProp.attrs.required"></tvu-checkbox>
+      <tvu-form-item class="tvu-jse__field">
+        <tvu-checkbox v-model="data.currProp.attrs.required" label="必填"></tvu-checkbox>
       </tvu-form-item>
-      <tvu-form-item class="tvu-jse__field" label="可否分组">
-        <tvu-checkbox v-model="data.currProp.attrs.groupable"></tvu-checkbox>
+      <tvu-form-item class="tvu-jse__field">
+        <tvu-checkbox v-model="data.currProp.attrs.groupable" label="可否分组"></tvu-checkbox>
       </tvu-form-item>
-      <tvu-form-item class="tvu-jse__field" label="选项格式"
+      <tvu-form-item class="tvu-jse__field" label="选项模式"
         v-if="['string', 'integer', 'number', 'array'].includes(data.currProp.attrs.type)">
         <tvu-select v-model="hasEnum" @change="onChangeHasEnum">
-          <tvu-option label="无" value=""></tvu-option>
+          <tvu-option label="不提供选项" value=""></tvu-option>
           <tvu-option label="oneOf" value="oneOf"></tvu-option>
           <tvu-option label="anyOf" value="anyOf"></tvu-option>
           <tvu-option label="enum" value="enum"></tvu-option>
@@ -168,41 +169,16 @@ let forbidden = computed(() => {
   }
   return false
 })
-// watch: {
-//   'form.schema.format': {
-//     handler: function (val) {
-//       if (
-//         Format2Comp[val] &&
-//         typeof Format2Comp[val].defaultFormatAttrs === 'function'
-//       ) {
-//         if (!data.currProp.attrs.formatAttrs) {
-//           data.currProp.attrs.formatAttrs = Format2Comp[val].defaultFormatAttrs()
-//         }
-//       }
-//     },
-//     immediate: true,
-//   },
-//   'form.schema.type': {
-//     handler: function () {
-//       if (data.currProp.attrs.default) {
-//         return data.currProp.attrs.default
-//       }
-//       data.currProp.attrs.default = data.currProp.attrs.type === 'array' ? [] : ''
-//     },
-//     immediate: true,
-//   },
-// },
 const onChangeType = (event: any) => {
   const type = event.target.value
   if (type === 'array') {
     data.currProp.items = { type: 'string' }
   } else {
     data.currProp.items = undefined
-  }  
+  }
 }
 
 const onChangeHasEnum = (event: any) => {
-  // bhasEnum应该是个event,不是boolean吧
   const { attrs } = data.currProp
   const value = event.target.value
   if (value) {
@@ -217,7 +193,6 @@ const onChangeHasEnum = (event: any) => {
     delete attrs[value]
     delete attrs.enumGroups
   }
-  console.log(data.currProp)
 }
 
 const onClickNode = (prop: SchemaProp) => {
@@ -226,7 +201,7 @@ const onClickNode = (prop: SchemaProp) => {
     hasEnum.value = 'enum'
   } else if (Array.isArray(prop.attrs.oneOf)) {
     hasEnum.value = 'oneOf'
-  } else if (Array.isArray(prop.attrs.anyOf)){
+  } else if (Array.isArray(prop.attrs.anyOf)) {
     hasEnum.value = 'anyOf'
   } else {
     hasEnum.value = ''
@@ -253,7 +228,6 @@ onMounted(() => {
   builder.flatten(JSON.parse(JSON.stringify(props.schema)))
   nodes.value = builder.props
 
-  console.log('editor', builder.props)
   data.currProp = builder.props?.[0]
 })
 /**
