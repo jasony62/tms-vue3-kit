@@ -1,3 +1,5 @@
+@import '../style/tailwind.common.scss';
+
 .tvu-jdoc__root {
   @apply flex flex-col gap-y-4;
 
@@ -20,6 +22,10 @@
       input {
         @apply rounded p-2 border-2 border-gray-200;
       }
+    }
+
+    .tvu-jdoc__nest {
+      @apply flex flex-col gap-2;
     }
   }
 }

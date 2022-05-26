@@ -9,6 +9,7 @@ const itemAddVNode = (ctx: FormContext, field: Field) => {
     components.button.tag,
     {
       name: field.fullname,
+      class: ['tvu-button'],
       onClick: () => {
         const fieldValue = ctx.editDoc.init(field.fullname, [])
         if (Array.isArray(fieldValue)) {
@@ -28,7 +29,7 @@ const itemAddVNode = (ctx: FormContext, field: Field) => {
         }
       },
     },
-    '添加'
+    '添加数组项目'
   )
   return h('div', { class: ['tvu-jdoc__nest__actions'] }, addVNode)
 }
@@ -39,6 +40,7 @@ const itemInsertVNode = (ctx: FormContext, field: Field, index: number) => {
     components.button.tag,
     {
       name: fullname,
+      class: ['tvu-button'],
       onClick: () => {
         switch (field.itemSchemaType) {
           case 'string':
@@ -55,7 +57,7 @@ const itemInsertVNode = (ctx: FormContext, field: Field, index: number) => {
         }
       },
     },
-    '插入'
+    '插入属性'
   )
 }
 
@@ -65,11 +67,12 @@ const itemRemoveVNode = (ctx: FormContext, field: Field, index: number) => {
     components.button.tag,
     {
       name: fullname,
+      class: ['tvu-button'],
       onClick: () => {
         ctx.editDoc.remove(fullname)
       },
     },
-    '删除'
+    '删除属性'
   )
 }
 /**

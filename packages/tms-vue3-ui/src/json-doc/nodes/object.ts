@@ -17,6 +17,7 @@ const itemAddVNode = (ctx: FormContext, field: Field) => {
       components.button.tag,
       {
         name: childProp.fullname,
+        class: ['tvu-button'],
         onClick: () => {
           let randexp = new RandExp(new RegExp(childProp.name))
           randexp.max = 8

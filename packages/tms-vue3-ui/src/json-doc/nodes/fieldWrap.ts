@@ -35,6 +35,7 @@ const fieldInsertVNode = (ctx: FormContext, field: Field) => {
     components.button.tag,
     {
       name: fullname,
+      class: ['tvu-button'],
       onClick: () => {
         let randexp = new RandExp(new RegExp(field.scheamProp.name))
         randexp.max = 8
@@ -52,7 +53,7 @@ const fieldInsertVNode = (ctx: FormContext, field: Field) => {
         }
       },
     },
-    '插入'
+    '插入属性'
   )
 }
 
@@ -61,11 +62,12 @@ const fieldRemoveVNode = (ctx: FormContext, field: Field) => {
     components.button.tag,
     {
       name: field.fullname,
+      class: ['tvu-button'],
       onClick: () => {
         ctx.editDoc.remove(field.fullname)
       },
     },
-    '删除'
+    '删除属性'
   )
 }
 /**

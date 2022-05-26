@@ -37,15 +37,7 @@ const components: { [k: string]: any } = {
   object: { tag: 'div', option },
   array: { tag: 'div', option },
   file: { tag: 'div', option },
-  button: {
-    tag: 'button',
-    option: {
-      ...option,
-      type: 'submit',
-      label: 'Submit',
-    },
-  },
-  jsondoc: { tag: 'tms-json-doc', option },
+  button: { tag: 'button', option },
   a: { tag: 'a', option },
 }
 

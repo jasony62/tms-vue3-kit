@@ -119,7 +119,11 @@ const components = {
   }),
   button: defineComponent({
     render() {
-      return h('button', { ...this.$attrs }, this.$slots.default?.())
+      return h(
+        'button',
+        { class: ['tvu-button'], ...this.$attrs },
+        this.$slots.default?.()
+      )
     },
   }),
 }

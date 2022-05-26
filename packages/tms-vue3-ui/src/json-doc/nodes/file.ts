@@ -53,6 +53,7 @@ const itemAddVNode = (ctx: FormContext, field: Field) => {
   let addVNode = h(
     components.button.tag,
     {
+      class: ['tvu-button'],
       onClick: () => {
         const fieldValue = ctx.editDoc.init(field.fullname, [])
         // if (Array.isArray(fieldValue)) {
@@ -75,6 +76,7 @@ const itemUploadVNode = (ctx: FormContext, field: Field) => {
   let addVNode = h(
     components.button.tag,
     {
+      class: ['tvu-button'],
       onClick: () => {
         let fieldValue = ctx.editDoc.get(field.fullname)
         /**只能在数组中添加文件*/
@@ -111,6 +113,7 @@ const itemRemoveVNode = (fieldValue: any[], index: number) => {
   return h(
     components.button.tag,
     {
+      class: ['tvu-button'],
       onClick: () => {
         // 删除数组中的内容
         fieldValue.splice(index, 1)
