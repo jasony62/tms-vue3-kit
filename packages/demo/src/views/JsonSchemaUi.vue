@@ -7,12 +7,17 @@
         ref="schemaEditor"
         :schema="SampleSchema"
         :on-upload="onUploadFile"
+        :on-message="onMessage"
         :root-name="'$'"
       >
         <template #extattrs="{ attrs }">
           <div>
             <div>不允许编辑</div>
             <input type="checkbox" v-model="attrs.readonly" />
+          </div>
+          <div>
+            <div>可否分组</div>
+            <input type="checkbox" v-model="attrs.groupable" />
           </div>
         </template>
       </tms-json-schema>
@@ -30,6 +35,10 @@ const schemaEditor = ref<{ editing: () => string } | null>(null)
 const onUploadFile = (file: { name: any }) => {
   let result = { name: file.name, url: location.href }
   return Promise.resolve(result)
+}
+
+const onMessage = (msg: string) => {
+  alert(`报错了:${msg}`, )
 }
 
 const getResult = () => {
