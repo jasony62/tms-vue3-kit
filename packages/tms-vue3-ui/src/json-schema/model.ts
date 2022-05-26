@@ -48,7 +48,6 @@ export type SchemaPropAttrs = {
   minItems?: number
   maxItems?: number
   default?: any
-  groupable?: boolean
   value?: any
   [k: string]: any
   initialName?: string // 正则表达式定义属性的初始名称
@@ -115,6 +114,7 @@ export type RawSchema = {
   properties?: { [k: string]: RawSchema }
   required?: boolean | string[]
   readonly?: boolean
+  groupable?: boolean
   format?: string
   attrs?: any
   items?: SchemaItem

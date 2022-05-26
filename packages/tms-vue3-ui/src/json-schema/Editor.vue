@@ -58,9 +58,6 @@
       <tvu-form-item class="tvu-jse__field">
         <tvu-checkbox v-model="data.currProp.attrs.required" label="必填"></tvu-checkbox>
       </tvu-form-item>
-      <tvu-form-item class="tvu-jse__field">
-        <tvu-checkbox v-model="data.currProp.attrs.groupable" label="可否分组"></tvu-checkbox>
-      </tvu-form-item>
       <tvu-form-item class="tvu-jse__field" label="选项模式"
         v-if="['string', 'integer', 'number', 'array'].includes(data.currProp.attrs.type)">
         <tvu-select v-model="hasEnum" @change="onChangeHasEnum">
@@ -87,8 +84,7 @@
       </div>
       <tvu-form-item class="tvu-jse__field__actions">
         <tvu-button @click="onRemoveNode">删除属性</tvu-button>
-        <tvu-button @click="onAddNode" v-if="['object', 'array'].includes(data.currProp.attrs.type)">添加属性
-        </tvu-button>
+        <tvu-button @click="onAddNode" v-if="hasAAddNode">添加属性</tvu-button>
       </tvu-form-item>
     </div>
     <!-- 开始：扩展定义 -->
@@ -123,7 +119,12 @@ const Format2Comp = {
   file: File
 }
 
-const props = defineProps({ schema: Object, onUpload: Function, rootName: { type: String, default: '' } })
+const props = defineProps({
+  schema: { type: Object, default: {} },
+  onUpload: Function,
+  onMessage: { type: Function, default(msg: string) { alert(msg) } },
+  rootName: { type: String, default: '' }
+})
 
 const builder = new JSONSchemaBuilder(props.rootName)
 const nodes = ref([] as SchemaProp[])
@@ -169,6 +170,13 @@ let forbidden = computed(() => {
   }
   return false
 })
+
+let hasAAddNode = computed(() => {
+  if (data.currProp.attrs.type === 'object') return true
+  if (data.currProp.attrs.type === 'array' && data.currProp.items?.type === 'object') return true
+  return false
+})
+
 const onChangeType = (event: any) => {
   const type = event.target.value
   if (type === 'array') {
@@ -218,16 +226,15 @@ const onRemoveNode = () => {
   if (typeof prev === 'object') {
     data.currProp = prev
   } else if (typeof prev === 'boolean' && prev === false) {
-    alert('根节点不允许删除')
+    props.onMessage('根节点不允许删除')
   } else {
-    alert('删除属性遇到未知错误')
+    props.onMessage('删除属性遇到未知错误')
   }
 }
 
 onMounted(() => {
   builder.flatten(JSON.parse(JSON.stringify(props.schema)))
   nodes.value = builder.props
-
   data.currProp = builder.props?.[0]
 })
 /**
