@@ -3,21 +3,14 @@
     <h3>编辑JSONSchema</h3>
     <div><button @click="getResult">查看结果</button></div>
     <div>
-      <tms-json-schema
-        ref="schemaEditor"
-        :schema="SampleSchema"
-        :on-upload="onUploadFile"
-        :on-message="onMessage"
-        :root-name="'$'"
-      >
+      <tms-json-schema ref="schemaEditor" :schema="SampleSchema" :on-upload="onUploadFile" :on-message="onMessage"
+        :root-name="'$'">
         <template #extattrs="{ attrs }">
           <div>
-            <div>不允许编辑</div>
-            <input type="checkbox" v-model="attrs.readonly" />
+            <label><input type="checkbox" v-model="attrs.readonly" />不允许编辑</label>
           </div>
           <div>
-            <div>可否分组</div>
-            <input type="checkbox" v-model="attrs.groupable" />
+            <label><input type="checkbox" v-model="attrs.groupable" />可否分组</label>
           </div>
         </template>
       </tms-json-schema>
@@ -38,7 +31,7 @@ const onUploadFile = (file: { name: any }) => {
 }
 
 const onMessage = (msg: string) => {
-  alert(`报错了:${msg}`, )
+  alert(`报错了:${msg}`,)
 }
 
 const getResult = () => {

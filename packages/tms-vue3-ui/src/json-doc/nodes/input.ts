@@ -54,7 +54,7 @@ export class Input extends FieldNode {
       name: fieldName,
       type,
       value: toRaw(fieldValue),
-      class: ['tvu-jdoc__field-input'],
+      class: ['tvu-jdoc__field-input tvu-input'],
       onInput,
     }
     /**设置核选框的值*/

@@ -18,6 +18,7 @@ const components = {
     render() {
       return h('input', {
         value: this.modelValue,
+        class: ['tvu-input'],
         onInput: ($event: any) => {
           this.$emit('update:modelValue', $event.target.value)
         },
@@ -104,6 +105,7 @@ const components = {
         'select',
         {
           value: this.modelValue,
+          class: ['tvu-input'],
           onChange: ($event: any) => {
             this.$emit('update:modelValue', $event.target.value)
           },

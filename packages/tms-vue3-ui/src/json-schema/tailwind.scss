@@ -15,7 +15,7 @@
   .tvu-jse__field {
     input,
     select {
-      @apply rounded p-2 border-2 border-gray-200 w-full;
+      @apply w-full;
     }
   }
 
@@ -46,11 +46,6 @@
 
       .tvu-jse__enum-group {
         @apply flex flex-col gap-y-2;
-
-        input,
-        select {
-          @apply rounded p-2 border-2 border-gray-200;
-        }
       }
     }
     .tvu-jse__enum-options {
@@ -58,11 +53,6 @@
 
       .tvu-jse__enum-option {
         @apply flex flex-col gap-y-2;
-
-        input,
-        select {
-          @apply rounded p-2 border-2 border-gray-200;
-        }
       }
     }
   }
@@ -83,10 +73,6 @@
       .tvu-jse__label {
         @apply p-2 flex-initial;
       }
-      input,
-      select {
-        @apply rounded p-2 border-2 border-gray-200;
-      }
     }
   }
   .tvu-jse__dependencies__rule-group-actions {
@@ -100,9 +86,4 @@
 
 .tvu-jse__event-config {
   @apply flex flex-col gap-y-2;
-
-  input,
-  select {
-    @apply rounded p-2 border-2 border-gray-200;
-  }
 }

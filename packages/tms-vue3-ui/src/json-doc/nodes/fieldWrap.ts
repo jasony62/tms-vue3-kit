@@ -8,6 +8,7 @@ import { Node, components } from './index'
 /**用户指定的字段名称*/
 const fieldNameVNode = (ctx: FormContext, field: Field) => {
   let inp = h('input', {
+    class: ['tvu-input'],
     value: field.name,
     onInput: (event: any) => {
       const newName = event && event.target ? event.target.value : event
