@@ -73,6 +73,21 @@
       <tvu-form-item class="tvu-jse__field" label="默认值" v-if="!hasEnum">
         <tvu-input v-model="data.currProp.attrs.default"></tvu-input>
       </tvu-form-item>
+      <tvu-form-item class="tvu-jse__field">
+        <tvu-checkbox v-model="supportAutofill" label="自动填充？"></tvu-checkbox>
+      </tvu-form-item>
+      <tvu-form-item v-if="supportAutofill" class="tvu-jse__field" label="获取填充值地址">
+        <tvu-input v-model="autofill.url"></tvu-input>
+      </tvu-form-item>
+      <tvu-form-item v-if="supportAutofill" class="tvu-jse__field" v-for="prop in nodes">
+        <tvu-checkbox v-model="autofill.params" :label="prop.name" :value="prop.name"></tvu-checkbox>
+      </tvu-form-item>
+      <tvu-form-item v-if="supportAutofill" class="tvu-jse__field" label="填充位置">
+        <tvu-select v-model="autofill.target">
+          <tvu-option label="作为填入值" value="value"></tvu-option>
+          <tvu-option label="作为可选项" value="items"></tvu-option>
+        </tvu-select>
+      </tvu-form-item>
       <div class="tvu-jse__field"
         v-if="onUpload && data.currProp.attrs.type === 'array' && data.currProp.items?.format === 'file'">
         <tvu-jse-attachment :schema-prop="data.currProp" :on-upload="onUpload"></tvu-jse-attachment>
@@ -103,6 +118,7 @@ import TvuJseEnumConfig from './EnumConfig.vue'
 import TvuJseEventConfig from './EventConfig.vue'
 import TvuJseAttachment from './Attachment.vue'
 import { computed, onMounted, reactive, ref, toRaw } from 'vue'
+import { PropAutofillTarget } from './model'
 
 export default {
   name: 'tms-json-schema',
@@ -130,6 +146,7 @@ const builder = new JSONSchemaBuilder(props.rootName)
 const nodes = ref([] as SchemaProp[])
 const data = reactive({ currProp: { name: '', attrs: {} } as SchemaProp })
 const hasEnum = ref("")
+const supportAutofill = ref(false)
 
 // 获得当前的JSONSchema数据
 const editing = () => {
@@ -177,6 +194,14 @@ let hasAAddNode = computed(() => {
   return false
 })
 
+const autofill = computed({
+  get: () => {
+    if (data.currProp.attrs.autofill) return data.currProp.attrs.autofill
+    return { url: '', params: [], target: PropAutofillTarget.value }
+  },
+  set: val => { }
+})
+
 const onChangeType = (event: any) => {
   const type = event.target.value
   if (type === 'array') {
@@ -214,6 +239,7 @@ const onClickNode = (prop: SchemaProp) => {
   } else {
     hasEnum.value = ''
   }
+  supportAutofill.value = typeof prop.attrs.autofill === 'object'
 }
 
 const onAddNode = () => {
@@ -236,11 +262,6 @@ onMounted(() => {
   builder.flatten(JSON.parse(JSON.stringify(props.schema)))
   nodes.value = builder.props
   data.currProp = builder.props?.[0]
+  supportAutofill.value = typeof data.currProp.attrs.autofill === 'object'
 })
-/**
- * 设置格式特定属性的编辑组件
- */
-// setFormatAttrsComp(format, comp) {
-//   Format2Comp[format] = comp
-// },
 </script>

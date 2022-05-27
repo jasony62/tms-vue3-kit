@@ -35,6 +35,19 @@ export type PropDep = {
   [k: string]: PropDepRuleSet
 }
 
+/**属性值自动填充位置*/
+export enum PropAutofillTarget {
+  'value' = 'value',
+  'items' = 'items',
+}
+
+/**属性值自动填充*/
+export type PropAutofill = {
+  url: string
+  params: string[]
+  target: PropAutofillTarget
+}
+
 export type SchemaPropAttrs = {
   type: string
   title?: string
@@ -48,9 +61,9 @@ export type SchemaPropAttrs = {
   minItems?: number
   maxItems?: number
   default?: any
-  value?: any
+  autofill?: PropAutofill
+  value?: any // 要要保留？没有对应的逻辑
   [k: string]: any
-  initialName?: string // 正则表达式定义属性的初始名称
 }
 
 export class SchemaProp {
@@ -113,8 +126,6 @@ export type RawSchema = {
   description?: string
   properties?: { [k: string]: RawSchema }
   required?: boolean | string[]
-  readonly?: boolean
-  groupable?: boolean
   format?: string
   attrs?: any
   items?: SchemaItem
@@ -123,6 +134,7 @@ export type RawSchema = {
   anyOf?: any
   oneOf?: any
   default?: any
+  autofill?: PropAutofill
   attachment?: any
   component?: any
   visible?: any
@@ -161,7 +173,7 @@ function* _parseChildren(
   }
 }
 
-/*处理JSONSchema的1个属性*/
+/**处理JSONSchema的1个属性*/
 function* _parseOne(
   name: string,
   rawProp: any,
@@ -222,7 +234,7 @@ function* _parseOne(
       case 'enum':
       case 'enumGroups':
       case 'default':
-      case 'initialName':
+      case 'autofill':
         Object.assign(newProp.attrs, { [key]: rawProp[key] })
         break
       default:

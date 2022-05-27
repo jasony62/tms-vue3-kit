@@ -100,7 +100,23 @@
 }
 ```
 
-## 动态数据
+## 属性值自动填充
+
+支持自动获取属性的值并填写
+
+autofill
+
+`url`获得填充值的地址。
+
+`params`需要在获取地址上添加的参数数组。数组中的项是 schema 中其他属性的名称。
+
+`target`指定获取的值填充位置，属性的值（value）或属性选项（items）的值。
+
+`runPolicy`执行运行策略。构造表单时执行一次（onCreate）。依赖的参数发生变化时执行（onParamChange）。用户主动更新（onUser）。
+
+这个不是 JSONSchema 标准中的内容。
+
+替代原来的 eventDependencies
 
 v1 获得值
 v2 获得列表

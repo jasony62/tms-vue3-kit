@@ -17,14 +17,16 @@
     "outDir": "./dist/es",
     "baseUrl": "./",
     "paths": { "@/*": ["src/*"] },
-    "types": ["node", "jest"]
+    "types": ["node", "jest"],
+    "forceConsistentCasingInFileNames": true
   },
   "include": [
     "src/**/*.ts",
     "src/**/*.js",
     "src/**/*.d.ts",
     "src/**/*.tsx",
-    "src/**/*.vue"
+    "src/**/*.vue",
+    "test/**/*.ts"
   ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

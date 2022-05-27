@@ -10,6 +10,7 @@
         <option value="object-map-object">对象有可选属性，属性类型是对象</option>
         <option value="object-map-array">对象有可选属性，属性类型是数组</option>
         <option value="files">文件示例</option>
+        <option value="autofill">自动填充</option>
       </select>
     </div>
     <div>
