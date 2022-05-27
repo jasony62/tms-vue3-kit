@@ -18,11 +18,11 @@ export const SampleSchema = {
         },
       ],
     },
-    province: {
+    city: {
       title: '省份',
       type: 'string',
       autofill: {
-        url: 'http://localhost:8080/order/api/admin/document/list?db=testSync&cl=areacode&page=1&size=100',
+        url: 'http://tms-vue3-kit/areaCode/city',
         params: ['areaCode'],
         target: 'value',
         runPolicy: 'onCreate',
@@ -30,3 +30,4 @@ export const SampleSchema = {
     },
   },
 }
+export const SampleData = {}

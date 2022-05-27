@@ -6,12 +6,14 @@
       <option value="array-object">数组的项目是对象</option>
       <option value="object-map-object">对象有可选属性，属性类型是对象</option>
       <option value="object-map-array">对象有可选属性，属性类型是数组</option>
+      <option value="autofill">自动填充</option>
     </select>
   </div>
   <div class="flex flex-row">
     <div class="w-1/3 p-4">
       <json-doc v-if="loading === false" ref="jsonDocEditor" :key="caseName" :schema="testObj.schema"
-        :value="testObj.data" :on-axios="onAxios" :on-file-download="onFileDownload" :on-file-upload="onFileUpload">
+        :value="testObj.data" :on-autofill="onAutofill" :on-file-download="onFileDownload"
+        :on-file-upload="onFileUpload">
       </json-doc>
     </div>
     <div class="p-4">
@@ -29,8 +31,6 @@
 import { JsonDoc } from 'tms-vue3-ui'
 import 'tms-vue3-ui/dist/es/json-doc/style/tailwind.scss'
 import { onMounted, reactive, ref, watch } from 'vue'
-
-localStorage.debug = '*'
 
 const jsonDocEditor = ref<{ editing: () => string } | null>(null)
 
@@ -61,7 +61,7 @@ watch(caseName, () => {
   loadTestData()
 })
 
-const onAxios = () => {
+const onAutofill = () => {
   return {
     post: (url: string, data: any) => {
       return new Promise((resolve, reject) => {

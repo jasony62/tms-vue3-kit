@@ -37,7 +37,7 @@ export abstract class FieldNode extends Node {
      * 每次有数据更新都会调用，这样对性能有影响，是否可以缓存数据？
      */
     nextTick(() => {
-      this._outerValue()
+      this._autofileValue()
     })
   }
 
@@ -106,27 +106,69 @@ export abstract class FieldNode extends Node {
   /**
    * 从外部数据源获取字段的值
    */
-  private _outerValue() {
-    const { editDoc, onAxios } = this.ctx
+  // private _autofileValue() {
+  //   const { editDoc, onAutofill } = this.ctx
+  //   const { field } = this
+  //   if (!field.scheamProp.eventDependency) return
+  //   /**构造查询参数*/
+  //   const { rule } = field.scheamProp.eventDependency
+  //   let postData = rule.params.reduce((c: any, p) => {
+  //     c[p] = { feature: 'start', keyword: editDoc.get(p) }
+  //     return c
+  //   }, {})
+  //   /**获取数据*/
+  //   const fieldName = field.name
+  //   onAutofill?.()
+  //     .post(rule.url, { filter: postData })
+  //     .then((rst: any) => {
+  //       const data = rst.data.result.docs ?? rst.data.result
+  //       if (rule.type === 'v1') {
+  //         /**返回的是值*/
+  //         let val = Array.isArray(data) ? data?.[0][fieldName] : data[fieldName]
+  //         this.autofillValue(field, val)
+  //       } else if (rule.type === 'v2') {
+  //         /**返回的是选项*/
+  //         let arr: any = []
+  //         if (Array.isArray(data)) {
+  //           data.forEach((item: any) => {
+  //             let value = item[fieldName]
+  //             arr.push({ label: value, value: value })
+  //           })
+  //         }
+  //         field.items = arr
+  //         if (arr.length === 1) {
+  //           // 选项唯一时自动赋值
+  //           this.autofillValue(field, arr[0].value)
+  //         }
+  //       }
+  //     })
+  //     .catch(() => {
+  //       this.ctx.onMessage('数据解析错误')
+  //     })
+  // }
+
+  private _autofileValue() {
+    const { editDoc, onAutofill } = this.ctx
     const { field } = this
-    if (!field.scheamProp.eventDependency) return
+    if (!field.scheamProp.attrs.autofill) return
     /**构造查询参数*/
-    const { rule } = field.scheamProp.eventDependency
+    const rule = field.scheamProp.attrs.autofill
     let postData = rule.params.reduce((c: any, p) => {
       c[p] = { feature: 'start', keyword: editDoc.get(p) }
       return c
     }, {})
     /**获取数据*/
     const fieldName = field.name
-    onAxios?.()
+    onAutofill?.()
       .post(rule.url, { filter: postData })
       .then((rst: any) => {
+        console.log('xxxxx', rst)
         const data = rst.data.result.docs ?? rst.data.result
-        if (rule.type === 'v1') {
+        if (rule.target === 'value') {
           /**返回的是值*/
           let val = Array.isArray(data) ? data?.[0][fieldName] : data[fieldName]
-          this.onOuterValue(field, val)
-        } else if (rule.type === 'v2') {
+          this.autofillValue(field, val)
+        } else if (rule.target === 'items') {
           /**返回的是选项*/
           let arr: any = []
           if (Array.isArray(data)) {
@@ -138,7 +180,7 @@ export abstract class FieldNode extends Node {
           field.items = arr
           if (arr.length === 1) {
             // 选项唯一时自动赋值
-            this.onOuterValue(field, arr[0].value)
+            this.autofillValue(field, arr[0].value)
           }
         }
       })
@@ -148,7 +190,7 @@ export abstract class FieldNode extends Node {
   }
 
   /**获得外部值时进行回调*/
-  protected onOuterValue(field: Field, val: any): void {}
+  protected autofillValue(field: Field, val: any): void {}
 
   /**提供渲染函数的参数*/
   abstract options(attrsOrProps: any): any

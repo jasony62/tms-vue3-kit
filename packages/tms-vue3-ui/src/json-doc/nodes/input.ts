@@ -65,7 +65,7 @@ export class Input extends FieldNode {
     return inpOps
   }
   /**获得外部时*/
-  protected onOuterValue(field: Field, val: any): void {
+  protected autofillValue(field: Field, val: any): void {
     if (this._vnode?.el) {
       let { el } = this._vnode
       el.value = val

@@ -57,7 +57,7 @@ export default defineComponent({
     /**
      * 通过动态数据
      */
-    onAxios: { type: Function },
+    onAutofill: { type: Function },
     /**
      * 选择文件的方法
      */
@@ -92,7 +92,7 @@ export default defineComponent({
       let {
         schema,
         onMessage,
-        onAxios,
+        onAutofill,
         onFileUpload,
         onFileSelect,
         onFileDownload,
@@ -103,7 +103,7 @@ export default defineComponent({
           editDoc,
           schema,
           onMessage,
-          onAxios,
+          onAutofill,
           onFileUpload,
           onFileSelect,
           onFileDownload,

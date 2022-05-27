@@ -511,7 +511,7 @@ export type FormContext = {
   editDoc: DocAsArray
   schema: RawSchema
   onMessage: Function
-  onAxios?: Function
+  onAutofill?: Function
   onFileUpload?: Function
   onFileSelect?: Function
   onFileDownload?: Function
