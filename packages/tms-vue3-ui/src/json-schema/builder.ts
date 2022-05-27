@@ -18,7 +18,7 @@ export const Type2Format = {
 } as { [k: string]: { value: string; label: string }[] }
 
 const propToRaw = (prop: SchemaProp, parent: any): any => {
-  let { items, dependencies, eventDependency } = prop
+  let { items, dependencies } = prop
 
   let rawProp: any = {
     ...prop.attrs,
@@ -33,11 +33,6 @@ const propToRaw = (prop: SchemaProp, parent: any): any => {
     if (dependencies) {
       if (typeof parent.dependencies === 'undefined') parent.dependencies = {}
       parent.dependencies[prop.name] = dependencies
-    }
-    if (eventDependency) {
-      if (typeof parent.eventDependencies === 'undefined')
-        parent.eventDependencies = {}
-      parent.eventDependencies[prop.name] = eventDependency
     }
   }
 

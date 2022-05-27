@@ -99,8 +99,6 @@
         v-if="onUpload && data.currProp.attrs.type === 'array' && data.currProp.items?.format === 'file'">
         <tvu-jse-attachment :schema-prop="data.currProp" :on-upload="onUpload"></tvu-jse-attachment>
       </div>
-      <tvu-jse-event-config v-if="data.currProp.eventDependency?.rule" :rule="data.currProp.eventDependency.rule">
-      </tvu-jse-event-config>
       <div class="tvu-jse__extra_fields">
         <slot name="extattrs" :attrs="data.currProp.attrs">备用内容</slot>
       </div>

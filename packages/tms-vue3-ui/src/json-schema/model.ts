@@ -13,12 +13,6 @@ export type EnumOption = {
   group?: any
 }
 
-export type PropEventRule = {
-  url: string
-  params: string[]
-  type: string
-}
-
 export type PropDepRule = {
   property: string
   value: string
@@ -78,7 +72,6 @@ export class SchemaProp {
   attrs: SchemaPropAttrs
   items?: { type: string; [k: string]: any }
   dependencies?: PropDepRuleSet
-  eventDependency?: { rule: PropEventRule }
   attachment?: any
   isPattern = false //  是否是由正则表达式定义名称的子属性
   patternChildren: SchemaProp[] | undefined
@@ -160,7 +153,6 @@ function* _parseChildren(
   properties: { [k: string]: RawSchema },
   parent: SchemaProp,
   dependencies?: PropDep,
-  eventDependencies?: { [k: string]: { rule: PropEventRule } },
   requiredSet?: string[],
   isPatternProperty = false
 ) {
@@ -172,7 +164,6 @@ function* _parseChildren(
       properties[key],
       parent,
       dependencies?.[key],
-      eventDependencies?.[key],
       requiredSet?.includes(key),
       isPatternProperty
     )
@@ -185,7 +176,6 @@ function* _parseOne(
   rawProp: any,
   parent?: SchemaProp,
   depRuleSet?: PropDepRuleSet,
-  evtRule?: { rule: PropEventRule },
   mandatory?: boolean,
   isPatternProperty = false
 ): any {
@@ -198,7 +188,6 @@ function* _parseOne(
   let newProp = new SchemaProp(path, name)
 
   if (depRuleSet) newProp.dependencies = depRuleSet
-  if (evtRule) newProp.eventDependency = evtRule
   if (mandatory) newProp.attrs.required = mandatory
   newProp.isPattern = isPatternProperty
   if (isPatternProperty) parent?.patternChildren?.push(newProp)
@@ -265,13 +254,7 @@ function* _parseOne(
     /*处理对象属性下的子属性*/
     if (typeof properties === 'object') {
       /**属性的子属性*/
-      yield* _parseChildren(
-        properties,
-        newProp,
-        dependencies,
-        eventDependencies,
-        requiredSet
-      )
+      yield* _parseChildren(properties, newProp, dependencies, requiredSet)
     }
     if (typeof patternProperties === 'object') {
       /**属性的模板子属性*/
@@ -279,7 +262,6 @@ function* _parseOne(
         patternProperties,
         newProp,
         dependencies,
-        eventDependencies,
         requiredSet,
         true
       )
@@ -291,7 +273,6 @@ function* _parseOne(
         items.properties,
         newProp,
         dependencies,
-        eventDependencies,
         requiredSet
       )
     }

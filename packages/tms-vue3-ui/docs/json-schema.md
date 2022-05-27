@@ -110,16 +110,17 @@ autofill
 
 `params`需要在获取地址上添加的参数数组。数组中的项是 schema 中其他属性的名称。
 
-`target`指定获取的值填充位置，属性的值（value）或属性选项（items）的值。
+`target`指定获取的数据的填充位置，作为填入只（value）或作为选项（items）的值。
 
 `runPolicy`执行运行策略。构造表单时执行一次（onCreate）。依赖的参数发生变化时执行（onParamChange）。用户主动更新（onUser）。
 
-这个不是 JSONSchema 标准中的内容。
+### 执行策略
 
-替代原来的 eventDependencies
+### 返回的数据
 
-v1 获得值
-v2 获得列表
+注：`autofill`不是`JSONSchema`标准中的内容。
+
+注：替代原来的`eventDependencies`
 
 ## 使用组件
 

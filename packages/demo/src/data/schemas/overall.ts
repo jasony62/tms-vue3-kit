@@ -148,6 +148,12 @@ export const SampleSchema = {
     city: {
       title: '城市（根据选择的区号通过API获取值）',
       type: 'string',
+      autofill: {
+        url: 'http://tms-vue3-kit/areaCode/city',
+        params: ['areaCode'],
+        target: 'value',
+        runPolicy: 'onCreate',
+      },
     },
     tel: {
       title: '电话（对象）',
@@ -227,15 +233,6 @@ export const SampleSchema = {
         },
       },
       operator: 'or',
-    },
-  },
-  eventDependencies: {
-    city: {
-      rule: {
-        url: 'http://tms-vue3-kit/areaCode/city',
-        params: ['areaCode'],
-        type: 'v1',
-      },
     },
   },
 }
