@@ -10,16 +10,9 @@
   </div>
   <div class="flex flex-row">
     <div class="w-1/3 p-4">
-      <json-doc
-        v-if="loading === false"
-        ref="jsonDocEditor"
-        :key="caseName"
-        :schema="testObj.schema"
-        :value="testObj.data"
-        :on-axios="onAxios"
-        :on-file-download="onFileDownload"
-        :on-file-upload="onFileUpload"
-      ></json-doc>
+      <json-doc v-if="loading === false" ref="jsonDocEditor" :key="caseName" :schema="testObj.schema"
+        :value="testObj.data" :on-axios="onAxios" :on-file-download="onFileDownload" :on-file-upload="onFileUpload">
+      </json-doc>
     </div>
     <div class="p-4">
       <div>
@@ -43,7 +36,7 @@ const jsonDocEditor = ref<{ editing: () => string } | null>(null)
 
 const jsonResult = ref('')
 
-const caseName = ref('object-map-object')
+const caseName = ref('overall')
 
 const loading = ref(true)
 

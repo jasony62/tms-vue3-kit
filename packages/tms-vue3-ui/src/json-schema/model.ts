@@ -240,6 +240,9 @@ function* _parseOne(
   // 返回当前的属性
   yield newProp
 
+  // 指定哪些子属性为必填
+  let requiredSet = Array.isArray(required) ? required : []
+
   if (rawProp.type === 'object') {
     /*处理对象属性下的子属性*/
     if (typeof properties === 'object') {
@@ -249,7 +252,7 @@ function* _parseOne(
         newProp,
         dependencies,
         eventDependencies,
-        required
+        requiredSet
       )
     }
     if (typeof patternProperties === 'object') {
@@ -259,7 +262,7 @@ function* _parseOne(
         newProp,
         dependencies,
         eventDependencies,
-        required,
+        requiredSet,
         true
       )
     }
@@ -271,7 +274,7 @@ function* _parseOne(
         newProp,
         dependencies,
         eventDependencies,
-        required
+        requiredSet
       )
     }
   }
