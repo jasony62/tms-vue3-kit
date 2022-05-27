@@ -25,6 +25,7 @@ export const SampleSchema = {
         url: 'http://localhost:8080/order/api/admin/document/list?db=testSync&cl=areacode&page=1&size=100',
         params: ['areaCode'],
         target: 'value',
+        runPolicy: 'onCreate',
       },
     },
   },

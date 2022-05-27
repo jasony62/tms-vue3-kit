@@ -88,6 +88,13 @@
           <tvu-option label="作为可选项" value="items"></tvu-option>
         </tvu-select>
       </tvu-form-item>
+      <tvu-form-item v-if="supportAutofill" class="tvu-jse__field" label="执行策略">
+        <tvu-select v-model="autofill.runPolicy">
+          <tvu-option label="表单创建时执行1次" value="onCreate"></tvu-option>
+          <tvu-option label="依赖参数更新时执行1次" value="onParamChange"></tvu-option>
+          <tvu-option label="用户执行" value="onUser"></tvu-option>
+        </tvu-select>
+      </tvu-form-item>
       <div class="tvu-jse__field"
         v-if="onUpload && data.currProp.attrs.type === 'array' && data.currProp.items?.format === 'file'">
         <tvu-jse-attachment :schema-prop="data.currProp" :on-upload="onUpload"></tvu-jse-attachment>
@@ -118,7 +125,7 @@ import TvuJseEnumConfig from './EnumConfig.vue'
 import TvuJseEventConfig from './EventConfig.vue'
 import TvuJseAttachment from './Attachment.vue'
 import { computed, onMounted, reactive, ref, toRaw } from 'vue'
-import { PropAutofillTarget } from './model'
+import { PropAutofillRunPolicy, PropAutofillTarget } from './model'
 
 export default {
   name: 'tms-json-schema',
@@ -197,7 +204,7 @@ let hasAAddNode = computed(() => {
 const autofill = computed({
   get: () => {
     if (data.currProp.attrs.autofill) return data.currProp.attrs.autofill
-    return { url: '', params: [], target: PropAutofillTarget.value }
+    return { url: '', params: [], target: PropAutofillTarget.value, runPolicy: PropAutofillRunPolicy.onCreate }
   },
   set: val => { }
 })

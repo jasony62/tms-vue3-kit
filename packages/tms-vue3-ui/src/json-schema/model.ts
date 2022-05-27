@@ -40,12 +40,18 @@ export enum PropAutofillTarget {
   'value' = 'value',
   'items' = 'items',
 }
-
+/**自动填充数据获取策略*/
+export enum PropAutofillRunPolicy {
+  'onCreate' = 'onCreate',
+  'onParamChange' = 'onParamChange',
+  'onUser' = 'onUser',
+}
 /**属性值自动填充*/
 export type PropAutofill = {
   url: string
   params: string[]
   target: PropAutofillTarget
+  runPolicy: PropAutofillRunPolicy
 }
 
 export type SchemaPropAttrs = {
