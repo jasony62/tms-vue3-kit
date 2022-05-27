@@ -28,7 +28,8 @@ const components = {
   upload: defineComponent({
     props: ['fileList', 'uploadFile', 'removeFile'],
     render() {
-      const divNode = this.fileList?.map((file: any) => {
+      // 已有的文件列表
+      let divNode = this.fileList?.map((file: any) => {
         return h('div', { class: 'tvu-jse__attachment' }, [
           h('div', file.name),
           h(
@@ -42,6 +43,9 @@ const components = {
           ),
         ])
       })
+      divNode ??= []
+
+      // 列表加上传文件操作
       return h('div', { class: ['tvu-jse__upload'] }, [
         ...divNode,
         h(
