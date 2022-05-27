@@ -103,49 +103,6 @@ export abstract class FieldNode extends Node {
       })
     }
   }
-  /**
-   * 从外部数据源获取字段的值
-   */
-  // private _autofileValue() {
-  //   const { editDoc, onAutofill } = this.ctx
-  //   const { field } = this
-  //   if (!field.scheamProp.eventDependency) return
-  //   /**构造查询参数*/
-  //   const { rule } = field.scheamProp.eventDependency
-  //   let postData = rule.params.reduce((c: any, p) => {
-  //     c[p] = { feature: 'start', keyword: editDoc.get(p) }
-  //     return c
-  //   }, {})
-  //   /**获取数据*/
-  //   const fieldName = field.name
-  //   onAutofill?.()
-  //     .post(rule.url, { filter: postData })
-  //     .then((rst: any) => {
-  //       const data = rst.data.result.docs ?? rst.data.result
-  //       if (rule.type === 'v1') {
-  //         /**返回的是值*/
-  //         let val = Array.isArray(data) ? data?.[0][fieldName] : data[fieldName]
-  //         this.autofillValue(field, val)
-  //       } else if (rule.type === 'v2') {
-  //         /**返回的是选项*/
-  //         let arr: any = []
-  //         if (Array.isArray(data)) {
-  //           data.forEach((item: any) => {
-  //             let value = item[fieldName]
-  //             arr.push({ label: value, value: value })
-  //           })
-  //         }
-  //         field.items = arr
-  //         if (arr.length === 1) {
-  //           // 选项唯一时自动赋值
-  //           this.autofillValue(field, arr[0].value)
-  //         }
-  //       }
-  //     })
-  //     .catch(() => {
-  //       this.ctx.onMessage('数据解析错误')
-  //     })
-  // }
 
   private _autofileValue() {
     const { editDoc, onAutofill } = this.ctx
@@ -162,7 +119,7 @@ export abstract class FieldNode extends Node {
     onAutofill?.()
       .post(rule.url, { filter: postData })
       .then((rst: any) => {
-        console.log('xxxxx', rst)
+        // TODO 不能是写死的，应该改为
         const data = rst.data.result.docs ?? rst.data.result
         if (rule.target === 'value') {
           /**返回的是值*/
