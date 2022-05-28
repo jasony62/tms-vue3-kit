@@ -30,7 +30,8 @@ export abstract class Field {
   itemVisible?: { [k: string]: boolean } // 记录字段的选项是否可见
   /**自动填充相关*/
   waitingRender: boolean = false // 是否在等待渲染
-  autofillParams: any // 当前值对应的自动填充参数，为了避免不必要接口调用
+  autofillURL: string = '' // 当前值对应的自动填充参数，为了避免不必要接口调用
+  autofillBody: any // 当前值对应的自动填充参数，为了避免不必要接口调用
   autofilled: boolean = false // 是否已经进行过填充
 
   constructor(prop: SchemaProp, index = -1, name = '') {

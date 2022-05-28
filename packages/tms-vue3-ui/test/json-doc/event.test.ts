@@ -21,7 +21,7 @@ describe('通过API从外部获取值', () => {
       onMessage: (msg: string) => {
         console.log(msg)
       },
-      onAutofill: onAxios,
+      httpRequest: onAxios,
     })
     // console.log(JSON.stringify(nodes, null, 2))
     setTimeout(() => {

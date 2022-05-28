@@ -12,7 +12,7 @@
   <div class="flex flex-row">
     <div class="w-1/3 p-4">
       <json-doc v-if="loading === false" ref="jsonDocEditor" :key="caseName" :schema="testObj.schema"
-        :value="testObj.data" :on-autofill="onAutofill" :on-file-download="onFileDownload"
+        :value="testObj.data" :autofill-request="onAutofill" :on-file-download="onFileDownload"
         :on-file-upload="onFileUpload">
       </json-doc>
     </div>
@@ -63,19 +63,28 @@ watch(caseName, () => {
 
 const onAutofill = () => {
   return {
+    get: (url: string) => {
+      console.log('autofile url', url)
+      return new Promise((resolve, reject) => {
+        let result: any = { data: { result: {} } }
+        if ('http://tms-vue3-kit/autofill/areaCode' === url) {
+          result.data.result = [{ code: '010' }, { code: '029' }]
+        } else if (url.indexOf('http://tms-vue3-kit/autofill/city') === 0) {
+          if (url.indexOf('areaCode=010') !== -1)
+            result.data.result.city = '北京'
+          else if (url.indexOf('areaCode=029') !== -1)
+            result.data.result.city = '西安'
+          else result.data.result.city = ''
+        }
+        resolve(result)
+      })
+    },
     post: (url: string, data: any) => {
+      console.log('autofile url', url, data)
       return new Promise((resolve, reject) => {
         let { filter } = data
         let result: any = { data: { result: {} } }
-        if ('http://tms-vue3-kit/areaCode/areaCode' === url) {
-          result.data.result = [{ code: '010' }, { code: '029' }]
-        } else if ('http://tms-vue3-kit/areaCode/city' === url) {
-          if (filter?.areaCode?.keyword === '010')
-            result.data.result.city = '北京'
-          else if (filter?.areaCode?.keyword === '029')
-            result.data.result.city = '西安'
-          else result.data.result.city = ''
-        } else if ('http://tms-vue3-kit/areaCode/district' === url) {
+        if ('http://tms-vue3-kit/autofill/district' === url) {
           if (filter?.areaCode?.keyword === '010')
             result.data.result.district = [{ name: '西城区' }, { name: '东城区' }, { name: '朝阳区' }, { name: '海淀区' }]
           else if (filter?.areaCode?.keyword === '029')

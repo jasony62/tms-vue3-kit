@@ -57,7 +57,7 @@ export default defineComponent({
     /**
      * 通过动态数据
      */
-    onAutofill: { type: Function },
+    autofillRequest: { type: Function },
     /**
      * 选择文件的方法
      */
@@ -93,7 +93,7 @@ export default defineComponent({
     let {
       schema,
       onMessage,
-      onAutofill,
+      autofillRequest,
       onFileUpload,
       onFileSelect,
       onFileDownload,
@@ -104,7 +104,7 @@ export default defineComponent({
       fields,
       schema,
       onMessage,
-      onAutofill,
+      autofillRequest,
       onFileUpload,
       onFileSelect,
       onFileDownload,

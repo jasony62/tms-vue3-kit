@@ -512,7 +512,7 @@ export type FormContext = {
   fields: Map<String, Field>
   schema: RawSchema
   onMessage: Function
-  onAutofill?: Function
+  autofillRequest?: Function
   onFileUpload?: Function
   onFileSelect?: Function
   onFileDownload?: Function

@@ -7,26 +7,52 @@ export const SampleSchema = {
     areaCode: {
       title: '区号',
       type: 'string',
-      enum: [
-        {
-          label: '010',
-          value: '010',
+      enum: [],
+      autofill: {
+        url: 'http://tms-vue3-kit/autofill/areaCode',
+        method: 'GET',
+        target: 'items',
+        runPolicy: 'onCreate',
+        itemPath: {
+          path: 'data.result',
+          value: 'code',
+          label: 'code',
         },
-        {
-          label: '029',
-          value: '029',
-        },
-      ],
+      },
     },
-    province: {
-      title: '省份',
+    city: {
+      title: '市',
       type: 'string',
       autofill: {
-        url: 'http://localhost:8080/order/api/admin/document/list?db=testSync&cl=areacode&page=1&size=100',
-        params: ['areaCode'],
+        url: 'http://tms-vue3-kit/autofill/city',
+        method: 'GET',
+        params: [
+          { path: 'areaCode', name: 'areaCode' },
+          { value: 'tms-vue3-ui', name: 'fromApp' },
+        ],
         target: 'value',
-        runPolicy: 'onCreate',
+        runPolicy: 'onParamChange',
         valuePath: 'data.result.city',
+      },
+    },
+    district: {
+      title: '区',
+      type: 'string',
+      oneOf: [],
+      autofill: {
+        url: 'http://tms-vue3-kit/autofill/district',
+        method: 'POST',
+        body: [
+          { path: 'areaCode', bodyPath: 'filter.areaCode.keyword' },
+          { value: 'start', bodyPath: 'filter.areaCode.feature' },
+        ],
+        target: 'items',
+        runPolicy: 'onParamChange',
+        itemPath: {
+          path: 'data.result.district',
+          value: 'name',
+          label: 'name',
+        },
       },
     },
   },

@@ -9,8 +9,8 @@ export const SampleSchema = {
       type: 'string',
       enum: [],
       autofill: {
-        url: 'http://tms-vue3-kit/areaCode/areaCode',
-        params: ['areaCode'],
+        url: 'http://tms-vue3-kit/autofill/areaCode',
+        method: 'GET',
         target: 'items',
         runPolicy: 'onCreate',
         itemPath: {
@@ -24,8 +24,12 @@ export const SampleSchema = {
       title: '市',
       type: 'string',
       autofill: {
-        url: 'http://tms-vue3-kit/areaCode/city',
-        params: ['areaCode'],
+        url: 'http://tms-vue3-kit/autofill/city',
+        method: 'GET',
+        params: [
+          { path: 'areaCode', name: 'areaCode' },
+          { value: 'tms-vue3-ui', name: 'fromApp' },
+        ],
         target: 'value',
         runPolicy: 'onParamChange',
         valuePath: 'data.result.city',
@@ -36,8 +40,12 @@ export const SampleSchema = {
       type: 'string',
       oneOf: [],
       autofill: {
-        url: 'http://tms-vue3-kit/areaCode/district',
-        params: ['areaCode'],
+        url: 'http://tms-vue3-kit/autofill/district',
+        method: 'POST',
+        body: [
+          { path: 'areaCode', bodyPath: 'filter.areaCode.keyword' },
+          { value: 'start', bodyPath: 'filter.areaCode.feature' },
+        ],
         target: 'items',
         runPolicy: 'onParamChange',
         itemPath: {

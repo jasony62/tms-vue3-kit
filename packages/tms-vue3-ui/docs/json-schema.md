@@ -108,7 +108,11 @@ autofill
 
 `url`获得填充值的地址。
 
+`method`接口的 http 请求方法，支持 GET 和 POST，不区分大小写
+
 `params`需要在获取地址上添加的参数数组。数组中的项是 schema 中其他属性的名称。
+
+`body`接口为 POST 请求时发送的消息体
 
 `target`指定获取的数据的填充位置，作为填入只（value）或作为选项（items）的值。
 

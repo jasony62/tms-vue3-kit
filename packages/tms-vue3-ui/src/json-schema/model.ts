@@ -43,7 +43,9 @@ export enum PropAutofillRunPolicy {
 /**属性值自动填充*/
 export type PropAutofill = {
   url: string
-  params: string[]
+  method: string
+  params: [{ path?: string; value?: any; name: string }]
+  body?: [{ path?: string; value?: any; bodyPath: string }]
   target: PropAutofillTarget
   runPolicy: PropAutofillRunPolicy
   valuePath?: string // 从返回结果中提取属性值的路径
