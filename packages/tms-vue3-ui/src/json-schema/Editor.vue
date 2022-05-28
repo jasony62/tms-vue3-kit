@@ -120,7 +120,6 @@ import { Type2Format, JSONSchemaBuilder, SchemaProp } from './builder'
 import File from './formats/File.vue'
 import TvuJseDependency from './Dependency.vue'
 import TvuJseEnumConfig from './EnumConfig.vue'
-import TvuJseEventConfig from './EventConfig.vue'
 import TvuJseAttachment from './Attachment.vue'
 import { computed, onMounted, reactive, ref, toRaw } from 'vue'
 import { PropAutofillRunPolicy, PropAutofillTarget } from './model'
@@ -130,7 +129,6 @@ export default {
   components: {
     TvuJseDependency,
     TvuJseEnumConfig,
-    TvuJseEventConfig
   },
 }
 </script>
@@ -150,7 +148,7 @@ const props = defineProps({
 const builder = new JSONSchemaBuilder(props.rootName)
 const nodes = ref([] as SchemaProp[])
 const data = reactive({ currProp: { name: '', attrs: {} } as SchemaProp })
-const hasEnum = ref("")
+const hasEnum = ref('')
 const supportAutofill = ref(false)
 
 // 获得当前的JSONSchema数据

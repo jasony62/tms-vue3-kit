@@ -42,7 +42,7 @@ function createArrayItemFields(
   if (Array.isArray(fieldValue) && fieldValue.length) {
     let fields = fieldValue.map((val, index) => {
       // 数组中的项目需要指定索引
-      const field = createField(prop, parentField, index)
+      const field = createField(ctx, prop, parentField, index)
       debug(
         `字段【${parentField.fullname}】根据文档数据生成数组项目字段【${field.fullname}】`
       )
@@ -120,7 +120,7 @@ function createOptionalFields(
   if (keys.length) {
     debug(`属性【${prop.fullname}】需要创建【${keys.length}】个字段`)
     let fields = keys.map((key) => {
-      const field = createField(prop, joint.field, -1, key)
+      const field = createField(ctx, prop, joint.field, -1, key)
       debug(`属性【${prop.fullname}】生成字段【${field.fullname}】`)
       return field
     })
@@ -165,7 +165,7 @@ function createFieldNode(
   prop: SchemaProp,
   joint: StackJoint
 ): FieldVNodePair {
-  const field = createField(prop, joint.field)
+  const field = createField(ctx, prop, joint.field)
   const vnode = createFieldWrapNode(ctx, field)
   debug(`属性【${prop.fullname}】生成字段【${field.fullname}】，生成节点`)
 
@@ -357,7 +357,7 @@ export function build(ctx: FormContext, fieldNames?: string[]): VNode[] {
   for (prop of iter) {
     /**处理根节点*/
     if (prop.name === iter.rootName) {
-      const rootField = createField(prop)
+      const rootField = createField(ctx, prop)
       stack.newJoint(rootField)
       debug(`----属性【${prop.fullname}】生成根字段，放入堆栈----`)
       continue
@@ -395,7 +395,7 @@ export function build(ctx: FormContext, fieldNames?: string[]): VNode[] {
         })
       } else {
         parentJoints.forEach((joint) => {
-          const field = createField(prop, joint.field)
+          const field = createField(ctx, prop, joint.field)
           stack.newJoint(field)
           debug(`属性【${prop.fullname}】生成字段【${field.fullname}】放入堆栈`)
         })
@@ -412,7 +412,7 @@ export function build(ctx: FormContext, fieldNames?: string[]): VNode[] {
         })
       } else {
         parentJoints.forEach((parentJoint) => {
-          const field = createField(prop, parentJoint.field)
+          const field = createField(ctx, prop, parentJoint.field)
           createArrayItemNode(stack, field, prop, ctx)
         })
       }
@@ -509,6 +509,7 @@ let mapBuilders = new Map()
 
 export type FormContext = {
   editDoc: DocAsArray
+  fields: Map<String, Field>
   schema: RawSchema
   onMessage: Function
   onAutofill?: Function
@@ -526,6 +527,7 @@ export type FormContext = {
 export default function (ctx: FormContext, fieldNames?: string[]) {
   let builder = mapBuilders.get(ctx)
   if (!builder) {
+    console.log('zzzzzzzzzzz')
     builder = new Builder(ctx, fieldNames)
     mapBuilders.set(ctx, builder)
   }

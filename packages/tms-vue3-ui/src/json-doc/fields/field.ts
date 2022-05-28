@@ -28,6 +28,10 @@ export abstract class Field {
   items?: FieldItem[] // 字段的可选项。应该改个名字，避免和schema中的items混淆。
   itemType?: string
   itemVisible?: { [k: string]: boolean } // 记录字段的选项是否可见
+  /**自动填充相关*/
+  waitingRender: boolean = false // 是否在等待渲染
+  autofillParams: any // 当前值对应的自动填充参数，为了避免不必要接口调用
+  autofilled: boolean = false // 是否已经进行过填充
 
   constructor(prop: SchemaProp, index = -1, name = '') {
     let { attrs } = prop

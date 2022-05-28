@@ -46,6 +46,8 @@ export type PropAutofill = {
   params: string[]
   target: PropAutofillTarget
   runPolicy: PropAutofillRunPolicy
+  valuePath?: string // 从返回结果中提取属性值的路径
+  itemPath?: { path: string; label: string; value: string } // 从返回结果中提取属选项列表值的路径
 }
 
 export type SchemaPropAttrs = {
@@ -112,12 +114,6 @@ export type SchemaItem = {
   enum?: any
 }
 
-export type SchemaEvtDepRule = {
-  params: string[]
-  url: string
-  type: string
-}
-
 export type RawSchema = {
   name?: string
   type: string
@@ -138,9 +134,6 @@ export type RawSchema = {
   component?: any
   visible?: any
   $id?: string
-  eventDependencies?: {
-    [k: string]: { rule: SchemaEvtDepRule }
-  }
   assocs?: string[] // 这个不应该放在Schema里
   minLength?: number
   maxLength?: number
@@ -192,14 +185,7 @@ function* _parseOne(
   newProp.isPattern = isPatternProperty
   if (isPatternProperty) parent?.patternChildren?.push(newProp)
 
-  let {
-    properties,
-    patternProperties,
-    items,
-    required,
-    dependencies,
-    eventDependencies,
-  } = rawProp
+  let { properties, patternProperties, items, required, dependencies } = rawProp
 
   let keys = Object.keys(rawProp)
   for (let i = 0; i < keys.length; i++) {
@@ -208,7 +194,6 @@ function* _parseOne(
       case 'properties':
       case 'patternProperties':
       case 'dependencies':
-      case 'eventDependencies':
       case 'required':
         break
       case 'items':

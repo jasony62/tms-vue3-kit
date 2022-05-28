@@ -66,14 +66,21 @@ const onAutofill = () => {
     post: (url: string, data: any) => {
       return new Promise((resolve, reject) => {
         let { filter } = data
-        console.log('axios.data.filter', filter)
         let result: any = { data: { result: {} } }
-        if ('http://tms-vue3-kit/areaCode/city' === url) {
+        if ('http://tms-vue3-kit/areaCode/areaCode' === url) {
+          result.data.result = [{ code: '010' }, { code: '029' }]
+        } else if ('http://tms-vue3-kit/areaCode/city' === url) {
           if (filter?.areaCode?.keyword === '010')
             result.data.result.city = '北京'
           else if (filter?.areaCode?.keyword === '029')
             result.data.result.city = '西安'
           else result.data.result.city = ''
+        } else if ('http://tms-vue3-kit/areaCode/district' === url) {
+          if (filter?.areaCode?.keyword === '010')
+            result.data.result.district = [{ name: '西城区' }, { name: '东城区' }, { name: '朝阳区' }, { name: '海淀区' }]
+          else if (filter?.areaCode?.keyword === '029')
+            result.data.result.district = [{ name: '新城区' }, { name: '碑林区' }, { name: '莲湖区' }, { name: '雁塔区' }]
+          else result.data.result.district = []
         }
         console.log('axios.result', result)
         resolve(result)

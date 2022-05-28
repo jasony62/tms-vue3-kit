@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import { h, nextTick, VNode } from 'vue'
 import { FormContext } from '../builder'
 import { Field } from '../fields'
@@ -107,37 +108,72 @@ export abstract class FieldNode extends Node {
   private _autofileValue() {
     const { editDoc, onAutofill } = this.ctx
     const { field } = this
+
+    // 没有指定自动填充数据规则
     if (!field.scheamProp.attrs.autofill) return
-    /**构造查询参数*/
+
+    // 如果字段是等待渲染的状态，该次渲染就不需要再次通过api获取的数据
+    if (field.waitingRender) {
+      field.waitingRender = false
+      return
+    }
+
     const rule = field.scheamProp.attrs.autofill
-    let postData = rule.params.reduce((c: any, p) => {
+
+    /**只在创建时调用1次*/
+    if (rule.runPolicy === 'onCreate' && field.autofilled === true) {
+      return
+    }
+
+    /**构造查询参数*/
+    const params = rule.params.reduce((c: any, p) => {
       c[p] = { feature: 'start', keyword: editDoc.get(p) }
       return c
     }, {})
-    /**获取数据*/
-    const fieldName = field.name
+    /**如果依赖的参数没有发生变化，就不进行调用*/
+    if (field.autofillParams) {
+      if (_.isEqual(field.autofillParams, params)) {
+        return
+      }
+    }
+    field.autofillParams = params
+    field.autofilled = true
+
+    /**从外部获取数据*/
     onAutofill?.()
-      .post(rule.url, { filter: postData })
+      .post(rule.url, { filter: params })
       .then((rst: any) => {
-        // TODO 不能是写死的，应该改为
-        const data = rst.data.result.docs ?? rst.data.result
-        if (rule.target === 'value') {
+        if (rule.target === 'value' && typeof rule.valuePath === 'string') {
           /**返回的是值*/
-          let val = Array.isArray(data) ? data?.[0][fieldName] : data[fieldName]
+          let val = _.get(rst, rule.valuePath)
           this.autofillValue(field, val)
-        } else if (rule.target === 'items') {
+        } else if (
+          rule.target === 'items' &&
+          typeof rule.itemPath === 'object'
+        ) {
           /**返回的是选项*/
+          const data = _.get(rst, rule.itemPath.path)
           let arr: any = []
-          if (Array.isArray(data)) {
+          if (Array.isArray(data) && data.length) {
+            let labelPath = rule.itemPath.label
+            let valuePath = rule.itemPath.value
             data.forEach((item: any) => {
-              let value = item[fieldName]
-              arr.push({ label: value, value: value })
+              arr.push({
+                label: _.get(item, labelPath),
+                value: _.get(item, valuePath),
+              })
             })
           }
-          field.items = arr
-          if (arr.length === 1) {
-            // 选项唯一时自动赋值
-            this.autofillValue(field, arr[0].value)
+          // 只有数据发生变化才触发渲染
+          if (!_.isEqual(field.items, arr)) {
+            field.items = arr
+            if (arr.length === 1) {
+              // 选项唯一时自动赋值
+              this.autofillValue(field, arr[0].value)
+            }
+            // 标记字段等待渲染，避免重复调用接口
+            field.waitingRender = true
+            this.ctx.editDoc.forceRender()
           }
         }
       })

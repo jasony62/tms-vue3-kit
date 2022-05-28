@@ -114,9 +114,15 @@ autofill
 
 `runPolicy`执行运行策略。构造表单时执行一次（onCreate）。依赖的参数发生变化时执行（onParamChange）。用户主动更新（onUser）。
 
+`valuePath`
+
+`itemPath`
+
 ### 执行策略
 
 ### 返回的数据
+
+发送 post 请求
 
 注：`autofill`不是`JSONSchema`标准中的内容。
 

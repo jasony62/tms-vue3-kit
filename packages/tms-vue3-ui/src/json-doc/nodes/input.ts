@@ -28,7 +28,6 @@ export class Input extends FieldNode {
     }
     /**修改底层数据*/
     this.ctx.editDoc.set(fieldName, updatedValue)
-    this.ctx.editDoc.renderCounter.value++
   }
   /**
    *
@@ -89,7 +88,6 @@ export class Input extends FieldNode {
   private createItems(children: VNode[]) {
     const { field } = this
     const fieldValue = this.fieldValue()
-
     field.items?.forEach((item) => {
       //TODO 需要处理选项是否可见
       if (field.itemType) {

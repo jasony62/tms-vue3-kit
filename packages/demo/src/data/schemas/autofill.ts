@@ -7,25 +7,44 @@ export const SampleSchema = {
     areaCode: {
       title: '区号',
       type: 'string',
-      enum: [
-        {
-          label: '010',
-          value: '010',
+      enum: [],
+      autofill: {
+        url: 'http://tms-vue3-kit/areaCode/areaCode',
+        params: ['areaCode'],
+        target: 'items',
+        runPolicy: 'onCreate',
+        itemPath: {
+          path: 'data.result',
+          value: 'code',
+          label: 'code',
         },
-        {
-          label: '029',
-          value: '029',
-        },
-      ],
+      },
     },
     city: {
-      title: '省份',
+      title: '市',
       type: 'string',
       autofill: {
         url: 'http://tms-vue3-kit/areaCode/city',
         params: ['areaCode'],
         target: 'value',
-        runPolicy: 'onCreate',
+        runPolicy: 'onParamChange',
+        valuePath: 'data.result.city',
+      },
+    },
+    district: {
+      title: '区',
+      type: 'string',
+      oneOf: [],
+      autofill: {
+        url: 'http://tms-vue3-kit/areaCode/district',
+        params: ['areaCode'],
+        target: 'items',
+        runPolicy: 'onParamChange',
+        itemPath: {
+          path: 'data.result.district',
+          value: 'name',
+          label: 'name',
+        },
       },
     },
   },

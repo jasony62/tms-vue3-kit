@@ -88,28 +88,31 @@ export default defineComponent({
     const editDoc = new DocAsArray(deepClone(props.value))
     editDoc.renderCounter = ref(0)
 
+    const fields = new Map()
+
+    let {
+      schema,
+      onMessage,
+      onAutofill,
+      onFileUpload,
+      onFileSelect,
+      onFileDownload,
+    } = props
+
+    const ctx = {
+      editDoc,
+      fields,
+      schema,
+      onMessage,
+      onAutofill,
+      onFileUpload,
+      onFileSelect,
+      onFileDownload,
+    }
+
     return () => {
-      let {
-        schema,
-        onMessage,
-        onAutofill,
-        onFileUpload,
-        onFileSelect,
-        onFileDownload,
-      } = props
       const fieldNames: string[] = []
-      const nodes = BuildEditor(
-        {
-          editDoc,
-          schema,
-          onMessage,
-          onAutofill,
-          onFileUpload,
-          onFileSelect,
-          onFileDownload,
-        },
-        fieldNames
-      )
+      const nodes = BuildEditor(ctx, fieldNames)
       console.log('render...')
       return h(
         'div',

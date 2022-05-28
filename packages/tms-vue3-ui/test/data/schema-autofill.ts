@@ -26,6 +26,7 @@ export const SampleSchema = {
         params: ['areaCode'],
         target: 'value',
         runPolicy: 'onCreate',
+        valuePath: 'data.result.city',
       },
     },
   },

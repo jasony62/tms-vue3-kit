@@ -178,7 +178,12 @@ export class DocAsArray {
   get properties() {
     return this._properties
   }
-
+  /**
+   *
+   */
+  forceRender() {
+    this.renderCounter.value++
+  }
   /**
    *
    * @param name
