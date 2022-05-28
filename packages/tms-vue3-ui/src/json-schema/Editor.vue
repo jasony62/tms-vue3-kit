@@ -79,8 +79,17 @@
       <tvu-form-item v-if="supportAutofill" class="tvu-jse__field" label="获取填充值地址">
         <tvu-input v-model="autofill.url"></tvu-input>
       </tvu-form-item>
-      <tvu-form-item v-if="supportAutofill" class="tvu-jse__field" v-for="prop in nodes">
-        <tvu-checkbox v-model="autofill.params" :label="prop.name" :value="prop.name"></tvu-checkbox>
+      <tvu-form-item v-if="supportAutofill" class="tvu-jse__field" label="HTTP方法">
+        <tvu-select v-model="autofill.method">
+          <tvu-option label="GET" value="GET"></tvu-option>
+          <tvu-option label="POST" value="POST"></tvu-option>
+        </tvu-select>
+      </tvu-form-item>
+      <tvu-form-item v-if="supportAutofill" class="tvu-jse__field" label="查询参数">
+        <tvu-json v-model="autofill.params"></tvu-json>
+      </tvu-form-item>
+      <tvu-form-item v-if="supportAutofill && autofill.method === 'POST'" class="tvu-jse__field" label="POST请求消息体">
+        <tvu-json v-model="autofill.body"></tvu-json>
       </tvu-form-item>
       <tvu-form-item v-if="supportAutofill" class="tvu-jse__field" label="填充位置">
         <tvu-select v-model="autofill.target">

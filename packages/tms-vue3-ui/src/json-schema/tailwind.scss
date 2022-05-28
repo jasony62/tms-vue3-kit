@@ -14,7 +14,8 @@
 
   .tvu-jse__field {
     input,
-    select {
+    select,
+    textarea {
       @apply w-full;
     }
   }

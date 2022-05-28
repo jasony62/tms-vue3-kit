@@ -1,30 +1,41 @@
 <template>
   <div class="json-schema-ui">
     <h3>编辑JSONSchema</h3>
-    <div><button @click="getResult">查看结果</button></div>
-    <div>
-      <select v-model="caseName">
-        <option value="overall">整体示例</option>
-        <option value="array-simple">数组的项目简单类型</option>
-        <option value="array-object">数组的项目是对象</option>
-        <option value="object-map-object">对象有可选属性，属性类型是对象</option>
-        <option value="object-map-array">对象有可选属性，属性类型是数组</option>
-        <option value="files">文件示例</option>
-        <option value="autofill">自动填充</option>
-      </select>
-    </div>
-    <div>
-      <tms-json-schema v-if="loading === false" ref="schemaEditor" :schema="testObj.schema" :on-upload="onUploadFile"
-        :on-message="onMessage" :root-name="'$'">
-        <template #extattrs="{ attrs }">
-          <div>
-            <label><input type="checkbox" v-model="attrs.readonly" />不允许编辑</label>
-          </div>
-          <div>
-            <label><input type="checkbox" v-model="attrs.groupable" />可否分组</label>
-          </div>
-        </template>
-      </tms-json-schema>
+    <div class="flex">
+      <div class="w-1/2">
+        <div>
+          <select v-model="caseName">
+            <option value="overall">整体示例</option>
+            <option value="array-simple">数组的项目简单类型</option>
+            <option value="array-object">数组的项目是对象</option>
+            <option value="object-map-object">对象有可选属性，属性类型是对象</option>
+            <option value="object-map-array">对象有可选属性，属性类型是数组</option>
+            <option value="files">文件示例</option>
+            <option value="autofill">自动填充</option>
+          </select>
+        </div>
+        <div>
+          <tms-json-schema v-if="loading === false" ref="schemaEditor" :schema="testObj.schema"
+            :on-upload="onUploadFile" :on-message="onMessage" :root-name="'$'">
+            <template #extattrs="{ attrs }">
+              <div>
+                <label><input type="checkbox" v-model="attrs.readonly" />不允许编辑</label>
+              </div>
+              <div>
+                <label><input type="checkbox" v-model="attrs.groupable" />可否分组</label>
+              </div>
+            </template>
+          </tms-json-schema>
+        </div>
+      </div>
+      <div class="w-1/2">
+        <div>
+          <button @click="getResult">查看结果</button>
+        </div>
+        <div>
+          <pre>{{ schemaResult }}</pre>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -40,6 +51,8 @@ const schemaEditor = ref<{ editing: () => string } | null>(null)
 const loading = ref(true)
 
 const testObj = reactive({ schema: {} })
+
+const schemaResult = ref('')
 
 function loadTestData() {
   loading.value = true
@@ -69,8 +82,6 @@ const onMessage = (msg: string) => {
 }
 
 const getResult = () => {
-  let value = JSON.stringify(schemaEditor.value?.editing(), null, 2)
-  alert(value)
-  console.log('jsonschemaui', schemaEditor.value?.editing())
+  schemaResult.value = JSON.stringify(schemaEditor.value?.editing(), null, 2)
 }
 </script>

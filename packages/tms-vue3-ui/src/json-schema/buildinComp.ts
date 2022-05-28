@@ -25,6 +25,20 @@ const components = {
       })
     },
   }),
+  json: defineComponent({
+    props: ['modelValue'],
+    emits: ['update:modelValue'],
+    render() {
+      return h('textarea', {
+        value: JSON.stringify(this.modelValue, null, 2),
+        class: ['tvu-input'],
+        onInput: ($event: any) => {
+          let data = JSON.parse($event.target.value)
+          this.$emit('update:modelValue', data)
+        },
+      })
+    },
+  }),
   upload: defineComponent({
     props: ['fileList', 'uploadFile', 'removeFile'],
     render() {
@@ -141,6 +155,9 @@ const BuildinComponents: { [k: string]: { [k: string]: any } } = {
   },
   'tvu-input': {
     ...components.input,
+  },
+  'tvu-json': {
+    ...components.json,
   },
   'tvu-input-number': {
     ...components.input,

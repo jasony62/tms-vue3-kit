@@ -8,16 +8,19 @@
 
 在实际的项目中可能存在两类扩展需求：1、规范中的关键字（keywords）不满足要求需要扩展，例如：指定某些属性只读；2、某些常用类型对象的输入限制条件，例如：手机号码、文件等。
 
-`json-schema`通过`slot`实现关键字扩展，插槽名称为`extKeywords`，示例代码如下。
+`json-schema`通过`slot`实现关键字扩展，插槽名称为`extattrs`，示例代码如下：
 
 ```
-<tms-json-schema ref="myJsonSchema" :schema="jsonSchema" :extendSchema="extendSchema">
-  <template v-slot:extKeywords="props">
-    <el-form-item label="不可修改">
-      <el-switch v-model="props.schema.readonly"></el-switch>
-    </el-form-item>
+<tms-json-schema schema="schema" :on-message="onMessage" :root-name="'$'">
+  <template #extattrs="{ attrs }">
+    <div>
+      <label><input type="checkbox" v-model="attrs.readonly" />不允许编辑</label>
+    </div>
+    <div>
+      <label><input type="checkbox" v-model="attrs.groupable" />可否分组</label>
+    </div>
   </template>
-</tms-json-schema>
+ </tms-json-schema>
 ```
 
 关键字扩展适用于对所有属性统一添加某种信息。
@@ -28,7 +31,7 @@
 
 如果数组设置了可选范围，支持设置要求的选项数量`minItems`和`maxItems`。
 
-## 计划内置支持的格式
+## 内置支持的格式
 
 | 基础类型（type） | 支持的格式（format） | 说明             |
 | ---------------- | -------------------- | ---------------- |
@@ -49,13 +52,11 @@
 
 [Required Properties](https://json-schema.org/understanding-json-schema/reference/object.html#id3)
 
-## 设置依赖
+## 属性依赖
 
 指定属性间的依赖关系，只有当某个（或某些）属性的值满足某条件时，属性才出现。
 
 `JSONSchema`只定义了简单的依赖关系，说明当某属性出现时，另一个属性必须出现。但是，经常需要支持的情况是当某属性的值满足某个条件时，另一个属性才出现。
-
-目前只实现了在同一个目录下的属性之间建立依赖关系，不支持建立和父对象属性的依赖关系。（计划支持）
 
 某个属性可以指定多条依赖关系，描述为某个属性等于某个值，然后指定这多个条件是需要全部满足还是满足任意一个就行。（单个条件除了等于，还有可能存在其他关系，例如：大于、小于等；多个条件之间除了与和或的关系，还有可能先分组，再描述组间的关系。）
 
@@ -78,7 +79,7 @@
 
 [Property dependencies](https://json-schema.org/understanding-json-schema/reference/object.html#id7)
 
-## 选项依赖（未实现）
+## 选项依赖
 
 属性值的可选项根据其他属性的值决定，例如：省市属性的值为北京时，区县属性的可选值（enum）只有北京下的区县。
 
@@ -102,31 +103,24 @@
 
 ## 属性值自动填充
 
-支持自动获取属性的值并填写
+通过`autofill`可以定义为属性通过调用 API 获取数据的规则。
 
-autofill
+| 字段       | 说明                                                                                                              |
+| ---------- | ----------------------------------------------------------------------------------------------------------------- |
+| url        | API 的地址。                                                                                                      |
+| method     | HTTP 请求方法，支持 POST 和 GET。                                                                                 |
+| params     | 设置 url 中的查询参数。数组，可包含多个定义。                                                                     |
+| --name     | 查询参数的名称。                                                                                                  |
+| --path     | 从 schema 对应的文档中获取查询参数值的路径。                                                                      |
+| --vaule    | 查询参数的值。（用于指定固定值）                                                                                  |
+| body       | 设置 POST 请求的消息体。数组，可包含多个定义。消息体为 JSON 对象。                                                |
+| --bodyPath | 消息对象中的属性名称。                                                                                            |
+| --path     | 从 schema 对应的文档中获取查询参数值的路径。                                                                      |
+| --value    | 消息对象中属性的值。（用于指定固定值）                                                                            |
+| target     | 指定获取的数据的填充位置，作为填入只（value）或作为选项（items）的值。                                            |
+| runPolicy  | 执行运行策略。构造表单时执行一次（onCreate）。依赖的参数发生变化时执行（onParamChange）。用户主动更新（onUser）。 |
 
-`url`获得填充值的地址。
-
-`method`接口的 http 请求方法，支持 GET 和 POST，不区分大小写
-
-`params`需要在获取地址上添加的参数数组。数组中的项是 schema 中其他属性的名称。
-
-`body`接口为 POST 请求时发送的消息体
-
-`target`指定获取的数据的填充位置，作为填入只（value）或作为选项（items）的值。
-
-`runPolicy`执行运行策略。构造表单时执行一次（onCreate）。依赖的参数发生变化时执行（onParamChange）。用户主动更新（onUser）。
-
-`valuePath`
-
-`itemPath`
-
-### 执行策略
-
-### 返回的数据
-
-发送 post 请求
+注：查询参数和消息体定义中的路径遵循`lodash`属性名的命名规则，支持多级，支持数组。
 
 注：`autofill`不是`JSONSchema`标准中的内容。
 
