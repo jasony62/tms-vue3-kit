@@ -16,8 +16,8 @@
       <div class="tvu-jse__dependencies__rule">
         <tvu-form-item class="tvu-jse__field" label="运算关系">
           <tvu-select v-model="group.operator">
-            <tvu-option label="满足任意条件" value="or"></tvu-option>
-            <tvu-option label="满足全部条件" value="and"></tvu-option>
+            <tvu-option label="满足任意条件(or)" value="or"></tvu-option>
+            <tvu-option label="满足全部条件(and)" value="and"></tvu-option>
           </tvu-select>
         </tvu-form-item>
       </div>
@@ -29,8 +29,8 @@
     <div class="tvu-jse__dependencies__rule">
       <tvu-form-item class="tvu-jse__field" label="规则间运算关系">
         <tvu-select v-model="dependencies.operator">
-          <tvu-option label="满足任意条件" value="or"></tvu-option>
-          <tvu-option label="满足全部条件" value="and"></tvu-option>
+          <tvu-option label="满足任意条件(or)" value="or"></tvu-option>
+          <tvu-option label="满足全部条件(and)" value="and"></tvu-option>
         </tvu-select>
       </tvu-form-item>
     </div>

@@ -12,6 +12,8 @@
             <option value="object-map-array">对象有可选属性，属性类型是数组</option>
             <option value="files">文件示例</option>
             <option value="autofill">自动填充</option>
+            <option value="prop-dep">属性依赖</option>
+            <option value="enum-dep">选项依赖</option>
           </select>
         </div>
         <div>

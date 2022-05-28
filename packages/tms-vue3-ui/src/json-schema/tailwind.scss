@@ -66,22 +66,11 @@
   }
 
   .tvu-jse__dependencies__rule {
-    @apply flex flex-row gap-x-2;
-
-    .tvu-jse__field {
-      @apply flex flex-row;
-
-      .tvu-jse__label {
-        @apply p-2 flex-initial;
-      }
-    }
+    @apply flex flex-col gap-y-2;
   }
+
   .tvu-jse__dependencies__rule-group-actions {
     @apply flex flex-row gap-x-2;
-
-    .tvu-jse__label {
-      @apply p-2 flex-initial;
-    }
   }
 }
 
