@@ -46,7 +46,7 @@
 import 'tms-vue3-ui/dist/es/json-schema/style/tailwind.scss'
 import { onMounted, reactive, ref, watch } from 'vue'
 
-const caseName = ref('overall')
+const caseName = ref('')
 
 const schemaEditor = ref<{ editing: () => string } | null>(null)
 
@@ -67,10 +67,13 @@ function loadTestData() {
 }
 
 onMounted(async () => {
+  let stored = sessionStorage.getItem('tms-vue3-ui/json-schema/caseName')
+  caseName.value = stored ?? 'overall'
   await loadTestData()
 })
 
 watch(caseName, () => {
+  sessionStorage.setItem('tms-vue3-ui/json-schema/caseName', caseName.value)
   loadTestData()
 })
 

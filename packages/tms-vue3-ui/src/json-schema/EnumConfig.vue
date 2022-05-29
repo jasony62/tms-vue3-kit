@@ -27,10 +27,10 @@
     </div>
     <div class="tvu-jse__enum-range">
       <tvu-form-item class="tvu-jse__field" label="至少选">
-        <tvu-input-number v-model="fieldAttrs.minItems"></tvu-input-number>
+        <tvu-input-number v-model.number="fieldAttrs.minItems"></tvu-input-number>
       </tvu-form-item>
       <tvu-form-item class="tvu-jse__field" label="最多选">
-        <tvu-input-number v-model="fieldAttrs.maxItems"></tvu-input-number>
+        <tvu-input-number v-model.number="fieldAttrs.maxItems"></tvu-input-number>
       </tvu-form-item>
     </div>
   </div>

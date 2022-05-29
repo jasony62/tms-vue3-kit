@@ -2,18 +2,17 @@
   <div class="tvu-jse tvu-jse--layout-default">
     <!--属性列表部分-->
     <div class="tvu-jse__properties">
-      <div class="tvu-jse__property" :class="p === data.currProp ? 'tvu-jse__property--active' : ''" v-for="p in nodes">
+      <div class="tvu-jse__property" :class="p === prop ? 'tvu-jse__property--active' : ''" v-for="p in nodes">
         <div @click="onClickNode(p)">{{ p.fullname }}</div>
       </div>
     </div>
     <!--属性编辑部分-->
     <div class="tvu-jse__property-fields">
       <tvu-form-item class="tvu-jse__field" label="键值">
-        <tvu-input v-model="data.currProp.name"
-          :disabled="data.currProp.name === props.rootName && data.currProp.path === ''"></tvu-input>
+        <tvu-input v-model.trim="prop.name" :disabled="prop.name === props.rootName && prop.path === ''"></tvu-input>
       </tvu-form-item>
       <tvu-form-item class="tvu-jse__field" label="类型">
-        <tvu-select v-model="data.currProp.attrs.type" :disabled="forbidden" @change="onChangeType">
+        <tvu-select v-model="attrs.type" :disabled="forbidden" @change="onChangeType">
           <tvu-option label="integer" value="integer"></tvu-option>
           <tvu-option label="number" value="number"></tvu-option>
           <tvu-option label="string" value="string"></tvu-option>
@@ -24,9 +23,8 @@
           <tvu-option label="null" value="null"></tvu-option>
         </tvu-select>
       </tvu-form-item>
-      <tvu-form-item v-if="data.currProp.attrs.type === 'array' && data.currProp.items" class="tvu-jse__field"
-        label="子对象类型">
-        <tvu-select v-model="data.currProp.items.type">
+      <tvu-form-item v-if="attrs.type === 'array' && items" class="tvu-jse__field" label="子对象类型">
+        <tvu-select v-model="items.type">
           <tvu-option label="integer" value="integer"></tvu-option>
           <tvu-option label="number" value="number"></tvu-option>
           <tvu-option label="string" value="string"></tvu-option>
@@ -37,90 +35,65 @@
         </tvu-select>
       </tvu-form-item>
       <tvu-form-item class="tvu-jse__field" label="格式" v-if="formats">
-        <tvu-select v-model="data.currProp.attrs.format" placeholder="请选择格式">
+        <tvu-select v-model="attrs.format" placeholder="请选择格式">
           <tvu-option v-for="format in formats" :key="format.value" :label="format.label" :value="format.value">
           </tvu-option>
         </tvu-select>
       </tvu-form-item>
-      <tvu-form-item class="tvu-jse__field" label="子对象格式" v-if="formats2 && data.currProp.items">
-        <tvu-select v-model="data.currProp.items.format" placeholder="请选择格式">
-          <tvu-option v-for="format in formats2" :key="format.value" :label="format.label" :value="format.value">
+      <tvu-form-item class="tvu-jse__field" label="子对象格式" v-if="itemsFormats && items">
+        <tvu-select v-model="items.format" placeholder="请选择格式" @change="onChangeItemsFormat">
+          <tvu-option v-for="format in itemsFormats" :key="format.value" :label="format.label" :value="format.value">
           </tvu-option>
         </tvu-select>
       </tvu-form-item>
-      <component :is="compFormatAttrs" v-bind.sync="data.currProp.items?.formatAttrs"></component>
       <tvu-form-item class="tvu-jse__field" label="标题">
-        <tvu-input v-model="data.currProp.attrs.title" placeholder="标题"></tvu-input>
+        <tvu-input v-model.trim="attrs.title" placeholder="标题"></tvu-input>
       </tvu-form-item>
       <tvu-form-item class="tvu-jse__field" label="描述">
-        <tvu-textarea v-model="data.currProp.attrs.description" placeholder="描述"></tvu-textarea>
+        <tvu-textarea v-model.trim="attrs.description" placeholder="描述"></tvu-textarea>
       </tvu-form-item>
       <tvu-form-item class="tvu-jse__field">
-        <tvu-checkbox v-model="data.currProp.attrs.required" label="必填"></tvu-checkbox>
+        <tvu-checkbox v-model="attrs.required" label="必填"></tvu-checkbox>
       </tvu-form-item>
+      <!--特定格式类型对应的扩展属性-->
+      <component v-if="items" :is="compFormatAttrs" v-model:formatAttrs="items.formatAttrs"></component>
+      <!--选项设置相关-->
       <tvu-form-item class="tvu-jse__field" label="选项模式"
-        v-if="['string', 'integer', 'number', 'array'].includes(data.currProp.attrs.type)">
-        <tvu-select v-model="hasEnum" @change="onChangeHasEnum">
+        v-if="['string', 'integer', 'number', 'array'].includes(attrs.type)">
+        <tvu-select v-model="choiceMode" @change="onChangeChoiceMode">
           <tvu-option label="不提供选项" value=""></tvu-option>
           <tvu-option label="oneOf" value="oneOf"></tvu-option>
           <tvu-option label="anyOf" value="anyOf"></tvu-option>
           <tvu-option label="enum" value="enum"></tvu-option>
         </tvu-select>
       </tvu-form-item>
-      <div class="tvu-jse__field" v-if="hasEnum">
-        <tvu-jse-enum-config :field-attrs="data.currProp.attrs" :field-attrs-type="hasEnum"></tvu-jse-enum-config>
-      </div>
-      <tvu-form-item class="tvu-jse__field" label="默认值" v-if="!hasEnum">
-        <tvu-input v-model="data.currProp.attrs.default"></tvu-input>
+      <component v-if="choiceMode" is="TvuJseEnumConfig" :field-attrs="attrs" :field-attrs-type="choiceMode">
+      </component>
+      <!--默认值-->
+      <tvu-form-item class="tvu-jse__field" label="默认值" v-if="!choiceMode">
+        <tvu-input v-model="attrs.default"></tvu-input>
       </tvu-form-item>
       <tvu-form-item class="tvu-jse__field">
-        <tvu-checkbox v-model="supportExistIf" label="有属性依赖条件？"></tvu-checkbox>
+        <tvu-checkbox v-model="useExistIf" label="有属性依赖条件？"></tvu-checkbox>
       </tvu-form-item>
-      <tvu-form-item v-if="supportExistIf" class="tvu-jse__field tvu-jse__field--json" label="属性依赖条件">
-        <tvu-json v-model="data.currProp.existIf"></tvu-json>
+      <tvu-form-item v-if="useExistIf" class="tvu-jse__field tvu-jse__field--json" label="属性依赖条件">
+        <tvu-json v-model="prop.existIf"></tvu-json>
       </tvu-form-item>
+      <!--自动填充数据规则定义-->
       <tvu-form-item class="tvu-jse__field">
-        <tvu-checkbox v-model="supportAutofill" label="自动填充？"></tvu-checkbox>
+        <tvu-checkbox v-model="useAutofill" label="自动填充？"></tvu-checkbox>
       </tvu-form-item>
-      <tvu-form-item v-if="supportAutofill" class="tvu-jse__field" label="获取填充值地址">
-        <tvu-input v-model="autofill.url"></tvu-input>
-      </tvu-form-item>
-      <tvu-form-item v-if="supportAutofill" class="tvu-jse__field" label="HTTP方法">
-        <tvu-select v-model="autofill.method">
-          <tvu-option label="GET" value="GET"></tvu-option>
-          <tvu-option label="POST" value="POST"></tvu-option>
-        </tvu-select>
-      </tvu-form-item>
-      <tvu-form-item v-if="supportAutofill" class="tvu-jse__field tvu-jse__field--json" label="查询参数">
-        <tvu-json v-model="autofill.params"></tvu-json>
-      </tvu-form-item>
-      <tvu-form-item v-if="supportAutofill && autofill.method === 'POST'" class="tvu-jse__field tvu-jse__field--json"
-        label="POST请求消息体">
-        <tvu-json v-model="autofill.body"></tvu-json>
-      </tvu-form-item>
-      <tvu-form-item v-if="supportAutofill" class="tvu-jse__field" label="填充位置">
-        <tvu-select v-model="autofill.target">
-          <tvu-option label="作为填入值" value="value"></tvu-option>
-          <tvu-option label="作为可选项" value="items"></tvu-option>
-        </tvu-select>
-      </tvu-form-item>
-      <tvu-form-item v-if="supportAutofill" class="tvu-jse__field" label="执行策略">
-        <tvu-select v-model="autofill.runPolicy">
-          <tvu-option label="表单创建时执行1次" value="onCreate"></tvu-option>
-          <tvu-option label="依赖参数更新时执行1次" value="onParamChange"></tvu-option>
-          <tvu-option label="用户执行" value="onUser"></tvu-option>
-        </tvu-select>
-      </tvu-form-item>
-      <div class="tvu-jse__field"
-        v-if="onUpload && data.currProp.attrs.type === 'array' && data.currProp.items?.format === 'file'">
-        <tvu-jse-attachment :schema-prop="data.currProp" :on-upload="onUpload"></tvu-jse-attachment>
+      <component v-if="useAutofill" :is="TvuJseAutofill" v-model:autofill="autofill"></component>
+      <!--上传模板文件-->
+      <div class="tvu-jse__field" v-if="onUpload && attrs.type === 'array' && items?.format === 'file'">
+        <tvu-jse-attachment :schema-prop="prop" :on-upload="onUpload"></tvu-jse-attachment>
       </div>
       <div class="tvu-jse__extra_fields">
-        <slot name="extattrs" :attrs="data.currProp.attrs">备用内容</slot>
+        <slot name="extattrs" :attrs="attrs">备用内容</slot>
       </div>
       <tvu-form-item class="tvu-jse__field__actions">
         <tvu-button @click="onRemoveNode">删除属性</tvu-button>
-        <tvu-button @click="onAddNode" v-if="hasAAddNode">添加属性</tvu-button>
+        <tvu-button @click="onAddNode" v-if="hasAddNode">添加属性</tvu-button>
       </tvu-form-item>
     </div>
   </div>
@@ -130,6 +103,7 @@ import { Type2Format, JSONSchemaBuilder, SchemaProp } from './builder'
 import File from './formats/File.vue'
 import TvuJseEnumConfig from './EnumConfig.vue'
 import TvuJseAttachment from './Attachment.vue'
+import TvuJseAutofill from './Autofill.vue'
 import { computed, onMounted, reactive, ref, toRaw } from 'vue'
 import { PropAutofillRunPolicy, PropAutofillTarget } from './model'
 
@@ -142,10 +116,6 @@ export default {
 </script>
 <script setup lang="ts">
 
-const Format2Comp = {
-  file: File
-}
-
 const props = defineProps({
   schema: { type: Object, default: {} },
   rootName: { type: String, default: '$' },
@@ -156,9 +126,9 @@ const props = defineProps({
 const builder = new JSONSchemaBuilder(props.rootName)
 const nodes = ref([] as SchemaProp[])
 const data = reactive({ currProp: { name: '', attrs: {} } as SchemaProp })
-const hasEnum = ref('')
-const supportAutofill = ref(false)
-const supportExistIf = ref(false)
+const choiceMode = ref('')
+const useAutofill = ref(false)
+const useExistIf = ref(false)
 
 // 获得当前的JSONSchema数据
 const editing = () => {
@@ -167,6 +137,18 @@ const editing = () => {
 
 // 允许在父组件中获取
 defineExpose({ editing })
+
+const prop = computed(() => {
+  return data.currProp
+})
+
+const attrs = computed(() => {
+  return data.currProp.attrs
+})
+
+const items = computed(() => {
+  return data.currProp.items
+})
 
 const compFormatAttrs = computed(() => {
   const format = data.currProp.items?.format
@@ -178,13 +160,13 @@ const compFormatAttrs = computed(() => {
 })
 
 const formats = computed(() => {
-  const { type } = data.currProp.attrs
+  const { type } = attrs.value
   return (typeof type === 'string' && Type2Format[type])
     ? [{ value: '', label: '无' }].concat(Type2Format[type])
     : null
 })
 
-const formats2 = computed(() => {
+const itemsFormats = computed(() => {
   const type = data.currProp?.items?.type
   return (type && Type2Format[type])
     ? [{ value: '', label: '无' }].concat(Type2Format[type])
@@ -192,7 +174,7 @@ const formats2 = computed(() => {
 })
 
 let forbidden = computed(() => {
-  const { type } = data.currProp.attrs
+  const { type } = attrs.value
   if (type === 'object' || (type === 'array' && data.currProp?.items?.type === 'object')) {
     const idx = nodes.value.findIndex((node: SchemaProp) => node.parentFullname === data.currProp.fullname)
     if (idx !== -1) return true
@@ -200,18 +182,16 @@ let forbidden = computed(() => {
   return false
 })
 
-let hasAAddNode = computed(() => {
-  if (data.currProp.attrs.type === 'object') return true
-  if (data.currProp.attrs.type === 'array' && data.currProp.items?.type === 'object') return true
+let hasAddNode = computed(() => {
+  if (attrs.value.type === 'object') return true
+  if (attrs.value.type === 'array' && data.currProp.items?.type === 'object') return true
   return false
 })
 
-const autofill = computed({
-  get: () => {
-    if (data.currProp.attrs.autofill) return data.currProp.attrs.autofill
-    return { url: '', params: [], target: PropAutofillTarget.value, runPolicy: PropAutofillRunPolicy.onCreate }
-  },
-  set: val => { }
+const autofill = computed(() => {
+  let rawAttrs = attrs.value
+  rawAttrs.autofill ??= { url: '', method: 'GET', target: PropAutofillTarget.value, runPolicy: PropAutofillRunPolicy.onCreate }
+  return rawAttrs.autofill
 })
 
 const onChangeType = (event: any) => {
@@ -223,7 +203,20 @@ const onChangeType = (event: any) => {
   }
 }
 
-const onChangeHasEnum = (event: any) => {
+const onChangeItemsFormat = (event: any) => {
+  const format = event.target.value
+  if (typeof data.currProp.items !== 'object') {
+    data.currProp.items = { type: '' }
+  }
+  let { items } = data.currProp
+  if (format === 'file') {
+    items.formatAttrs = {}
+  } else {
+    delete items.formatAttrs
+  }
+}
+
+const onChangeChoiceMode = (event: any) => {
   const { attrs } = data.currProp
   const value = event.target.value
   if (value) {
@@ -243,16 +236,16 @@ const onChangeHasEnum = (event: any) => {
 const onClickNode = (prop: SchemaProp) => {
   data.currProp = prop
   if (Array.isArray(prop.attrs.enum)) {
-    hasEnum.value = 'enum'
+    choiceMode.value = 'enum'
   } else if (Array.isArray(prop.attrs.oneOf)) {
-    hasEnum.value = 'oneOf'
+    choiceMode.value = 'oneOf'
   } else if (Array.isArray(prop.attrs.anyOf)) {
-    hasEnum.value = 'anyOf'
+    choiceMode.value = 'anyOf'
   } else {
-    hasEnum.value = ''
+    choiceMode.value = ''
   }
-  supportAutofill.value = typeof prop.attrs.autofill === 'object'
-  supportExistIf.value = typeof prop.existIf === 'object'
+  useAutofill.value = typeof prop.attrs.autofill === 'object'
+  useExistIf.value = typeof prop.existIf === 'object'
 }
 
 const onAddNode = () => {
@@ -275,7 +268,7 @@ onMounted(() => {
   builder.flatten(JSON.parse(JSON.stringify(props.schema)))
   nodes.value = builder.props
   data.currProp = builder.props?.[0]
-  supportAutofill.value = typeof data.currProp.attrs.autofill === 'object'
-  supportExistIf.value = typeof data.currProp.existIf === 'object'
+  useAutofill.value = typeof data.currProp.attrs.autofill === 'object'
+  useExistIf.value = typeof data.currProp.existIf === 'object'
 })
 </script>
