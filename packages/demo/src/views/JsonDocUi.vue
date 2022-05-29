@@ -7,6 +7,7 @@
       <option value="object-map-object">对象有可选属性，属性类型是对象</option>
       <option value="object-map-array">对象有可选属性，属性类型是数组</option>
       <option value="autofill">自动填充</option>
+      <option value="prop-dep">属性依赖</option>
     </select>
   </div>
   <div class="flex flex-row">
@@ -36,7 +37,7 @@ const jsonDocEditor = ref<{ editing: () => string } | null>(null)
 
 const jsonResult = ref('')
 
-const caseName = ref('overall')
+const caseName = ref('')
 
 const loading = ref(true)
 
@@ -54,10 +55,13 @@ function loadTestData() {
 }
 
 onMounted(async () => {
+  let stored = sessionStorage.getItem('tms-vue3-ui/json-doc/caseName')
+  caseName.value = stored ?? 'overall'
   await loadTestData()
 })
 
 watch(caseName, () => {
+  sessionStorage.setItem('tms-vue3-ui/json-doc/caseName', caseName.value)
   loadTestData()
 })
 

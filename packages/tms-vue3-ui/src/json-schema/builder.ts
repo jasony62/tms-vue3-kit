@@ -18,7 +18,7 @@ export const Type2Format = {
 } as { [k: string]: { value: string; label: string }[] }
 
 const propToRaw = (prop: SchemaProp, parent: any): any => {
-  let { items, dependencies } = prop
+  let { items, existIf } = prop
 
   let rawProp: any = {
     ...prop.attrs,
@@ -28,12 +28,8 @@ const propToRaw = (prop: SchemaProp, parent: any): any => {
     rawProp.items = items
   }
 
-  /*子节点的数据集中放到父属性中*/
-  if (parent) {
-    if (dependencies) {
-      if (typeof parent.dependencies === 'undefined') parent.dependencies = {}
-      parent.dependencies[prop.name] = dependencies
-    }
+  if (existIf) {
+    rawProp.existIf = existIf
   }
 
   return rawProp

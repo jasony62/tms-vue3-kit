@@ -185,49 +185,127 @@ function createJointNode(
 
   return createWrapClass(labelAndDesc)
 }
-
-function getFieldVisible(prop: SchemaProp, doc: any): boolean {
-  let ruleSet = prop.dependencies
-  if (!ruleSet) return true
-
-  let visible = false
-  let matched: { [k: string]: boolean } = {}
-  let docVal
-
-  for (const [key, rule] of Object.entries(ruleSet['dependencyRules'])) {
-    if (rule.operator === 'or') {
-      matched[key] = false
-      rule.rules.forEach(({ property, value }) => {
-        docVal = doc[property]
-        if (
-          docVal === value ||
-          (Array.isArray(docVal) && docVal.includes(value))
-        ) {
-          matched[key] = true
-        }
-      })
-    } else if (rule.operator === 'and') {
-      matched[key] = true
-      rule.rules.forEach(({ property, value }) => {
-        docVal = doc[property]
-        if (
-          !docVal ||
-          (docVal !== value &&
-            !(Array.isArray(docVal) && docVal.includes(value)))
-        ) {
-          matched[key] = false
-        }
-      })
+/**
+ * 检查是否所有规则都满足
+ * @param rule
+ * @param doc
+ * @returns
+ */
+function checkPropExistIfProperties(rule: any, doc: DocAsArray): boolean {
+  let props = Object.keys(rule)
+  return props.every((prop) => {
+    let docVal = doc.get(prop)
+    return rule[prop].const === docVal
+  })
+}
+/**
+ * 每个条件都要满足
+ * @param rules
+ * @param doc
+ * @returns
+ */
+function checkPropExistIfallOf(rules: any, doc: DocAsArray): boolean {
+  return rules.every((rule: any) => {
+    let matched = false
+    let { properties, allOf, oneOf } = rule
+    if (typeof properties === 'object') {
+      matched = checkPropExistIfProperties(properties, doc)
+    } else if (Array.isArray(oneOf) && oneOf.length) {
+      matched = checkPropExistIfoneOf(oneOf, doc)
+    } else if (Array.isArray(allOf) && allOf.length) {
+      matched = checkPropExistIfallOf(allOf, doc)
     }
+    return matched
+  })
+}
+/**
+ * 只要有1条规则满足就可以
+ * @param rules
+ * @param doc
+ * @returns
+ */
+function checkPropExistIfoneOf(rules: any, doc: DocAsArray): boolean {
+  return rules.some((rule: any) => {
+    let matched = false
+    let { properties, allOf, oneOf } = rule
+    if (typeof properties === 'object') {
+      matched = checkPropExistIfProperties(properties, doc)
+    } else if (Array.isArray(oneOf) && oneOf.length) {
+      matched = checkPropExistIfoneOf(oneOf, doc)
+    } else if (Array.isArray(allOf) && allOf.length) {
+      matched = checkPropExistIfallOf(allOf, doc)
+    }
+    return matched
+  })
+}
+
+/**
+ * 检查属性依赖条件
+ * @param prop
+ * @param doc
+ * @returns
+ */
+function checkPropExistIf(prop: SchemaProp, doc: DocAsArray): boolean {
+  let { existIf } = prop
+
+  // 未指定规则，属性存在
+  if (typeof existIf !== 'object') return true
+
+  const { properties, allOf, oneOf } = existIf
+
+  let matched = false
+
+  if (typeof properties === 'object') {
+    matched = checkPropExistIfProperties(properties, doc)
+  } else if (Array.isArray(allOf) && allOf.length) {
+    matched = checkPropExistIfallOf(allOf, doc)
+  } else if (Array.isArray(oneOf) && oneOf.length) {
+    matched = checkPropExistIfoneOf(oneOf, doc)
   }
 
-  if (ruleSet.operator === 'or') {
-    visible = Object.values(matched).includes(true)
-  } else if (ruleSet.operator === 'and') {
-    visible = !Object.values(matched).includes(false)
-  }
+  return matched
 
-  return visible
+  // let ruleSet = prop.dependencies
+  // if (!ruleSet) return true
+
+  // let visible = false
+  // let matched: { [k: string]: boolean } = {}
+  // let docVal
+
+  // for (const [key, rule] of Object.entries(ruleSet['dependencyRules'])) {
+  //   if (rule.operator === 'or') {
+  //     matched[key] = false
+  //     rule.rules.forEach(({ property, value }) => {
+  //       docVal = doc[property]
+  //       if (
+  //         docVal === value ||
+  //         (Array.isArray(docVal) && docVal.includes(value))
+  //       ) {
+  //         matched[key] = true
+  //       }
+  //     })
+  //   } else if (rule.operator === 'and') {
+  //     matched[key] = true
+  //     rule.rules.forEach(({ property, value }) => {
+  //       docVal = doc[property]
+  //       if (
+  //         !docVal ||
+  //         (docVal !== value &&
+  //           !(Array.isArray(docVal) && docVal.includes(value)))
+  //       ) {
+  //         matched[key] = false
+  //       }
+  //     })
+  //   }
+  // }
+
+  // if (ruleSet.operator === 'or') {
+  //   visible = Object.values(matched).includes(true)
+  // } else if (ruleSet.operator === 'and') {
+  //   visible = !Object.values(matched).includes(false)
+  // }
+
+  // return visible
 }
 
 type StackJoint = {
@@ -373,7 +451,7 @@ export function build(ctx: FormContext, fieldNames?: string[]): VNode[] {
     }
 
     // 需要处理题目是否可见
-    if (false === getFieldVisible(prop, editDoc)) {
+    if (false === checkPropExistIf(prop, editDoc)) {
       // 子字段也不能显示
       // 将对应数据对象的值清空
       continue

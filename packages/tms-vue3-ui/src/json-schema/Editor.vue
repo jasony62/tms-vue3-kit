@@ -53,7 +53,7 @@
         <tvu-input v-model="data.currProp.attrs.title" placeholder="标题"></tvu-input>
       </tvu-form-item>
       <tvu-form-item class="tvu-jse__field" label="描述">
-        <tvu-input v-model="data.currProp.attrs.description" placeholder="描述"></tvu-input>
+        <tvu-textarea v-model="data.currProp.attrs.description" placeholder="描述"></tvu-textarea>
       </tvu-form-item>
       <tvu-form-item class="tvu-jse__field">
         <tvu-checkbox v-model="data.currProp.attrs.required" label="必填"></tvu-checkbox>
@@ -74,6 +74,12 @@
         <tvu-input v-model="data.currProp.attrs.default"></tvu-input>
       </tvu-form-item>
       <tvu-form-item class="tvu-jse__field">
+        <tvu-checkbox v-model="supportExistIf" label="有属性依赖条件？"></tvu-checkbox>
+      </tvu-form-item>
+      <tvu-form-item v-if="supportExistIf" class="tvu-jse__field tvu-jse__field--json" label="属性依赖条件">
+        <tvu-json v-model="data.currProp.existIf"></tvu-json>
+      </tvu-form-item>
+      <tvu-form-item class="tvu-jse__field">
         <tvu-checkbox v-model="supportAutofill" label="自动填充？"></tvu-checkbox>
       </tvu-form-item>
       <tvu-form-item v-if="supportAutofill" class="tvu-jse__field" label="获取填充值地址">
@@ -85,10 +91,11 @@
           <tvu-option label="POST" value="POST"></tvu-option>
         </tvu-select>
       </tvu-form-item>
-      <tvu-form-item v-if="supportAutofill" class="tvu-jse__field" label="查询参数">
+      <tvu-form-item v-if="supportAutofill" class="tvu-jse__field tvu-jse__field--json" label="查询参数">
         <tvu-json v-model="autofill.params"></tvu-json>
       </tvu-form-item>
-      <tvu-form-item v-if="supportAutofill && autofill.method === 'POST'" class="tvu-jse__field" label="POST请求消息体">
+      <tvu-form-item v-if="supportAutofill && autofill.method === 'POST'" class="tvu-jse__field tvu-jse__field--json"
+        label="POST请求消息体">
         <tvu-json v-model="autofill.body"></tvu-json>
       </tvu-form-item>
       <tvu-form-item v-if="supportAutofill" class="tvu-jse__field" label="填充位置">
@@ -116,18 +123,11 @@
         <tvu-button @click="onAddNode" v-if="hasAAddNode">添加属性</tvu-button>
       </tvu-form-item>
     </div>
-    <!-- 开始：扩展定义 -->
-    <div class="tvu-jse__extra">
-      <tvu-jse-dependency v-if="data.currProp.dependencies" :dependencies="data.currProp.dependencies">
-      </tvu-jse-dependency>
-    </div>
-    <!-- 结束：扩展定义 -->
   </div>
 </template>
 <script lang="ts">
 import { Type2Format, JSONSchemaBuilder, SchemaProp } from './builder'
 import File from './formats/File.vue'
-import TvuJseDependency from './Dependency.vue'
 import TvuJseEnumConfig from './EnumConfig.vue'
 import TvuJseAttachment from './Attachment.vue'
 import { computed, onMounted, reactive, ref, toRaw } from 'vue'
@@ -136,7 +136,6 @@ import { PropAutofillRunPolicy, PropAutofillTarget } from './model'
 export default {
   name: 'tms-json-schema',
   components: {
-    TvuJseDependency,
     TvuJseEnumConfig,
   },
 }
@@ -149,9 +148,9 @@ const Format2Comp = {
 
 const props = defineProps({
   schema: { type: Object, default: {} },
-  onUpload: Function,
+  rootName: { type: String, default: '$' },
   onMessage: { type: Function, default(msg: string) { alert(msg) } },
-  rootName: { type: String, default: '' }
+  onUpload: Function,
 })
 
 const builder = new JSONSchemaBuilder(props.rootName)
@@ -159,6 +158,7 @@ const nodes = ref([] as SchemaProp[])
 const data = reactive({ currProp: { name: '', attrs: {} } as SchemaProp })
 const hasEnum = ref('')
 const supportAutofill = ref(false)
+const supportExistIf = ref(false)
 
 // 获得当前的JSONSchema数据
 const editing = () => {
@@ -252,6 +252,7 @@ const onClickNode = (prop: SchemaProp) => {
     hasEnum.value = ''
   }
   supportAutofill.value = typeof prop.attrs.autofill === 'object'
+  supportExistIf.value = typeof prop.existIf === 'object'
 }
 
 const onAddNode = () => {
@@ -275,5 +276,6 @@ onMounted(() => {
   nodes.value = builder.props
   data.currProp = builder.props?.[0]
   supportAutofill.value = typeof data.currProp.attrs.autofill === 'object'
+  supportExistIf.value = typeof data.currProp.existIf === 'object'
 })
 </script>

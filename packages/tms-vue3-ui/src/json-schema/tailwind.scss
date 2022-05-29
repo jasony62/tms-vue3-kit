@@ -2,6 +2,7 @@
 @import './index.scss';
 
 .tvu-jse__properties {
+  min-width: 16rem;
   .tvu-jse__property {
     @apply p-2;
     &.tvu-jse__property--active {
@@ -10,6 +11,7 @@
   }
 }
 .tvu-jse__property-fields {
+  min-width: 16rem;
   @apply bg-white flex flex-col gap-y-2;
 
   .tvu-jse__field {
@@ -30,6 +32,12 @@
 
   .tvu-jse__file-attrs {
     @apply grid grid-cols-1 gap-y-4;
+  }
+
+  .tvu-jse__field--json {
+    textarea.tvu-input {
+      min-height: 12rem;
+    }
   }
 
   .tvu-jse__form__actions {

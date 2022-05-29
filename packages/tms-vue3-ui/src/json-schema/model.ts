@@ -13,22 +13,6 @@ export type EnumOption = {
   group?: any
 }
 
-export type PropDepRule = {
-  property: string
-  value: string
-}
-
-export type PropDepRuleSet = {
-  dependencyRules: {
-    [k: string]: { rules: PropDepRule[]; operator: string }
-  }
-  operator: string
-}
-
-export type PropDep = {
-  [k: string]: PropDepRuleSet
-}
-
 /**属性值自动填充位置*/
 export enum PropAutofillTarget {
   'value' = 'value',
@@ -52,6 +36,20 @@ export type PropAutofill = {
   itemPath?: { path: string; label: string; value: string } // 从返回结果中提取属选项列表值的路径
 }
 
+/**
+ * 属性是否在文档中存在的规则
+ * 指定的所有属性需要等于给定的值
+ */
+export type ExistIfRule = { [k: string]: { const: string } }
+/**
+ * 属性是否在文档中存在的规则集
+ */
+export type ExistIfRuleSet = {
+  properties?: ExistIfRule
+  allOf?: ExistIfRuleSet[]
+  oneOf?: ExistIfRuleSet[]
+}
+
 export type SchemaPropAttrs = {
   type: string
   title?: string
@@ -69,13 +67,13 @@ export type SchemaPropAttrs = {
   value?: any // 要要保留？没有对应的逻辑
   [k: string]: any
 }
-
+/**单个属性定义*/
 export class SchemaProp {
   path: string
   name: string
   attrs: SchemaPropAttrs
+  existIf: ExistIfRuleSet | undefined
   items?: { type: string; [k: string]: any }
-  dependencies?: PropDepRuleSet
   attachment?: any
   isPattern = false //  是否是由正则表达式定义名称的子属性
   patternChildren: SchemaProp[] | undefined
@@ -147,7 +145,6 @@ export type RawSchema = {
 function* _parseChildren(
   properties: { [k: string]: RawSchema },
   parent: SchemaProp,
-  dependencies?: PropDep,
   requiredSet?: string[],
   isPatternProperty = false
 ) {
@@ -158,7 +155,6 @@ function* _parseChildren(
       key,
       properties[key],
       parent,
-      dependencies?.[key],
       requiredSet?.includes(key),
       isPatternProperty
     )
@@ -170,7 +166,6 @@ function* _parseOne(
   name: string,
   rawProp: any,
   parent?: SchemaProp,
-  depRuleSet?: PropDepRuleSet,
   mandatory?: boolean,
   isPatternProperty = false
 ): any {
@@ -182,12 +177,11 @@ function* _parseOne(
 
   let newProp = new SchemaProp(path, name)
 
-  if (depRuleSet) newProp.dependencies = depRuleSet
   if (mandatory) newProp.attrs.required = mandatory
   newProp.isPattern = isPatternProperty
   if (isPatternProperty) parent?.patternChildren?.push(newProp)
 
-  let { properties, patternProperties, items, required, dependencies } = rawProp
+  let { properties, patternProperties, items, required, existIf } = rawProp
 
   let keys = Object.keys(rawProp)
   for (let i = 0; i < keys.length; i++) {
@@ -195,7 +189,7 @@ function* _parseOne(
     switch (key) {
       case 'properties':
       case 'patternProperties':
-      case 'dependencies':
+      case 'existIf':
       case 'required':
         break
       case 'items':
@@ -231,6 +225,11 @@ function* _parseOne(
   if (rawProp.type === 'object' && typeof patternProperties === 'object') {
     newProp.patternChildren = []
   }
+  // 属性依赖规则
+  if (typeof existIf === 'object') {
+    newProp.existIf = existIf
+  }
+
   // 返回当前的属性
   yield newProp
 
@@ -241,27 +240,16 @@ function* _parseOne(
     /*处理对象属性下的子属性*/
     if (typeof properties === 'object') {
       /**属性的子属性*/
-      yield* _parseChildren(properties, newProp, dependencies, requiredSet)
+      yield* _parseChildren(properties, newProp, requiredSet)
     }
     if (typeof patternProperties === 'object') {
       /**属性的模板子属性*/
-      yield* _parseChildren(
-        patternProperties,
-        newProp,
-        dependencies,
-        requiredSet,
-        true
-      )
+      yield* _parseChildren(patternProperties, newProp, requiredSet, true)
     }
   } else if (rawProp.type === 'array') {
     // 处理数组属性下的子属性
     if (typeof items === 'object' && typeof items.properties === 'object') {
-      yield* _parseChildren(
-        items.properties,
-        newProp,
-        dependencies,
-        requiredSet
-      )
+      yield* _parseChildren(items.properties, newProp, requiredSet)
     }
   }
 }

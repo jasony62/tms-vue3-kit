@@ -4,32 +4,9 @@
 
 ## 核心功能
 
-`JSONSchema`支持 7 种基本属性数据类型，包括：`string`，`number`，`integer`，`object`，`array`，`boolean`，`null`。针对每种类型，`JSONSchema`定义了若干关键字（keywords），用来描述每种类型的数据规范化要求，例如：`minLength`和`maxLength`限制字符串类型的长度等。（参考：[Understanding JSON Schema](https://json-schema.org/understanding-json-schema/index.html))
-
-在实际的项目中可能存在两类扩展需求：1、规范中的关键字（keywords）不满足要求需要扩展，例如：指定某些属性只读；2、某些常用类型对象的输入限制条件，例如：手机号码、文件等。
-
-`json-schema`通过`slot`实现关键字扩展，插槽名称为`extattrs`，示例代码如下：
-
-```
-<tms-json-schema schema="schema" :on-message="onMessage" :root-name="'$'">
-  <template #extattrs="{ attrs }">
-    <div>
-      <label><input type="checkbox" v-model="attrs.readonly" />不允许编辑</label>
-    </div>
-    <div>
-      <label><input type="checkbox" v-model="attrs.groupable" />可否分组</label>
-    </div>
-  </template>
- </tms-json-schema>
-```
-
-关键字扩展适用于对所有属性统一添加某种信息。
+`JSONSchema`支持 7 种基本属性数据类型，包括：`string`，`number`，`integer`，`object`，`array`，`boolean`，`null`，扩展`json`类型用于直接编辑 json 格式数据。针对每种类型，`JSONSchema`定义了若干关键字（keywords），用来描述每种类型的数据规范化要求，例如：`minLength`和`maxLength`限制字符串类型的长度等。（参考：[Understanding JSON Schema](https://json-schema.org/understanding-json-schema/index.html))
 
 `JSONSchema`标准对`string`类型提供了格式（format）关键字，说明输入格式要求，`json-schema`将`format`扩展到了`object`类型，例如，限制文件的类型和大小等。`JSONSchema`内置实现了一些常用格式扩展信息，例如：文件。组件的使用者也可以通过`setFormatAttrsComp`方法，指定特定格式对应的扩展信息编辑组件。格式扩展信息记录在`formatAttrs`关键字中。自定义的格式扩展信息编辑组件必须实现`defaultFormatAttrs`方法，提供扩展信息的默认设置。
-
-数组类型（array），字符串类型（string）和整数类型（integer）的属性支持通过`enum`设置可选项范围。目前，`enum`仅支持放`{label:"",value:""}`的对象。
-
-如果数组设置了可选范围，支持设置要求的选项数量`minItems`和`maxItems`。
 
 ## 内置支持的格式
 
@@ -52,32 +29,90 @@
 
 [Required Properties](https://json-schema.org/understanding-json-schema/reference/object.html#id3)
 
+## 选项
+
+属性的类型为`integer`、`number`、`string`、`array`，出现设置【选项模式】。
+
+【选项模式】要支持`enum`，`oneOf`和`anyOf`几种情况。
+
+选项中的值固定为包含`label`和`value`属性的对象。
+
+```json
+[
+  {
+    "label": "男",
+    "value": "male"
+  },
+  {
+    "label": "女",
+    "value": "female"
+  }
+]
+```
+
+支持设置要求的选项数量`minItems`和`maxItems`。
+
 ## 属性依赖
 
-指定属性间的依赖关系，只有当某个（或某些）属性的值满足某条件时，属性才出现。
+用`existIf`指定属性间的依赖关系，只有当某个（或某些）属性的值满足条件时，属性才存在（出现在表达中）。
 
-`JSONSchema`只定义了简单的依赖关系，说明当某属性出现时，另一个属性必须出现。但是，经常需要支持的情况是当某属性的值满足某个条件时，另一个属性才出现。
-
-某个属性可以指定多条依赖关系，描述为某个属性等于某个值，然后指定这多个条件是需要全部满足还是满足任意一个就行。（单个条件除了等于，还有可能存在其他关系，例如：大于、小于等；多个条件之间除了与和或的关系，还有可能先分组，再描述组间的关系。）
+用`properties`定义属性的取值条件，多个属性取值条件是和的关系（同时满足）。
 
 ```json
 {
-  "dependencies": {
-    "file": {
-      "rules": { "familyName": "1", "givenName": "2" },
-      "operator": "or"
-    }
-  }
+  "properties": { "prop1": { "const": "value" }, "prop2": { "const": "value" } }
 }
 ```
 
-| 关键字       | 说明                                                                                                                                                      | 类型   |
-| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| dependencies | 对象类型下和`properties`并列，描述`properties`之间的依赖关系。由其它属性的值决定是否需要在表单中显示的属性作为对象的`key`，对应的值为描述依赖规则的对象。 | object |
-| rules        | 依赖规则的集合。对象的`key`为被依赖的属性，值为当属性等一该值时规则成立。                                                                                 | object |
-| operator     | 多条规则间的预算规则，目前仅支持`and`和`or`两个值，分别代表全部满足或满足任意一个。                                                                       | string |
+用`oneOf`定义多组条件间任意满足一项的情况，多个条件放在数组中。
+
+```json
+{
+  "oneOf": [
+    { "properties": { "prop1": { "const": "value" } } },
+    { "properties": { "prop2": { "const": "value" } } }
+  ]
+}
+```
+
+用`allOf`定义多组条件间同时满足的情况，多个条件放在数组中。
+
+```json
+{
+  "allOf": [
+    { "properties": { "prop1": { "const": "value" } } },
+    { "properties": { "prop2": { "const": "value" } } }
+  ]
+}
+```
+
+支持条件嵌套。
+
+```json
+{
+  "allOf": [
+    {
+      "anyOf": [
+        { "prop1": { "const": "value" } },
+        { "prop2": { "const": "value" } }
+      ]
+    },
+    { "properties": [{ "prop3": { "const": "value" } }] }
+  ]
+}
+```
+
+注：目前，仅支持通过直接填入规则`JSON`文本的方式定义属性依赖规则。
+
+[dependentRequired](https://json-schema.org/understanding-json-schema/reference/conditionals.html#id4)
+
+[dependentSchemas](https://json-schema.org/understanding-json-schema/reference/conditionals.html#id5)
+
+[If-Then-Else](https://json-schema.org/understanding-json-schema/reference/conditionals.html#id6)
 
 [Property dependencies](https://json-schema.org/understanding-json-schema/reference/object.html#id7)
+
+[Constant values](https://json-schema.org/understanding-json-schema/reference/generic.html#id5)
 
 ## 选项依赖
 
@@ -124,9 +159,41 @@
 
 注：`autofill`不是`JSONSchema`标准中的内容。
 
-注：替代原来的`eventDependencies`
+## 文件属性
+
+待补充
+
+## 扩展属性定义
+
+在实际的项目中可能存在两类扩展需求：1、规范中的关键字（keywords）不满足要求需要扩展，例如：指定某些属性只读；2、某些常用类型对象的输入限制条件，例如：手机号码、文件等。
+
+`json-schema`通过`slot`实现关键字扩展，插槽名称为`extattrs`，示例代码如下：
+
+```
+<tms-json-schema schema="schema" :on-message="onMessage" :root-name="'$'">
+  <template #extattrs="{ attrs }">
+    <div>
+      <label><input type="checkbox" v-model="attrs.readonly" />不允许编辑</label>
+    </div>
+    <div>
+      <label><input type="checkbox" v-model="attrs.groupable" />可否分组</label>
+    </div>
+  </template>
+ </tms-json-schema>
+```
+
+关键字扩展适用于对所有属性统一添加某种信息。
+
+注：`JSONSchema`新版本规范中已经支持`readOnly`和`writeOnly`属性。
 
 ## 使用组件
+
+| 组件属性  | 说明                                                     | 类型     | 必填 | 默认值 |
+| --------- | -------------------------------------------------------- | -------- | ---- | ------ |
+| schema    | 要编辑的`JSONSchema`对象。编辑过程中不会改变传入的对象。 | object   | 否   |        |
+| onMessage | 显示提示信息。                                           | function | 否   |        |
+| onUpload  | 为文件属性提供上传模版文件的方法。                       | function | 否   |        |
+| rootName  | 属性路径名的根节点名称。请参考`JSON Path`的定义。        | sting    | 否   | $      |
 
 ```js
 import { JsonSchema } from 'tms-vue3-ui'
@@ -135,8 +202,6 @@ import { JsonSchema } from 'tms-vue3-ui'
 ```html
 <json-schema :schema="jsonSchema"></json-schema>
 ```
-
-> 注意在 JavaScript 中对象和数组是通过引用传入的，所以对于一个数组或对象类型的 prop 来说，在子组件中改变这个对象或数组本身将会影响到父组件的状态。
 
 # 参考
 

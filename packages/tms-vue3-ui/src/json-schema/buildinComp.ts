@@ -25,6 +25,19 @@ const components = {
       })
     },
   }),
+  textarea: defineComponent({
+    props: ['modelValue'],
+    emits: ['update:modelValue'],
+    render() {
+      return h('textarea', {
+        value: this.modelValue,
+        class: ['tvu-input'],
+        onInput: ($event: any) => {
+          this.$emit('update:modelValue', $event.target.value)
+        },
+      })
+    },
+  }),
   json: defineComponent({
     props: ['modelValue'],
     emits: ['update:modelValue'],
@@ -155,6 +168,9 @@ const BuildinComponents: { [k: string]: { [k: string]: any } } = {
   },
   'tvu-input': {
     ...components.input,
+  },
+  'tvu-textarea': {
+    ...components.textarea,
   },
   'tvu-json': {
     ...components.json,

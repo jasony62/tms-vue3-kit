@@ -108,10 +108,6 @@ export abstract class Field {
     this._required = val
   }
 
-  get dependencies() {
-    return this._prop.dependencies
-  }
-
   get visible() {
     return this._visible
   }

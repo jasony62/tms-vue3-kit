@@ -18,7 +18,7 @@
         </div>
         <div>
           <tms-json-schema v-if="loading === false" ref="schemaEditor" :schema="testObj.schema"
-            :on-upload="onUploadFile" :on-message="onMessage" :root-name="'$'">
+            :on-upload="onUploadFile" :on-message="onMessage">
             <template #extattrs="{ attrs }">
               <div>
                 <label><input type="checkbox" v-model="attrs.readonly" />不允许编辑</label>
