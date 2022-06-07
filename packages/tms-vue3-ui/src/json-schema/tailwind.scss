@@ -18,6 +18,7 @@
     input,
     select,
     textarea {
+      min-width: 1rem;
       @apply w-full;
     }
   }
