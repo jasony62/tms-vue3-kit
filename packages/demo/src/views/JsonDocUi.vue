@@ -8,6 +8,7 @@
       <option value="object-map-array">对象有可选属性，属性类型是数组</option>
       <option value="autofill">自动填充</option>
       <option value="prop-dep">属性依赖</option>
+      <option value="files">文件</option>
     </select>
   </div>
   <div class="flex flex-row">
@@ -68,7 +69,6 @@ watch(caseName, () => {
 const onAutofill = () => {
   return {
     get: (url: string) => {
-      console.log('autofile url', url)
       return new Promise((resolve, reject) => {
         let result: any = { data: { result: {} } }
         if ('http://tms-vue3-kit/autofill/areaCode' === url) {
@@ -84,7 +84,6 @@ const onAutofill = () => {
       })
     },
     post: (url: string, data: any) => {
-      console.log('autofile url', url, data)
       return new Promise((resolve, reject) => {
         let { filter } = data
         let result: any = { data: { result: {} } }
@@ -106,7 +105,6 @@ const onAutofill = () => {
  * @param params
  */
 const onFileSelect = (params: any) => {
-  console.log('params', params)
   return new Promise((resolve) => {
     /**这里需要返回文件属性中items.properties中定义的内容*/
     resolve({

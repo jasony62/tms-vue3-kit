@@ -147,36 +147,24 @@ export class FileNode extends FieldNode {
   protected children(): VNode[] {
     const { ctx, field } = this
     const fieldValue = this.fieldValue()
-
     /**生成数组中已有项目的节点*/
     const itemNestVNodes: VNode[] = []
-    /**children是个二维数组，第1维是字段，第2纬是数组的项目*/
-    if (Array.isArray(this._children) && this._children.length) {
-      let fieldNum = this._children.length
-      let itemNum = Array.isArray(this._children[0])
-        ? this._children[0].length
-        : 0
 
-      for (let i = 0; i < itemNum; i++) {
-        let itemVNodes = [] // 数组中1个item的虚节点
-        for (let j = 0; j < fieldNum; j++) {
-          let fieldVNodes = this._children[j] // 一类字段的虚节点
-          if (Array.isArray(fieldVNodes)) itemVNodes.push(fieldVNodes[i])
-        }
-        /**数组的一个项目*/
-        // 针对一个项目的操作
-        let itemActionsVNode = h(
-          'div',
-          { class: ['jdoc__nest__item__actions'] },
-          [itemRemoveVNode(fieldValue, i)]
-        )
-        let itemNestVNode = h('div', { class: ['tvu-jdoc__nest__item'] }, [
-          itemVNodes,
-          itemActionsVNode,
-        ])
-        itemNestVNodes.push(itemNestVNode)
-      }
-    }
+    this._children.forEach((child, index) => {
+      let itemVNodes = [] // 数组中1个item的虚节点
+      itemVNodes.push(child)
+      let itemActionsVNode = h(
+        'div',
+        { class: ['jdoc__nest__item__actions'] },
+        [itemRemoveVNode(fieldValue, index)]
+      )
+      let itemNestVNode = h('div', { index, class: ['tvu-jdoc__nest__item'] }, [
+        itemVNodes,
+        itemActionsVNode,
+      ])
+      itemNestVNodes.push(itemNestVNode)
+    })
+
     /**是否支持上传文件*/
     let newItemVNode
     if (

@@ -4,6 +4,9 @@ import { Field } from '../fields'
 import { h, VNode } from 'vue'
 import { components } from '.'
 import RandExp from 'randexp'
+import Debug from 'debug'
+
+const debug = Debug('json-doc')
 
 /**
  * 添加子属性操作
@@ -47,6 +50,9 @@ export class ObjectNode extends FieldNode {
   constructor(ctx: FormContext, field: Field, children?: VNode[]) {
     super(ctx, field)
     this._children = children
+    debug(
+      `字段【${field.fullname}】构造节点对象，包含【${children?.length}】个子节点`
+    )
   }
 
   options() {

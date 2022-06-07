@@ -178,6 +178,9 @@ function createJointNode(
   field: Field,
   children: VNode[]
 ): VNode {
+  debug(
+    `字段【${field.fullname}】，生成节点，包含【${children.length}】个子节点`
+  )
   const node = prepareFieldNode(ctx, field, children)
 
   const wrapNode = new FieldWrap(ctx, node)
@@ -420,7 +423,13 @@ class Stack {
     return this.joints.length
   }
 }
-
+/**
+ * 创建表单中的节点
+ *
+ * @param ctx
+ * @param fieldNames
+ * @returns
+ */
 export function build(ctx: FormContext, fieldNames?: string[]): VNode[] {
   const { schema, editDoc } = ctx
 
@@ -460,7 +469,7 @@ export function build(ctx: FormContext, fieldNames?: string[]): VNode[] {
     if (prop.attrs.type === 'object') {
       // 对象，连接节点
       if (prop.isPattern) {
-        // 需要根据文档数据生成字段
+        // 属性是动态的，需要根据文档数据生成字段
         parentJoints.forEach((joint) => {
           let fields = createOptionalFields(ctx, prop, joint)
           debug(`属性【${prop.fullname}】生成${fields.length}个字段`)
@@ -587,7 +596,7 @@ let mapBuilders = new Map()
 
 export type FormContext = {
   editDoc: DocAsArray
-  fields: Map<String, Field>
+  fields: Map<String, Field> // 保存表单中的field对象，避免每一次渲染都重新生成
   schema: RawSchema
   onMessage: Function
   autofillRequest?: Function
@@ -605,7 +614,6 @@ export type FormContext = {
 export default function (ctx: FormContext, fieldNames?: string[]) {
   let builder = mapBuilders.get(ctx)
   if (!builder) {
-    console.log('zzzzzzzzzzz')
     builder = new Builder(ctx, fieldNames)
     mapBuilders.set(ctx, builder)
   }

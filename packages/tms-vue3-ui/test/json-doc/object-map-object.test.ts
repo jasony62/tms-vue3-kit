@@ -18,6 +18,7 @@ describe('对象包含可选属性，可选属性为对象类型', () => {
     build(
       {
         schema: SampleSchema,
+        fields: new Map(),
         editDoc,
         onMessage: (msg: string) => {
           console.log(msg)

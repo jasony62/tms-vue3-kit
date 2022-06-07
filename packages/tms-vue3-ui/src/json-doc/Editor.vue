@@ -113,7 +113,6 @@ export default defineComponent({
     return () => {
       const fieldNames: string[] = []
       const nodes = BuildEditor(ctx, fieldNames)
-      console.log('render...')
       return h(
         'div',
         {
