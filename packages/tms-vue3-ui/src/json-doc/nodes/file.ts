@@ -35,8 +35,9 @@ const uploadLocalFile = (
       let data = await getFileBase64(file)
       fileUpload({ fullname, data, field }).then((fileData: any) => {
         // 设置初始值和添加项目必须在dom循环中完成，不能在promise外面初始化
-        fieldValue ??= ctx.editDoc.init(field.fullname, [])
-        // fieldValue.push(fileData)
+        const fieldValue = ctx.editDoc.init(field.fullname, [])
+        if (Array.isArray(fieldValue))
+          ctx.editDoc.appendAt(field.fullname, fileData)
       })
     }
   })
@@ -56,9 +57,7 @@ const itemAddVNode = (ctx: FormContext, field: Field) => {
       class: ['tvu-button'],
       onClick: () => {
         const fieldValue = ctx.editDoc.init(field.fullname, [])
-        // if (Array.isArray(fieldValue)) {
-        //   fieldValue.push({})
-        // }
+        if (Array.isArray(fieldValue)) ctx.editDoc.appendAt(field.fullname, {})
       },
     },
     '添加'
@@ -81,13 +80,7 @@ const itemUploadVNode = (ctx: FormContext, field: Field) => {
         let fieldValue = ctx.editDoc.get(field.fullname)
         /**只能在数组中添加文件*/
         if ((fieldValue ?? true) || Array.isArray(fieldValue)) {
-          if (typeof ctx.onFileSelect === 'function') {
-            ctx.onFileSelect(field.fullname, field).then((fileData: any) => {
-              // 设置初始值和添加项目必须在dom循环中完成，不能在promise外面初始化
-              fieldValue ??= ctx.editDoc.init(field.fullname, [])
-              fieldValue.push(fileData)
-            })
-          } else if (typeof ctx.onFileUpload === 'function') {
+          if (typeof ctx.onFileUpload === 'function') {
             /**提供了接收上传本地文件的方法*/
             uploadLocalFile(ctx, field, fieldValue, ctx.onFileUpload)
           }
@@ -95,6 +88,39 @@ const itemUploadVNode = (ctx: FormContext, field: Field) => {
       },
     },
     '上传文件'
+  )
+
+  return h('div', { class: ['tvu-jdoc__nest__actions'] }, addVNode)
+}
+
+/**
+ * 执行选取文件操作
+ * @param ctx
+ * @param field
+ * @param fileUpload
+ * @returns
+ */
+const itemPickVNode = (ctx: FormContext, field: Field) => {
+  let addVNode = h(
+    components.button.tag,
+    {
+      class: ['tvu-button'],
+      onClick: () => {
+        let fieldValue = ctx.editDoc.get(field.fullname)
+        /**只能在数组中添加文件*/
+        if ((fieldValue ?? true) || Array.isArray(fieldValue)) {
+          if (typeof ctx.onFileSelect === 'function') {
+            ctx.onFileSelect(field.fullname, field).then((fileData: any) => {
+              // 设置初始值和添加项目必须在dom循环中完成，不能在promise外面初始化
+              const fieldValue = ctx.editDoc.init(field.fullname, [])
+              if (Array.isArray(fieldValue))
+                ctx.editDoc.appendAt(field.fullname, fileData)
+            })
+          }
+        }
+      },
+    },
+    '选取文件'
   )
 
   return h('div', { class: ['tvu-jdoc__nest__actions'] }, addVNode)
@@ -109,14 +135,16 @@ const getFileBase64 = (file: any) => {
   })
 }
 
-const itemRemoveVNode = (fieldValue: any[], index: number) => {
+const itemRemoveVNode = (ctx: FormContext, field: Field, index: number) => {
+  let fullname = `${field.fullname}[${index}]`
   return h(
     components.button.tag,
     {
+      name: fullname,
       class: ['tvu-button'],
       onClick: () => {
         // 删除数组中的内容
-        fieldValue.splice(index, 1)
+        ctx.editDoc.remove(fullname)
       },
     },
     '删除'
@@ -156,7 +184,7 @@ export class FileNode extends FieldNode {
       let itemActionsVNode = h(
         'div',
         { class: ['jdoc__nest__item__actions'] },
-        [itemRemoveVNode(fieldValue, index)]
+        [itemRemoveVNode(ctx, field, index)]
       )
       let itemNestVNode = h('div', { index, class: ['tvu-jdoc__nest__item'] }, [
         itemVNodes,
@@ -167,11 +195,10 @@ export class FileNode extends FieldNode {
 
     /**是否支持上传文件*/
     let newItemVNode
-    if (
-      typeof ctx.onFileUpload === 'function' ||
-      typeof ctx.onFileSelect === 'function'
-    ) {
+    if (typeof ctx.onFileUpload === 'function') {
       newItemVNode = itemUploadVNode(ctx, field)
+    } else if (typeof ctx.onFileSelect === 'function') {
+      newItemVNode = itemPickVNode(ctx, field)
     } else {
       newItemVNode = itemAddVNode(ctx, field)
     }

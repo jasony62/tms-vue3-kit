@@ -15,7 +15,7 @@
     <div class="w-1/3 p-4">
       <json-doc v-if="loading === false" ref="jsonDocEditor" :key="caseName" :schema="testObj.schema"
         :value="testObj.data" :autofill-request="onAutofill" :on-file-download="onFileDownload"
-        :on-file-upload="onFileUpload">
+        :on-file-select="onFileSelect">
       </json-doc>
     </div>
     <div class="p-4">
@@ -117,16 +117,16 @@ const onFileSelect = (params: any) => {
  * 表单中文件上传方法
  * @param params
  */
-const onFileUpload = (params: any) => {
-  console.log('params', params)
-  return new Promise((resolve) => {
-    /**这里需要返回文件属性中items.properties中定义的内容*/
-    resolve({
-      name: 'onFileUpload返回文件名称',
-      url: 'onFileUpload返回的文件地址',
-    })
-  })
-}
+// const onFileUpload = (params: any) => {
+//   console.log('params', params)
+//   return new Promise((resolve) => {
+//     /**这里需要返回文件属性中items.properties中定义的内容*/
+//     resolve({
+//       name: 'onFileUpload返回文件名称',
+//       url: 'onFileUpload返回的文件地址',
+//     })
+//   })
+// }
 
 const onFileDownload = (name: string, url: string) => {
   alert(`下载文件：name=${name},url=${url}`)

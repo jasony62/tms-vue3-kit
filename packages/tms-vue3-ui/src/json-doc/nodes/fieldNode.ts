@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import { stringify } from 'querystring'
 import { h, nextTick, VNode } from 'vue'
 import { FormContext } from '../builder'
 import { Field } from '../fields'

@@ -217,15 +217,18 @@ export class DocAsArray {
   }
   /**
    * 给属性追加子属性
+   *
    * @param name 属性的名称
    * @param value 子属性的值
    * @param key 子属性的名称
    */
   appendAt(name: string, value: any, key?: string, needRender = true) {
+    let newProp
     if (!name) {
       /**添加根属性，没有父属性*/
       if (typeof key === 'string') {
-        this._properties.push(new DocProp(undefined, key, value))
+        newProp = new DocProp(undefined, key, value)
+        this._properties.push(newProp)
       } else {
         throw Error(`文档根属性不允许指定为数字类型【${key}】`)
       }
@@ -246,25 +249,23 @@ export class DocAsArray {
           }
           lastChildIndex++
         }
-        let prop = new DocProp(parent, key, value)
-        this._properties.splice(lastChildIndex, 0, prop)
+        newProp = new DocProp(parent, key, value)
+        this._properties.splice(lastChildIndex, 0, newProp)
         debug(
-          `属性【${name}】在【${lastChildIndex}】添加子字段【${prop.name}】`
+          `属性【${name}】在【${lastChildIndex}】添加子字段【${newProp.name}】`
         )
       } else if ((key ?? true) || typeof key === 'number') {
         /**数组添加项目*/
         let index = parent._children.length
-        // let re = new RegExp(`^${nameToRegExp(name)}\\[(\\d+)\\]$`)
-        // let lastChildIndex = parentIndex + 1
-        // while (lastChildIndex < this._properties.length) {
-        //   let next = this._properties[lastChildIndex]
-        //   if (!re.test(next.name)) break
-        //   lastChildIndex++
-        // }
-        let prop = new DocProp(parent, index, value)
-        this._properties.push(prop)
-        debug(`属性【${name}】在位置添加子属性【${prop.name}】`)
+        newProp = new DocProp(parent, index, value)
+        this._properties.push(newProp)
+        debug(`属性【${name}】在位置添加子属性【${newProp.name}】`)
       }
+    }
+    // 需要添加子字段。插入的位置需要控制吗？
+    if (newProp && typeof value === 'object' && Object.keys(value).length) {
+      let iter = new DocIter(value, newProp.name)
+      Array.from(iter).forEach((child) => this._properties.push(child))
     }
 
     if (needRender) this.renderCounter.value++
@@ -296,6 +297,12 @@ export class DocAsArray {
     }
 
     this._properties.push(newProp)
+
+    // 需要添加子字段。插入的位置需要控制吗？
+    if (newProp && typeof value === 'object' && Object.keys(value).length) {
+      let iter = new DocIter(value, newProp.name)
+      Array.from(iter).forEach((child) => this._properties.push(child))
+    }
 
     if (needRender) this.renderCounter.value++
   }
