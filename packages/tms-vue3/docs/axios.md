@@ -28,7 +28,7 @@ let tmsAxios = this.TmsAxios(name)
 不通过 Vue 使用之前创建的实例。
 
 ```javascript
-import { TmsAxios } from 'tms-vue3-ts'
+import { TmsAxios } from 'tms-vue3'
 let name = 'tms-axios-1'
 let tmsAxios = TmsAxios.ins(name)
 ```
