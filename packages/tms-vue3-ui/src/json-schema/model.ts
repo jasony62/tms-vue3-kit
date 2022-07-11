@@ -81,7 +81,7 @@ export class SchemaProp {
   constructor(path: string, name: string, type?: string) {
     this.path = path
     this.name = name
-    this.attrs = { type: type ?? '' }
+    this.attrs = { type: type ?? '', required: false }
   }
 
   get fullname(): string {
