@@ -94,6 +94,7 @@
       <tvu-form-item class="tvu-jse__field__actions">
         <tvu-button @click="onRemoveNode">删除属性</tvu-button>
         <tvu-button @click="onAddNode" v-if="hasAddNode">添加属性</tvu-button>
+        <tvu-button @click="onAddNode" v-if="hasAddNode">添加模板属性</tvu-button>
       </tvu-form-item>
     </div>
   </div>
@@ -218,18 +219,36 @@ const onChangeItemsFormat = (event: any) => {
 
 const onChangeChoiceMode = (event: any) => {
   const { attrs } = data.currProp
-  const value = event.target.value
-  if (value) {
-    if (!Array.isArray(attrs[value])) {
-      attrs[value] = [
+  let oldValue = ""
+  Object.keys(attrs).forEach(item => {
+    if (['oneOf', 'anyOf', 'enum'].includes(item)) {
+      oldValue = item
+    }
+  })
+  const newValue = event.target.value
+
+  if (oldValue) {
+    if (!newValue) {
+      delete attrs[oldValue]
+      delete attrs.enumGroups
+    } else if (newValue !== oldValue) {
+      delete attrs[oldValue]
+      delete attrs.enumGroups
+
+      attrs[newValue] = [
         { label: '选项1', value: 'a' },
-        { label: '选项2', value: 'b' },
+        { label: '选项2', value: 'b' }
       ]
       data.currProp.attrs.enumGroups = []
     }
   } else {
-    delete attrs[value]
-    delete attrs.enumGroups
+    if (newValue) {
+      attrs[newValue] = [
+        { label: '选项1', value: 'a' },
+        { label: '选项2', value: 'b' }
+      ]
+      data.currProp.attrs.enumGroups = []
+    }
   }
 }
 
