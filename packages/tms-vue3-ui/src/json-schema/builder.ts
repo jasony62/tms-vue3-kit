@@ -81,7 +81,7 @@ export class JSONSchemaBuilder {
         throw Error('键值不允许为空')
       }
       // 将数组类型分为两次查找
-      let pathsegs = path.replace('[*]', '.[*]').split('.')
+      let pathsegs = path.replace(/\[\*\]/g, '.[*]').split('.')
       let parent = pathsegs.reduce((prev, seg) => {
         // 跳过根节点
         if (seg === this.rootName) {
