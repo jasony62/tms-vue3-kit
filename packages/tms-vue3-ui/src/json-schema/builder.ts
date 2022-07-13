@@ -80,8 +80,12 @@ export class JSONSchemaBuilder {
         alert('键值不允许为空')
         throw Error('键值不允许为空')
       }
+      if (prop.isPattern && !(/\^.+\$/.test(name))) {
+        alert('正则表达式类型的键值必须以"^"开头,"$"结尾')
+        throw Error('正则表达式类型的键值格式不正确')
+      }
       // 将数组类型分为两次查找
-      let pathsegs = path.replace('[*]', '.[*]').split('.')
+      let pathsegs = path.replace(/\[\*\]/g, '.[*]').split('.')
       let parent = pathsegs.reduce((prev, seg) => {
         // 跳过根节点
         if (seg === this.rootName) {
@@ -94,20 +98,35 @@ export class JSONSchemaBuilder {
           }
           return prev.items
         }
-        // 子节点加到父节点的properties字段中
-        if (typeof prev.properties === 'undefined') {
-          prev.properties = { [seg]: {} }
-        } else if (typeof prev.properties[seg] === 'undefined') {
-          prev.properties[seg] = {}
+        // 分开处理properties和patternProperties
+        if (/\^.+\$/.test(seg)) {
+          if (typeof prev.patternProperties === 'undefined') {
+            prev.patternProperties = { [seg]: {} }
+          } else if (typeof prev.patternProperties[seg] === 'undefined') {
+            prev.patternProperties[seg] = {}
+          }
+          return prev.patternProperties[seg]
+        } else {
+          // 子节点加到父节点的properties字段中
+          if (typeof prev.properties === 'undefined') {
+            prev.properties = { [seg]: {} }
+          } else if (typeof prev.properties[seg] === 'undefined') {
+            prev.properties[seg] = {}
+          }
+          return prev.properties[seg]
         }
-        return prev.properties[seg]
       }, rootObj)
 
       /**在父对象中添加当前属性 */
       let newProp = propToRaw(prop, parent)
       /**加入父属性 */
-      if (typeof parent.properties === 'undefined') parent.properties = {}
-      parent.properties[name] = newProp
+      if (typeof prop.isPattern === 'boolean' && prop.isPattern === true) {
+        if (typeof parent.patternProperties === 'undefined') parent.patternProperties = {}
+        parent.patternProperties[name] = newProp
+      } else {
+        if (typeof parent.properties === 'undefined') parent.properties = {}
+        parent.properties[name] = newProp
+      }
     }
 
     return rootObj
@@ -129,12 +148,13 @@ export class JSONSchemaBuilder {
   /**
    * 在指定的属性下添加子属性
    */
-  addProp(parent: SchemaProp): SchemaProp {
+  addProp(parent: SchemaProp, type: string): SchemaProp {
     // 节点所在路径
     let path = parent.fullname
     if (parent.attrs.type === 'array') path += '[*]'
 
     let newProp = new SchemaProp(path, 'newKey', 'string')
+    newProp.isPattern = type === 'patternProperties' ?  true : false
 
     /**将新节点加入到适当位置*/
     let lastIndex = this.getLastChildIndex(parent)

@@ -66,6 +66,7 @@ export type SchemaPropAttrs = {
   autofill?: PropAutofill
   value?: any // 要要保留？没有对应的逻辑
   [k: string]: any
+  initialName?: string
 }
 /**单个属性定义*/
 export class SchemaProp {
@@ -81,7 +82,7 @@ export class SchemaProp {
   constructor(path: string, name: string, type?: string) {
     this.path = path
     this.name = name
-    this.attrs = { type: type ?? '' }
+    this.attrs = { type: type ?? '', required: false }
   }
 
   get fullname(): string {
@@ -139,6 +140,7 @@ export type RawSchema = {
   maxLength?: number
   pattern?: string
   $defs?: { [k: string]: RawSchema }
+  initialName?: string
 }
 
 /**依次处理子属性*/
@@ -211,6 +213,7 @@ function* _parseOne(
       case 'enumGroups':
       case 'default':
       case 'autofill':
+      case 'initialName':
         Object.assign(newProp.attrs, { [key]: rawProp[key] })
         break
       default:

@@ -11,6 +11,9 @@
       <tvu-form-item class="tvu-jse__field" label="键值">
         <tvu-input v-model.trim="prop.name" :disabled="prop.name === props.rootName && prop.path === ''"></tvu-input>
       </tvu-form-item>
+      <tvu-form-item class="tvu-jse__field" label="初始名称" v-if="prop.isPattern">
+        <tvu-input v-model.trim="attrs.initialName"></tvu-input>
+      </tvu-form-item>
       <tvu-form-item class="tvu-jse__field" label="类型">
         <tvu-select v-model="attrs.type" :disabled="forbidden" @change="onChangeType">
           <tvu-option label="integer" value="integer"></tvu-option>
@@ -93,7 +96,8 @@
       </div>
       <tvu-form-item class="tvu-jse__field__actions">
         <tvu-button @click="onRemoveNode">删除属性</tvu-button>
-        <tvu-button @click="onAddNode" v-if="hasAddNode">添加属性</tvu-button>
+        <tvu-button @click="onAddNode('properties')" v-if="hasAddNode">添加属性</tvu-button>
+        <tvu-button @click="onAddNode('patternProperties')" v-if="hasAddNode">添加模板属性</tvu-button>
       </tvu-form-item>
     </div>
   </div>
@@ -218,18 +222,36 @@ const onChangeItemsFormat = (event: any) => {
 
 const onChangeChoiceMode = (event: any) => {
   const { attrs } = data.currProp
-  const value = event.target.value
-  if (value) {
-    if (!Array.isArray(attrs[value])) {
-      attrs[value] = [
+  let oldValue = ""
+  Object.keys(attrs).forEach(item => {
+    if (['oneOf', 'anyOf', 'enum'].includes(item)) {
+      oldValue = item
+    }
+  })
+  const newValue = event.target.value
+
+  if (oldValue) {
+    if (!newValue) {
+      delete attrs[oldValue]
+      delete attrs.enumGroups
+    } else if (newValue !== oldValue) {
+      delete attrs[oldValue]
+      delete attrs.enumGroups
+
+      attrs[newValue] = [
         { label: '选项1', value: 'a' },
-        { label: '选项2', value: 'b' },
+        { label: '选项2', value: 'b' }
       ]
       data.currProp.attrs.enumGroups = []
     }
   } else {
-    delete attrs[value]
-    delete attrs.enumGroups
+    if (newValue) {
+      attrs[newValue] = [
+        { label: '选项1', value: 'a' },
+        { label: '选项2', value: 'b' }
+      ]
+      data.currProp.attrs.enumGroups = []
+    }
   }
 }
 
@@ -248,8 +270,8 @@ const onClickNode = (prop: SchemaProp) => {
   useExistIf.value = typeof prop.existIf === 'object'
 }
 
-const onAddNode = () => {
-  let child = builder.addProp(toRaw(data.currProp))
+const onAddNode = (type: string) => {
+  let child = builder.addProp(toRaw(data.currProp), type)
   data.currProp = child
 }
 
