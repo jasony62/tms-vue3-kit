@@ -26,4 +26,7 @@ export default defineConfig({
       '@': resolve(__dirname, 'src'),
     },
   },
+  server: {
+    port: parseInt(process.env.SERVER_PORT) || 3000,
+  },
 })
