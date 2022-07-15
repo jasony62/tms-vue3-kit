@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent, h, PropType, ref } from 'vue'
+import { defineComponent, h, PropType, ref, computed } from 'vue'
 import { RawSchema } from '@/json-schema/model'
 import { deepClone } from '@/utils'
 import BuildEditor from './builder'
@@ -81,7 +81,7 @@ export default defineComponent({
      */
     const editing = (isCheckValidity = true): any => {
       // if (isCheckValidity && !checkValidity()) return false
-      return editDoc.build()
+      return jsonRawNames.value.length ?editDoc.build(jsonRawNames) : editDoc.build()
     }
     context.expose({ editing })
 
@@ -109,6 +109,17 @@ export default defineComponent({
       onFileSelect,
       onFileDownload,
     }
+
+    const jsonRawNames = computed(() => {
+      let names = []
+      for (let name in schema.properties) {
+        const property = schema.properties[name]
+        if (property.type === 'json') {
+          names.push(name)
+        }
+      }
+      return names
+    })
 
     return () => {
       const fieldNames: string[] = []

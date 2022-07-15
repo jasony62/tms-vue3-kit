@@ -51,6 +51,7 @@ schema.type 有 6 种有效的 type，需要设置成对应的 field.type
 | enum    |              | select   |                         |
 | oneOf   |              | radio    |                         |
 | anyOf   |              | checkbox |                         |
+| json    |              | textarea |                         |
 
 ## field.value
 

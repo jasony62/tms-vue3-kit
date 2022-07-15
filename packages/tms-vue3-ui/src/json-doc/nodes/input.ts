@@ -14,12 +14,7 @@ export class Input extends FieldNode {
     const fieldName = field.fullname
     let updatedValue
     /**设置对象的值*/
-    if (field.schemaType === 'json') {
-      try {
-        let jsonValue = JSON.parse(newValue)
-        updatedValue = jsonValue
-      } catch (e) {}
-    } else if (field instanceof FieldBoolean) {
+    if (field instanceof FieldBoolean) {
       updatedValue = !this.ctx.editDoc.get(fieldName)
     } else if (typeof newValue === 'string') {
       updatedValue = newValue.trim()
