@@ -46,6 +46,7 @@ function* _pasrseObj(parent: DocProp): any {
 export const DEFAULT_ROOT_NAME = ''
 /**
  * 文档对象迭代器。
+ * 不包含根对象
  */
 export class DocIter {
   _rawDoc
@@ -55,11 +56,17 @@ export class DocIter {
     this._rawDoc = rawDoc
     this._rootName = rootName
   }
+
+  get rawDoc() {
+    return this._rawDoc
+  }
+
   /**
    * 迭代文档中的数据
    */
   *[Symbol.iterator]() {
     let prop = new DocProp(undefined, this._rootName, this._rawDoc)
+    yield prop
     yield* _pasrseObj(prop)
   }
 }
@@ -165,6 +172,7 @@ function nameToRegExp(name: string): string {
  * 将文档转换为数组表示
  */
 export class DocAsArray {
+  _rawDoc
   _properties: DocProp[] // 文档的属性
   renderCounter: any // 用于出发渲染
 
@@ -173,11 +181,17 @@ export class DocAsArray {
     let props = Array.from(iter)
     this._properties = props ?? []
     this.renderCounter = { value: 0 }
+    this._rawDoc = rawDoc
+  }
+
+  get rawDoc() {
+    return this._rawDoc
   }
 
   get properties() {
     return this._properties
   }
+
   /**
    *
    */
@@ -209,7 +223,8 @@ export class DocAsArray {
    */
   build(rawSchema?: any): any {
     let obj = {}
-    this._properties.forEach((prop) => {
+    this._properties.forEach((prop, index) => {
+      if (index === 0) return
       let val = this.get(prop.name)
       if (rawSchema && rawSchema.length) {
         rawSchema.forEach((schema: string) => {
@@ -229,47 +244,42 @@ export class DocAsArray {
    */
   appendAt(name: string, value: any, key?: string, needRender = true) {
     let newProp
-    if (!name) {
-      /**添加根属性，没有父属性*/
-      if (typeof key === 'string') {
-        newProp = new DocProp(undefined, key, value)
-        this._properties.push(newProp)
-      } else {
-        throw Error(`文档根属性不允许指定为数字类型【${key}】`)
-      }
-    } else {
-      let { index: parentIndex, prop: parent } = this.findByName(name)
-      if (parent === undefined) {
-        let msg = `指定的子属性【${key}】的父属性【${name}】不存在`
-        debug(msg + '\n' + JSON.stringify(this._properties, null, 2))
-        throw Error(msg)
-      }
+    let { index: parentIndex, prop: parent } = this.findByName(name)
+    if (parent === undefined) {
+      let msg = `指定的子属性【${key}】的父属性【${name}】不存在`
+      debug(msg + '\n' + JSON.stringify(this._properties, null, 2))
+      throw Error(msg)
+    }
 
-      debug(`属性【${name}】存储位置【${parentIndex}】`)
+    debug(
+      `属性【${key ?? true}】的父文档属性【${name}】存储位置【${parentIndex}】`
+    )
 
-      if (typeof key === 'string') {
-        /**对象添加子属性*/
-        let re = new RegExp(`^${nameToRegExp(name)}\\.(\\w+)$`)
-        let lastChildIndex = parentIndex + 1
-        while (lastChildIndex < this._properties.length) {
-          let next = this._properties[lastChildIndex]
-          if (!re.test(next.name)) {
-            break
-          }
-          lastChildIndex++
+    if (typeof key === 'string') {
+      /**对象添加子属性*/
+      // 子属性名匹配规则
+      let re = name
+        ? new RegExp(`^${nameToRegExp(name)}\\.(\\w+)(\\.|$)`)
+        : new RegExp(`^\\w+(\\.|$)`)
+      let lastChildIndex = parentIndex + 1
+      while (lastChildIndex < this._properties.length) {
+        let next = this._properties[lastChildIndex]
+        if (!re.test(next.name)) {
+          break
         }
-        newProp = new DocProp(parent, key, value)
-        this._properties.splice(lastChildIndex, 0, newProp)
-        debug(
-          `属性【${name}】在【${lastChildIndex}】添加子字段【${newProp.name}】`
-        )
-      } else if ((key ?? true) || typeof key === 'number') {
-        /**数组添加项目*/
-        let index = parent._children.length
-        newProp = new DocProp(parent, index, value)
-        this._properties.push(newProp)
-        debug(`属性【${name}】在位置添加子属性【${newProp.name}】`)
+        lastChildIndex++
       }
+      newProp = new DocProp(parent, key, value)
+      this._properties.splice(lastChildIndex, 0, newProp)
+      debug(
+        `属性【${name}】在【${lastChildIndex}】添加子字段【${newProp.name}】`
+      )
+    } else if ((key ?? true) || typeof key === 'number') {
+      /**数组添加项目*/
+      let index = parent._children.length
+      newProp = new DocProp(parent, index, value)
+      this._properties.push(newProp)
+      debug(`属性【${name}】在位置添加子属性【${newProp.name}】`)
     }
     // 需要添加子字段。插入的位置需要控制吗？
     if (newProp && typeof value === 'object' && Object.keys(value).length) {
@@ -280,7 +290,7 @@ export class DocAsArray {
     if (needRender) this.renderCounter.value++
   }
   /**
-   *
+   * 给属性添加兄弟属性
    * @param name
    * @param value
    * @param key

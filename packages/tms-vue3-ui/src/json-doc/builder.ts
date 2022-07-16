@@ -61,7 +61,7 @@ function createArrayItemNode(
   prop: SchemaProp,
   ctx: FormContext
 ) {
-  const joint = stack.newJoint(field)
+  const joint = stack.newJoint(field, -1)
   debug(`属性【${prop.fullname}】生成字段【${field.fullname}】放入堆栈`)
   /**如果数组中的项目是简单类型，生成字段*/
   if (prop.items?.type) {
@@ -75,7 +75,7 @@ function createArrayItemNode(
     if (['object', 'array'].includes(items.type)) {
       // 根据文档数据生成字段，放入堆栈
       itemFields.forEach((field) => {
-        stack.newJoint(field)
+        stack.newJoint(field, -1)
         debug(`属性【${fullname}】生成字段【${field.fullname}】，放入堆栈`)
       })
     } else {
@@ -116,6 +116,10 @@ function createOptionalFields(
       }
       keys.push(key)
     })
+  } else {
+    debug(
+      `属性【${prop.fullname}】的父属性【${prop.parentFullname}】的在文档中的值不是对象`
+    )
   }
   if (keys.length) {
     debug(`属性【${prop.fullname}】需要创建【${keys.length}】个字段`)
@@ -126,6 +130,11 @@ function createOptionalFields(
     })
     debug(`属性【${prop.fullname}】根据文档数据生成${fields.length}个字段`)
     return fields
+  } else {
+    debug(
+      `属性【${prop.fullname}】无法根据文档数据生成字段\n` +
+        JSON.stringify(fieldValue, null, 2)
+    )
   }
 
   return []
@@ -134,6 +143,7 @@ function createOptionalFields(
 type FieldVNodePair = {
   field: Field
   vnode: VNode
+  index?: number // 在父节点中的位置
 }
 
 /**生成字段和节点*/
@@ -316,6 +326,7 @@ type StackJoint = {
   childNames: string[]
   children: VNode[]
   childrenIndex: number
+  indexInParent: number //连接字段在父字段中的位置。这时节点还没有生成，所以还不能加入的到父连接字段的子节点中。
 }
 
 class Stack {
@@ -329,9 +340,17 @@ class Stack {
     this.fieldNames = fieldNames ?? []
   }
 
-  /**新的连接字段*/
-  newJoint(field: Field) {
-    const joint = { field, childNames: [], children: [], childrenIndex: -1 }
+  /**
+   * 新的连接字段
+   */
+  newJoint(field: Field, indexInParent: number): StackJoint {
+    const joint = {
+      field,
+      childNames: [],
+      children: [],
+      childrenIndex: -1,
+      indexInParent,
+    }
     this.joints.push(joint)
     return joint
   }
@@ -385,13 +404,22 @@ class Stack {
     }
   }
 
-  /**将创建的节点放入堆栈中的父字段*/
+  /**
+   * 将创建的节点放入堆栈中的父字段
+   *
+   * @param atHeader 是为了解决一个属性有多个字段的情况。这个多个字段是逆序加入的到父节点中的。父节点中用childrenIndex记录。有漏洞？
+   */
   addNode(pair: FieldVNodePair, parent: StackJoint, atHeader = false) {
     if (parent) {
       debug(
         `字段【${parent.field.fullname}】添加子节点【${pair.field.fullname}】`
       )
-      if (atHeader) {
+      if (typeof pair.index === 'number') {
+        /**指定了节点的添加位置*/
+        parent.childNames.splice(pair.index, 0, pair.field.name)
+        parent.children.splice(pair.index, 0, pair.vnode)
+        this.fieldNames.splice(pair.index, 0, pair.field.fullname)
+      } else if (atHeader) {
         if (parent.childrenIndex === -1) {
           parent.childrenIndex = parent.children.length
         }
@@ -415,7 +443,7 @@ class Stack {
       let vnode = createJointNode(this.ctx, field, children)
       let parent = this.fieldParent(field)
       if (parent) {
-        this.addNode({ field, vnode }, parent, true)
+        this.addNode({ field, vnode, index: joint.indexInParent }, parent, true)
         continue
       }
       rootVNode = vnode
@@ -452,7 +480,7 @@ export function build(ctx: FormContext, fieldNames?: string[]): VNode {
     /**处理根节点*/
     if (prop.name === iter.rootName) {
       const rootField = createField(ctx, prop)
-      stack.newJoint(rootField)
+      stack.newJoint(rootField, -1)
       debug(`----属性【${prop.fullname}】生成根字段，放入堆栈----`)
       continue
     }
@@ -483,7 +511,7 @@ export function build(ctx: FormContext, fieldNames?: string[]): VNode {
           let fields = createOptionalFields(ctx, prop, joint)
           debug(`属性【${prop.fullname}】生成${fields.length}个字段`)
           fields.forEach((field) => {
-            stack.newJoint(field)
+            stack.newJoint(field, joint.children.length)
             debug(
               `属性【${prop.fullname}】生成字段【${field.fullname}】放入堆栈`
             )
@@ -492,7 +520,7 @@ export function build(ctx: FormContext, fieldNames?: string[]): VNode {
       } else {
         parentJoints.forEach((joint) => {
           const field = createField(ctx, prop, joint.field)
-          stack.newJoint(field)
+          stack.newJoint(field, joint.children.length)
           debug(`属性【${prop.fullname}】生成字段【${field.fullname}】放入堆栈`)
         })
       }
@@ -553,11 +581,12 @@ class Builder {
   createForm() {
     const { ctx } = this
 
-    const formNode = new FormNode(ctx)
+    // const formNode = new FormNode(ctx)
 
     const formSubNode = build(ctx, this.fieldNames)
 
-    return formNode.createElem(formSubNode)
+    // return formNode.createElem(formSubNode)
+    return formSubNode
   }
 
   render() {

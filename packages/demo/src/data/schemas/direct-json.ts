@@ -31,7 +31,7 @@ export const SampleSchema = {
     },
   },
   patternProperties: {
-    '^\\w+$': {
+    '^ext_\\w+$': {
       title: '扩展JSON字段',
       type: 'json',
     },
