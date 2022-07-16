@@ -5,6 +5,10 @@ import { Field } from '../fields'
 import { FieldNode } from './fieldNode'
 import { Node, components } from './index'
 
+import Debug from 'debug'
+
+const debug = Debug('json-doc:fieldWrap')
+
 /**用户指定的字段名称*/
 const fieldNameVNode = (ctx: FormContext, field: Field) => {
   let inp = h('input', {
@@ -41,6 +45,7 @@ const fieldInsertVNode = (ctx: FormContext, field: Field) => {
         let randexp = new RandExp(new RegExp(field.scheamProp.name))
         randexp.max = 8
         let newKey = randexp.gen()
+        debug(`执行【插入属性】，随机属性名：${newKey}`)
         switch (field.scheamProp.attrs.type) {
           case 'string':
             ctx.editDoc.insertAt(fullname, '', newKey)

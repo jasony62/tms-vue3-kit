@@ -239,7 +239,11 @@ export class DocAsArray {
       }
     } else {
       let { index: parentIndex, prop: parent } = this.findByName(name)
-      if (parent === undefined) throw Error(`指定的父属性【${name}】不存在`)
+      if (parent === undefined) {
+        let msg = `指定的子属性【${key}】的父属性【${name}】不存在`
+        debug(msg + '\n' + JSON.stringify(this._properties, null, 2))
+        throw Error(msg)
+      }
 
       debug(`属性【${name}】存储位置【${parentIndex}】`)
 

@@ -6,7 +6,7 @@ import { components } from '.'
 import RandExp from 'randexp'
 import Debug from 'debug'
 
-const debug = Debug('json-doc')
+const debug = Debug('json-doc:object')
 
 /**
  * 添加子属性操作
@@ -25,8 +25,16 @@ const itemAddVNode = (ctx: FormContext, field: Field) => {
           let randexp = new RandExp(new RegExp(childProp.name))
           randexp.max = 8
           let newKey = randexp.gen()
+          debug(
+            `字段【${field.fullname}】执行【添加${
+              childProp.attrs.title ?? childProp.name
+            }属性】，随机属性名：${newKey}`
+          )
           switch (childProp.attrs.type) {
             case 'string':
+              ctx.editDoc.appendAt(field.fullname, '', newKey)
+              break
+            case 'json':
               ctx.editDoc.appendAt(field.fullname, '', newKey)
               break
             case 'object':
@@ -64,7 +72,9 @@ export class ObjectNode extends FieldNode {
       class: ['tvu-jdoc__nest'],
     }
 
-    if (depth) options.class.push(`tvu-jdoc__nest--depth-${depth}`)
+    if (depth) {
+      options.class.push(`tvu-jdoc__nest--depth`)
+    }
 
     return options
   }

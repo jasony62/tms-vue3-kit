@@ -18,10 +18,12 @@
         @apply w-full bg-gray-200;
       }
     }
-
     .tvu-jdoc__nest {
-      @apply flex flex-col gap-2 ml-2 pl-2;
-      border-left: 1px solid #ddd;
+      @apply flex flex-col gap-4;
+      &.tvu-jdoc__nest--depth {
+        @apply flex flex-col gap-2 ml-2 pl-2;
+        border-left: 1px solid #ddd;
+      }
     }
   }
 }

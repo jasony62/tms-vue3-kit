@@ -81,7 +81,8 @@ export abstract class Field {
   }
   /**字段在文档对象中的深度*/
   get depth() {
-    return this.fullname.split(/\.|\[\d+\]/).length
+    let fn = this.fullname
+    return fn ? fn.split(/\.|\[\d+\]/).length : 0
   }
 
   get label() {

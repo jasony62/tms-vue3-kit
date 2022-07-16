@@ -1,0 +1,55 @@
+Date : 2022-07-16 21:21:30
+Directory : /Users/yangyue/project/tms-vue3-kit/packages/tms-vue3-ui/src/json-doc
+Total : 26 files,  2423 codes, 481 comments, 426 blanks, all 3330 lines
+
+Languages
++------------+------------+------------+------------+------------+------------+
+| language   | files      | code       | comment    | blank      | total      |
++------------+------------+------------+------------+------------+------------+
+| TypeScript |         23 |      2,050 |        470 |        282 |      2,802 |
+| Markdown   |          1 |        216 |         11 |        128 |        355 |
+| vue        |          1 |        135 |          0 |         10 |        145 |
+| SCSS       |          1 |         22 |          0 |          6 |         28 |
++------------+------------+------------+------------+------------+------------+
+
+Directories
++----------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                                         | files      | code       | comment    | blank      | total      |
++----------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                            |         26 |      2,423 |        481 |        426 |      3,330 |
+| fields                                                                                       |          7 |        329 |         58 |         54 |        441 |
+| nodes                                                                                        |         13 |        993 |        196 |        124 |      1,313 |
++----------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++----------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| filename                                                                                     | language   | code       | comment    | blank      | total      |
++----------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| /Users/yangyue/project/tms-vue3-kit/packages/tms-vue3-ui/src/json-doc/Editor.vue             | vue        |        135 |          0 |         10 |        145 |
+| /Users/yangyue/project/tms-vue3-kit/packages/tms-vue3-ui/src/json-doc/README.md              | Markdown   |        216 |         11 |        128 |        355 |
+| /Users/yangyue/project/tms-vue3-kit/packages/tms-vue3-ui/src/json-doc/builder.ts             | TypeScript |        430 |        135 |         68 |        633 |
+| /Users/yangyue/project/tms-vue3-kit/packages/tms-vue3-ui/src/json-doc/fields/array.ts        | TypeScript |         58 |          0 |          9 |         67 |
+| /Users/yangyue/project/tms-vue3-kit/packages/tms-vue3-ui/src/json-doc/fields/boolean.ts      | TypeScript |          8 |          0 |          2 |         10 |
+| /Users/yangyue/project/tms-vue3-kit/packages/tms-vue3-ui/src/json-doc/fields/field.ts        | TypeScript |        114 |         11 |         21 |        146 |
+| /Users/yangyue/project/tms-vue3-kit/packages/tms-vue3-ui/src/json-doc/fields/file.ts         | TypeScript |         18 |         27 |          7 |         52 |
+| /Users/yangyue/project/tms-vue3-kit/packages/tms-vue3-ui/src/json-doc/fields/index.ts        | TypeScript |         74 |          8 |          6 |         88 |
+| /Users/yangyue/project/tms-vue3-kit/packages/tms-vue3-ui/src/json-doc/fields/object.ts       | TypeScript |         18 |          1 |          4 |         23 |
+| /Users/yangyue/project/tms-vue3-kit/packages/tms-vue3-ui/src/json-doc/fields/text.ts         | TypeScript |         39 |         11 |          5 |         55 |
+| /Users/yangyue/project/tms-vue3-kit/packages/tms-vue3-ui/src/json-doc/index.ts               | TypeScript |          2 |          0 |          2 |          4 |
+| /Users/yangyue/project/tms-vue3-kit/packages/tms-vue3-ui/src/json-doc/model.ts               | TypeScript |        296 |         81 |         34 |        411 |
+| /Users/yangyue/project/tms-vue3-kit/packages/tms-vue3-ui/src/json-doc/nodes/array.ts         | TypeScript |        109 |          3 |         11 |        123 |
+| /Users/yangyue/project/tms-vue3-kit/packages/tms-vue3-ui/src/json-doc/nodes/checkboxgroup.ts | TypeScript |         25 |          4 |          4 |         33 |
+| /Users/yangyue/project/tms-vue3-kit/packages/tms-vue3-ui/src/json-doc/nodes/dateTime.ts      | TypeScript |          2 |          0 |          2 |          4 |
+| /Users/yangyue/project/tms-vue3-kit/packages/tms-vue3-ui/src/json-doc/nodes/fieldNode.ts     | TypeScript |        174 |         55 |         31 |        260 |
+| /Users/yangyue/project/tms-vue3-kit/packages/tms-vue3-ui/src/json-doc/nodes/fieldWrap.ts     | TypeScript |        146 |         11 |         20 |        177 |
+| /Users/yangyue/project/tms-vue3-kit/packages/tms-vue3-ui/src/json-doc/nodes/file.ts          | TypeScript |        190 |         35 |         16 |        241 |
+| /Users/yangyue/project/tms-vue3-kit/packages/tms-vue3-ui/src/json-doc/nodes/form.ts          | TypeScript |         17 |         14 |          5 |         36 |
+| /Users/yangyue/project/tms-vue3-kit/packages/tms-vue3-ui/src/json-doc/nodes/index.ts         | TypeScript |         78 |          3 |          4 |         85 |
+| /Users/yangyue/project/tms-vue3-kit/packages/tms-vue3-ui/src/json-doc/nodes/input.ts         | TypeScript |         88 |         31 |          7 |        126 |
+| /Users/yangyue/project/tms-vue3-kit/packages/tms-vue3-ui/src/json-doc/nodes/node.ts          | TypeScript |         26 |         16 |          7 |         49 |
+| /Users/yangyue/project/tms-vue3-kit/packages/tms-vue3-ui/src/json-doc/nodes/object.ts        | TypeScript |         78 |          9 |         10 |         97 |
+| /Users/yangyue/project/tms-vue3-kit/packages/tms-vue3-ui/src/json-doc/nodes/select.ts        | TypeScript |         47 |          8 |          4 |         59 |
+| /Users/yangyue/project/tms-vue3-kit/packages/tms-vue3-ui/src/json-doc/nodes/textarea.ts      | TypeScript |         13 |          7 |          3 |         23 |
+| /Users/yangyue/project/tms-vue3-kit/packages/tms-vue3-ui/src/json-doc/tailwind.scss          | SCSS       |         22 |          0 |          6 |         28 |
+| Total                                                                                        |            |      2,423 |        481 |        426 |      3,330 |
++----------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+

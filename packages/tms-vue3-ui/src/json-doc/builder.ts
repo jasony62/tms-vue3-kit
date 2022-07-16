@@ -407,19 +407,22 @@ class Stack {
   }
 
   /**堆栈中的所有字段生成节点*/
-  shrink() {
+  shrink(): VNode {
     debug('执行堆栈收缩，生成连接字段节点')
-    let joint
-    while (this.joints.length > 1 && (joint = this.joints.pop())) {
+    let joint, rootVNode
+    while (this.joints.length && (joint = this.joints.pop())) {
       let { field, children } = joint
       let vnode = createJointNode(this.ctx, field, children)
       let parent = this.fieldParent(field)
       if (parent) {
         this.addNode({ field, vnode }, parent, true)
-      } else {
-        debug(`字段【${field.fullname}】【${field.path}】没有找到父字段`)
+        continue
       }
+      rootVNode = vnode
     }
+    if (!rootVNode) throw Error('执行shrink操作没有获得根VNode')
+
+    return rootVNode
   }
 
   get length() {
@@ -427,13 +430,14 @@ class Stack {
   }
 }
 /**
- * 创建表单中的节点
+ * 创建表单中的根节点
+ * 根节点是对象
  *
  * @param ctx
  * @param fieldNames
  * @returns
  */
-export function build(ctx: FormContext, fieldNames?: string[]): VNode[] {
+export function build(ctx: FormContext, fieldNames?: string[]): VNode {
   const { schema, editDoc } = ctx
 
   /**创建属性迭代器*/
@@ -525,13 +529,9 @@ export function build(ctx: FormContext, fieldNames?: string[]): VNode[] {
     }
   }
 
-  stack.shrink()
+  let rootVNode = stack.shrink()
 
-  if (stack.length > 1) throw Error('生成表单失败，有未解析的数据')
-
-  const root = stack.pop()
-
-  return root?.children ?? []
+  return rootVNode
 }
 
 let _uid = 0
