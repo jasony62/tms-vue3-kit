@@ -45,12 +45,17 @@ const fieldInsertVNode = (ctx: FormContext, field: Field) => {
           case 'string':
             ctx.editDoc.insertAt(fullname, '', newKey)
             break
+          case 'json':
+            ctx.editDoc.insertAt(fullname, '', newKey)
+            break
           case 'object':
             ctx.editDoc.insertAt(fullname, {}, newKey)
             break
           case 'array':
             ctx.editDoc.insertAt(fullname, [], newKey)
             break
+          default:
+            ctx.editDoc.insertAt(fullname, undefined, newKey)
         }
       },
     },
@@ -88,6 +93,7 @@ export class FieldWrap extends Node {
   protected children(): VNode[] {
     const children = []
     const { field, ctx } = this
+
     if (field.label) {
       children.push(
         h(
@@ -100,6 +106,11 @@ export class FieldWrap extends Node {
       )
     }
 
+    if (this.ctx.showFieldFullname === true && field.fullname) {
+      children.push(
+        h('div', { class: ['tvu-jdoc__field-fullname'] }, field.fullname)
+      )
+    }
     /**如果属性名称是用户定义的，需要显示给用户，并且允许进行编辑*/
     if (field.scheamProp.isPattern) {
       children.push(fieldNameVNode(ctx, field))
@@ -116,7 +127,7 @@ export class FieldWrap extends Node {
         )
       )
     }
-
+    /**属性是可扩展属性*/
     if (field.scheamProp.isPattern) {
       let actions = h(
         'div',
@@ -149,9 +160,9 @@ export class FieldWrap extends Node {
     if (field.scheamProp.isPattern) {
       Object.assign(options, { 'data-optinal-field': 'true' })
     }
-    if (field.visible === false) {
-      options.class.push('tvu-jdoc__field--hide')
-    }
+    // if (field.visible === false) {
+    //   options.class.push('tvu-jdoc__field--hide')
+    // }
 
     this._vnode = h(this.rawArgs.tag, options, vnodes)
 

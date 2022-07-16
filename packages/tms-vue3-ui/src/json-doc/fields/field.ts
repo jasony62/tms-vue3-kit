@@ -79,6 +79,10 @@ export abstract class Field {
       return fullname
     }
   }
+  /**字段在文档对象中的深度*/
+  get depth() {
+    return this.fullname.split(/\.|\[\d+\]/).length
+  }
 
   get label() {
     return this._prop.attrs.title ?? ''

@@ -6,6 +6,7 @@
       <option value="array-object">数组的项目是对象</option>
       <option value="object-map-object">对象有可选属性，属性类型是对象</option>
       <option value="object-map-array">对象有可选属性，属性类型是数组</option>
+      <option value="direct-json">JSON属性</option>
       <option value="autofill">自动填充</option>
       <option value="prop-dep">属性依赖</option>
       <option value="files">文件</option>
@@ -15,7 +16,7 @@
     <div class="w-1/3 p-4">
       <json-doc v-if="loading === false" ref="jsonDocEditor" :key="caseName" :schema="testObj.schema"
         :value="testObj.data" :autofill-request="onAutofill" :on-file-download="onFileDownload"
-        :on-file-select="onFileSelect">
+        :on-file-select="onFileSelect" :show-field-fullname="true">
       </json-doc>
     </div>
     <div class="p-4">

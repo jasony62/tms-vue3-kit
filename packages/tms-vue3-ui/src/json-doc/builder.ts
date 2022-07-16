@@ -362,9 +362,12 @@ class Stack {
 
       if (isParent) {
         topJoints.push(joint)
-        debug(
-          `属性【${childProp.fullname}】是【${field.fullname}】【${field.scheamProp.fullname}】的子属性`
-        )
+        let msg = `属性【${childProp.fullname}】是`
+        msg += field.fullname
+          ? `字段【${field.fullname}】字段属性【${field.scheamProp.fullname}】`
+          : '根字段'
+        msg += `的子属性`
+        debug(msg)
       }
     }
 
@@ -452,11 +455,13 @@ export function build(ctx: FormContext, fieldNames?: string[]): VNode[] {
 
     debug(`----属性【${prop.fullname}】开始处理----`)
 
-    // 当前属性的父字段。如果是父属性是可选属性，可能有多个父字段。
+    // 当前属性的父字段。如果父属性是可选属性，可能有多个父字段。
     const parentJoints = stack.propParent(prop)
     if (parentJoints.length === 0) {
       debug(`属性【${prop.fullname}】父字段不存在，跳过`)
       continue
+    } else {
+      debug(`属性【${prop.fullname}】有${parentJoints.length}个父字段`)
     }
 
     // 需要处理题目是否可见
@@ -603,6 +608,7 @@ export type FormContext = {
   onFileUpload?: Function
   onFileSelect?: Function
   onFileDownload?: Function
+  showFieldFullname?: Boolean
 }
 
 /**

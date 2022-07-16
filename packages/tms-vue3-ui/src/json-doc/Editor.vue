@@ -42,6 +42,10 @@ export default defineComponent({
      */
     fieldWrapClass: { type: String },
     /**
+     * 显示字段路径名称
+     */
+    showFieldFullname: { type: Boolean, default: false },
+    /**
      * 是否需要显示表单按钮
      */
     requireButtons: { type: Boolean, default: () => true },
@@ -81,12 +85,12 @@ export default defineComponent({
      */
     const editing = (isCheckValidity = true): any => {
       // if (isCheckValidity && !checkValidity()) return false
-      return jsonRawNames.value.length ?editDoc.build(jsonRawNames) : editDoc.build()
+      return jsonRawNames.value.length ? editDoc.build(jsonRawNames) : editDoc.build()
     }
     context.expose({ editing })
 
     const editDoc = new DocAsArray(deepClone(props.value))
-    editDoc.renderCounter = ref(0)
+    editDoc.renderCounter = ref(0) // 用于强制触发渲染
 
     const fields = new Map()
 
@@ -97,6 +101,7 @@ export default defineComponent({
       onFileUpload,
       onFileSelect,
       onFileDownload,
+      showFieldFullname
     } = props
 
     const ctx = {
@@ -108,6 +113,7 @@ export default defineComponent({
       onFileUpload,
       onFileSelect,
       onFileDownload,
+      showFieldFullname
     }
 
     const jsonRawNames = computed(() => {

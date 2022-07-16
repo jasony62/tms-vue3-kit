@@ -57,11 +57,14 @@ export class ObjectNode extends FieldNode {
 
   options() {
     const { field } = this
+    const { fullname, type, depth } = field
     const options = {
-      name: field.fullname,
-      type: field.type,
+      name: fullname,
+      type,
       class: ['tvu-jdoc__nest'],
     }
+
+    if (depth) options.class.push(`tvu-jdoc__nest--depth-${depth}`)
 
     return options
   }

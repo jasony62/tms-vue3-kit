@@ -220,7 +220,7 @@ class TmsAxios {
   }
 }
 
-export { TmsAxios }
+export { TmsAxios, InterceptorRule }
 
 export default function install(app: any) {
   let TmsAxiosIns: any = TmsAxios.ins

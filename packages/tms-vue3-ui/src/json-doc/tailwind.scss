@@ -8,16 +8,20 @@
 
     .tvu-jdoc__field {
       @apply flex flex-col gap-y-2;
+      .tvu-jdoc__field-fullname {
+        @apply text-gray-300;
+      }
     }
 
     .tvu-jdoc__field-name {
       input {
-        @apply w-full;
+        @apply w-full bg-gray-200;
       }
     }
 
     .tvu-jdoc__nest {
-      @apply flex flex-col gap-2;
+      @apply flex flex-col gap-2 ml-2 pl-2;
+      border-left: 1px solid #ddd;
     }
   }
 }
