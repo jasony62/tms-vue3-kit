@@ -365,7 +365,6 @@ export class DocAsArray {
    */
   set(name: string, value: any, needRender = true) {
     let { prop } = this.findByName(name)
-
     if (prop === undefined) {
       this.appendAt('', value, name)
     } else {

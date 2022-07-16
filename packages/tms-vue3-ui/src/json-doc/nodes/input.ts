@@ -1,7 +1,7 @@
 import { h, toRaw, VNode } from 'vue'
 import { FieldNode } from './fieldNode'
 import { components } from '.'
-import { Field, FieldBoolean } from '../fields'
+import { Field } from '../fields'
 /**
  * text/radiogroup
  */
@@ -14,15 +14,26 @@ export class Input extends FieldNode {
     const fieldName = field.fullname
     let updatedValue
     /**设置对象的值*/
-    if (field instanceof FieldBoolean) {
-      updatedValue = !this.ctx.editDoc.get(fieldName)
-    } else if (typeof newValue === 'string') {
-      updatedValue = newValue.trim()
-    } else {
-      updatedValue = newValue
+    switch (field.schemaType) {
+      case 'boolean':
+        updatedValue = !this.ctx.editDoc.get(fieldName)
+        /**修改底层数据*/
+        this.ctx.editDoc.set(fieldName, updatedValue)
+        break
+      case 'json':
+        try {
+          let newJson = JSON.parse(newValue)
+          updatedValue = newJson
+          this.ctx.editDoc.set(fieldName, updatedValue)
+        } catch (e) {
+          // 不更新文档
+        }
+        break
+      default:
+        updatedValue = newValue.trim()
+        /**修改底层数据*/
+        this.ctx.editDoc.set(fieldName, updatedValue)
     }
-    /**修改底层数据*/
-    this.ctx.editDoc.set(fieldName, updatedValue)
   }
   /**
    *
@@ -49,8 +60,9 @@ export class Input extends FieldNode {
       type,
       value: toRaw(fieldValue),
       class: ['tvu-jdoc__field-input tvu-input'],
-      onInput,
     }
+    inpOps.onInput = onInput
+
     /**设置核选框的值*/
     if (this.field.type === 'checkbox' && typeof fieldValue === 'boolean') {
       inpOps.checked = fieldValue
