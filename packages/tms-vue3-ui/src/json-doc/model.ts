@@ -207,10 +207,15 @@ export class DocAsArray {
   /**
    * 构造对象
    */
-  build(): any {
+  build(rawSchema?: any): any {
     let obj = {}
     this._properties.forEach((prop) => {
       let val = this.get(prop.name)
+      if (rawSchema && rawSchema.length) {
+        rawSchema.forEach((schema: string) => {
+          if (schema === prop.name) val = val ? JSON.parse(val) : {}
+        })
+      }
       _.set(obj, prop.name, val)
     })
     return obj
