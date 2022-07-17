@@ -246,9 +246,17 @@ export class DocAsArray {
     let newProp
     let { index: parentIndex, prop: parent } = this.findByName(name)
     if (parent === undefined) {
-      let msg = `指定的子属性【${key}】的父属性【${name}】不存在`
-      debug(msg + '\n' + JSON.stringify(this._properties, null, 2))
-      throw Error(msg)
+      let msg = `指定的属性【${key}】的父属性【${name}】不存在，添加默认值`
+      debug(msg)
+      if (typeof key === 'string') this.set(name, {}, false)
+      else this.set(name, [], false)
+      let indexAndProp = this.findByName(name)
+      parentIndex = indexAndProp.index
+      parent = indexAndProp.prop
+      if (parent === undefined)
+        throw Error(
+          `指定的属性【${key}】的父属性【${name}】不存在，添加默认值失败`
+        )
     }
 
     debug(

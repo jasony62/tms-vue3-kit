@@ -14,6 +14,4 @@ export const SampleSchema = {
   },
 }
 
-export const SampleData = {
-  additionalName: ['alice', 'bob'],
-}
+export const SampleData = {}

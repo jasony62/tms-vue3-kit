@@ -41,7 +41,4 @@ export const SampleSchema = {
 export const SampleData = {
   id: '123',
   data: { name: 'tester' },
-  objData: {
-    label: '研发部',
-  },
 }
