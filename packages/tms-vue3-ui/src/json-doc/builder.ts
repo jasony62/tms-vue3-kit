@@ -487,6 +487,22 @@ export function build(ctx: FormContext, fieldNames?: string[]): VNode {
 
     debug(`----属性【${prop.fullname}】开始处理----`)
 
+    /**
+     * 这是1个补丁
+     * 解决json字段需要清除文档中的子属性的问题
+     * 应该找办法在构造editDoc的时候解决
+     */
+    if (prop.attrs.type === 'json') {
+      let { prop: docProp } = editDoc.findByName(prop.fullname)
+      if (docProp?._children.length) {
+        docProp._children.forEach((child) => {
+          editDoc.remove(child.name, false)
+        })
+        docProp._children.splice(0, docProp._children.length)
+        debug(`清除属性【${prop.fullname}】的在文档中的子属性`)
+      }
+    }
+
     // 当前属性的父字段。如果父属性是可选属性，可能有多个父字段。
     const parentJoints = stack.propParent(prop)
     if (parentJoints.length === 0) {
@@ -638,6 +654,8 @@ export type FormContext = {
   onFileSelect?: Function
   onFileDownload?: Function
   showFieldFullname?: Boolean
+  onNodeFocus: (field: Field) => void
+  onNodeBlur: (field: Field) => void
 }
 
 /**

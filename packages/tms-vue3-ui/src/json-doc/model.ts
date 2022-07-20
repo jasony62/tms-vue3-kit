@@ -203,7 +203,7 @@ export class DocAsArray {
    * @param name
    * @returns
    */
-  private findByName(name: string): {
+  findByName(name: string): {
     index: number
     prop: DocProp | undefined
   } {

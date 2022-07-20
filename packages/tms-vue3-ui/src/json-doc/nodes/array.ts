@@ -1,4 +1,4 @@
-import { h, VNode, nextTick } from 'vue'
+import { h, VNode } from 'vue'
 import { components } from './index'
 import { FieldNode } from './fieldNode'
 import { Field } from '../fields'

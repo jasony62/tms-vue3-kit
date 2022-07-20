@@ -1,10 +1,13 @@
 <script lang="ts">
-import { defineComponent, h, PropType, ref, computed } from 'vue'
+import { defineComponent, h, PropType, ref, computed, getCurrentInstance } from 'vue'
 import { RawSchema } from '@/json-schema/model'
 import { deepClone } from '@/utils'
 import BuildEditor from './builder'
 import { Field } from './fields'
 import { DocAsArray } from './model'
+import Debug from 'debug'
+
+const debug = Debug('json-doc')
 
 type FileSelectArgs = {
   fullname: string // 文件对应的字段名称
@@ -79,7 +82,9 @@ export default defineComponent({
      */
     onFileDownload: { type: Function },
   },
+  emits: ['jdocFocus', 'jdocBlur'],
   setup(props: any, context: any) {
+    const internalInstance = getCurrentInstance()
     /**
      * 返回表单中正在编辑的数据
      */
@@ -87,10 +92,11 @@ export default defineComponent({
       // if (isCheckValidity && !checkValidity()) return false
       return jsonRawNames.value.length ? editDoc.build(jsonRawNames) : editDoc.build()
     }
-    context.expose({ editing })
 
     const editDoc = new DocAsArray(deepClone(props.value))
     editDoc.renderCounter = ref(0) // 用于强制触发渲染
+
+    context.expose({ editing, editDoc })
 
     const fields = new Map()
 
@@ -113,7 +119,15 @@ export default defineComponent({
       onFileUpload,
       onFileSelect,
       onFileDownload,
-      showFieldFullname
+      showFieldFullname,
+      onNodeFocus: (field: Field) => {
+        debug(`节点【${field.fullname}】获得输入焦点，抛出jdocFocus事件`)
+        internalInstance?.emit('jdocFocus', field)
+      },
+      onNodeBlur: (field: Field) => {
+        debug(`节点【${field.fullname}】获得输入焦点，抛出jdocBlur事件`)
+        internalInstance?.emit('jdocBlur', field)
+      }
     }
 
     const jsonRawNames = computed(() => {

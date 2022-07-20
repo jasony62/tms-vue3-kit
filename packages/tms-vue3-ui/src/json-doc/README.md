@@ -352,3 +352,109 @@ div.tvu-jdoc**field
 --
 --div.tvu-jdoc\_\_field-desc
 --div.tvu-jdoc\_\_field-actions
+
+# 类
+
+## 表单字段类图
+
+```mermaid
+classDiagram
+
+class Field {
+  <<abstract>>
+  isChildOf(parent)
+}
+
+class FieldText
+class FieldObject
+class FieldArray
+class FieldFile
+
+Field<|--FieldText
+Field<|--FieldBoolean
+Field<|--FieldObject
+Field<|--FieldArray
+Field<|--FieldFile
+```
+
+## 表单节点类图
+
+```mermaid
+classDiagram
+
+class Node {
+  ctx: FormContext
+  attrOrProps()
+  createElem(children)
+}
+
+class FieldNode {
+  <<abstract>>
+  fieldValue()
+  #children()
+  createElem()
+  options()
+}
+
+class FieldWrap {
+  #children()
+  createElem()
+}
+
+class Input {
+  options()
+}
+class Textarea
+class Select
+class Checkboxgroup
+class DateTime
+class ObjectNode
+class ArrayNode
+class FormNode
+
+Node<|--FieldNode
+Node<|--FieldWrap
+Node<|--FormNode
+FieldNode<|--Input
+Input<|--Textarea
+Input<|--Select
+Input<|--DateTime
+Input<|--Checkboxgroup
+FieldNode<|--ObjectNode
+FieldNode<|--ArrayNode
+FieldNode<|--FileNode
+
+
+```
+
+## 文档类
+
+```mermaid
+classDiagram
+
+class DocIter
+class DocProp {
+  removeChild(key)
+}
+class DocAsArray {
+  build()
+  appendAt()
+  insertAt()
+  remove(name, needRender)
+  get(name)
+  set(name, value, needRender)
+  init()
+  rename()
+}
+
+```
+
+# 当前正在编辑的节点
+
+叶子节点获取输入焦点时，通知父节点获取输入焦点。
+
+父节点决定是否生成获取输入焦点事件并继续通知上级节点。
+
+组件外部要能够获取当前获取数据焦点的路径。
+
+`tvu-focus`

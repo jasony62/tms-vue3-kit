@@ -16,8 +16,16 @@
     <div class="w-1/3 p-4">
       <json-doc v-if="loading === false" ref="jsonDocEditor" :key="caseName" :schema="testObj.schema"
         :value="testObj.data" :autofill-request="onAutofill" :on-file-download="onFileDownload"
-        :on-file-select="onFileSelect" :show-field-fullname="true">
+        :on-file-select="onFileSelect" :show-field-fullname="true" @jdoc-focus="onJdocFocus" @jdoc-blur="onJdocBlur">
       </json-doc>
+    </div>
+    <div class="w-1/3">
+      <div v-if="activeField?.schemaType === 'json'" class="h-full flex flex-col">
+        <div>
+          <button @click="updateJson">更新数据【{{ activeField.fullname }}】</button>
+        </div>
+        <div ref="elJsonEditor" class="flex-grow"></div>
+      </div>
     </div>
     <div class="p-4">
       <div>
@@ -32,18 +40,25 @@
 
 <script setup lang="ts">
 import { JsonDoc } from 'tms-vue3-ui'
+import { Field, DocAsArray } from 'tms-vue3-ui/dist/es/json-doc'
 import 'tms-vue3-ui/dist/es/json-doc/style/tailwind.scss'
-import { onMounted, reactive, ref, watch } from 'vue'
+import { nextTick, onMounted, reactive, ref, watch } from 'vue'
+import JSONEditor from 'jsoneditor'
+import 'jsoneditor/dist/jsoneditor.css'
 
-const jsonDocEditor = ref<{ editing: () => string } | null>(null)
+const jsonDocEditor = ref<{ editing: () => string, editDoc: DocAsArray } | null>(null)
 
-const jsonResult = ref('')
+const caseName = ref('') // 演示数据
 
-const caseName = ref('')
+const jsonResult = ref('') // 表单数据结果
 
 const loading = ref(true)
 
 const testObj = reactive({ schema: {}, data: {} })
+
+const activeField = ref<Field>() // 正在编辑的字段
+
+const elJsonEditor = ref<HTMLElement | null>(null)
 
 function loadTestData() {
   loading.value = true
@@ -56,6 +71,14 @@ function loadTestData() {
   )
 }
 
+const options = reactive({
+  mode: 'code',
+  search: false,
+  transform: false,
+})
+
+let jsonEditor: any = null
+
 onMounted(async () => {
   let stored = sessionStorage.getItem('tms-vue3-ui/json-doc/caseName')
   caseName.value = stored ?? 'overall'
@@ -66,6 +89,36 @@ watch(caseName, () => {
   sessionStorage.setItem('tms-vue3-ui/json-doc/caseName', caseName.value)
   loadTestData()
 })
+
+const onJdocFocus = (field: Field) => {
+  console.log(`字段【${field.fullname}】获得输入焦点`)
+  if (activeField.value !== field) {
+    activeField.value = field
+    if (field.schemaType === 'json') {
+      nextTick(() => {
+        if (elJsonEditor.value) {
+          let child = elJsonEditor.value.querySelector('.jsoneditor')
+          if (child) elJsonEditor.value.removeChild(child)
+          // @ts-ignore
+          jsonEditor = new JSONEditor(elJsonEditor.value, options)
+          jsonEditor.set(jsonDocEditor.value?.editDoc.get(field.fullname))
+        }
+      })
+    }
+  }
+}
+
+const onJdocBlur = (field: Field) => {
+  console.log(`字段【${field.fullname}】失去输入焦点`)
+  // activeField.value = undefined
+}
+
+const updateJson = () => {
+  if (activeField.value) {
+    let newVal = jsonEditor.get()
+    jsonDocEditor.value?.editDoc.set(activeField.value.fullname, newVal)
+  }
+}
 
 const onAutofill = () => {
   return {
@@ -137,3 +190,14 @@ const getResult = () => {
   jsonResult.value = JSON.stringify(jsonDocEditor.value?.editing(), null, 2)
 }
 </script>
+
+<style lang="scss">
+.jsoneditor {
+
+  .jsoneditor-transform,
+  .jsoneditor-repair,
+  .jsoneditor-poweredBy {
+    display: none;
+  }
+}
+</style>

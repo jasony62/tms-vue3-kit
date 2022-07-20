@@ -2,8 +2,11 @@ import { h, toRaw, VNode } from 'vue'
 import { FieldNode } from './fieldNode'
 import { components } from '.'
 import { Field } from '../fields'
+import Debug from 'debug'
+
+const debug = Debug('json-doc:input')
 /**
- * text/radiogroup
+ * text/json/radiogroup
  */
 export class Input extends FieldNode {
   /**
@@ -43,9 +46,10 @@ export class Input extends FieldNode {
   options(attrOrProps: any) {
     let { field } = this
     const fieldName = field.fullname
-    // 有些radio和checkbox是模拟的
     const fieldValue = this.fieldValue()
-
+    debug(
+      `字段【${fieldName}】的值为：\n${JSON.stringify(fieldValue, null, 2)}`
+    )
     let { type } = attrOrProps
 
     const onInput = (event: any) => {
@@ -62,6 +66,12 @@ export class Input extends FieldNode {
       class: ['tvu-jdoc__field-input tvu-input'],
     }
     inpOps.onInput = onInput
+    inpOps.onFocus = () => {
+      this.ctx.onNodeFocus(field)
+    }
+    inpOps.onBlur = () => {
+      this.ctx.onNodeBlur(field)
+    }
 
     /**设置核选框的值*/
     if (this.field.type === 'checkbox' && typeof fieldValue === 'boolean') {
