@@ -15,7 +15,7 @@ function* _parseArray(parent: DocProp): any {
     yield prop
     if (Array.isArray(value)) {
       yield* _parseArray(prop)
-    } else if (typeof value === 'object') {
+    } else if (value !== null && typeof value === 'object') {
       yield* _pasrseObj(prop)
     }
   }
@@ -26,6 +26,7 @@ function* _parseArray(parent: DocProp): any {
  */
 function* _pasrseObj(parent: DocProp): any {
   let rawObj = parent.value
+  if (rawObj === null) return
   let keys = Object.keys(rawObj)
   for (let i = 0; i < keys.length; i++) {
     let key = keys[i]
@@ -34,7 +35,7 @@ function* _pasrseObj(parent: DocProp): any {
     yield prop
     if (Array.isArray(value)) {
       yield* _parseArray(prop)
-    } else if (typeof value === 'object') {
+    } else if (value !== null && typeof value === 'object') {
       yield* _pasrseObj(prop)
     }
   }
