@@ -9,6 +9,14 @@
       @apply bg-gray-200;
     }
   }
+  .tvu-jse__property__actions {
+    > div {
+      @apply flex flex-row gap-2 mt-1;
+      button {
+        @apply border-2 border-blue-500 rounded-md text-blue-500 bg-white px-2;
+      }
+    }
+  }
 }
 .tvu-jse__property-fields {
   min-width: 16rem;

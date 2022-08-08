@@ -80,7 +80,7 @@ export class JSONSchemaBuilder {
         alert('键值不允许为空')
         throw Error('键值不允许为空')
       }
-      if (prop.isPattern && !(/\^.+\$/.test(name))) {
+      if (prop.isPattern && !/\^.+\$/.test(name)) {
         alert('正则表达式类型的键值必须以"^"开头,"$"结尾')
         throw Error('正则表达式类型的键值格式不正确')
       }
@@ -121,7 +121,8 @@ export class JSONSchemaBuilder {
       let newProp = propToRaw(prop, parent)
       /**加入父属性 */
       if (typeof prop.isPattern === 'boolean' && prop.isPattern === true) {
-        if (typeof parent.patternProperties === 'undefined') parent.patternProperties = {}
+        if (typeof parent.patternProperties === 'undefined')
+          parent.patternProperties = {}
         parent.patternProperties[name] = newProp
       } else {
         if (typeof parent.properties === 'undefined') parent.properties = {}
@@ -131,8 +132,26 @@ export class JSONSchemaBuilder {
 
     return rootObj
   }
-
-  /**指定属性下最后一个子节点的索引 */
+  /**
+   * 返回指定节点的父节点
+   */
+  getParent(prop: SchemaProp): SchemaProp | undefined {
+    return this.props.find((other) => {
+      return (
+        other.fullname === prop.path ||
+        other.fullname === prop.path.replace(/\[\*\]$/, '')
+      )
+    })
+  }
+  /**
+   * 当前节点在全局数组中的位置
+   */
+  getIndex(prop: SchemaProp): number {
+    return this.props.findIndex((other) => other.fullname === prop.fullname)
+  }
+  /**
+   * 指定属性下最后一个子节点的索引
+   */
   getLastChildIndex(prop: SchemaProp): number {
     let lastIndex = -1
     let child
@@ -154,7 +173,7 @@ export class JSONSchemaBuilder {
     if (parent.attrs.type === 'array') path += '[*]'
 
     let newProp = new SchemaProp(path, 'newKey', 'string')
-    newProp.isPattern = type === 'patternProperties' ?  true : false
+    newProp.isPattern = type === 'patternProperties' ? true : false
 
     /**将新节点加入到适当位置*/
     let lastIndex = this.getLastChildIndex(parent)

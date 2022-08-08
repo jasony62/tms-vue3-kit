@@ -3,7 +3,18 @@
     <!--属性列表部分-->
     <div class="tvu-jse__properties">
       <div class="tvu-jse__property" :class="p === prop ? 'tvu-jse__property--active' : ''" v-for="p in nodes">
-        <div @click="onClickNode(p)">{{ p.fullname }}</div>
+        <div class="tvu-jse__property__fullname" @click="onClickNode(p)">{{ p.fullname }}</div>
+        <div class="tvu-jse__property__actions" v-if="p === prop">
+          <div>
+            <button @click="onRemoveProp" v-if="canRemove()">删除</button>
+            <button @click="onMoveUpProp" v-if="canMoveUp()">上移</button>
+            <button @click="onMoveDownProp" v-if="canMoveDown()">下移</button>
+          </div>
+          <div v-if="hasAddNode" class="flex flex-row gap-2">
+            <button @click="onAddProp('properties')">添加属性</button>
+            <button @click="onAddProp('patternProperties')">添加模板属性</button>
+          </div>
+        </div>
       </div>
     </div>
     <!--属性编辑部分-->
@@ -94,11 +105,6 @@
       <div class="tvu-jse__extra_fields">
         <slot name="extattrs" :attrs="attrs">备用内容</slot>
       </div>
-      <tvu-form-item class="tvu-jse__field__actions">
-        <tvu-button @click="onRemoveNode">删除属性</tvu-button>
-        <tvu-button @click="onAddNode('properties')" v-if="hasAddNode">添加属性</tvu-button>
-        <tvu-button @click="onAddNode('patternProperties')" v-if="hasAddNode">添加模板属性</tvu-button>
-      </tvu-form-item>
     </div>
   </div>
 </template>
@@ -142,6 +148,7 @@ const editing = () => {
 // 允许在父组件中获取
 defineExpose({ editing })
 
+// 当前编辑的属性
 const prop = computed(() => {
   return data.currProp
 })
@@ -186,6 +193,7 @@ let forbidden = computed(() => {
   return false
 })
 
+/**允许添加属性*/
 let hasAddNode = computed(() => {
   if (attrs.value.type === 'object') return true
   if (attrs.value.type === 'array' && data.currProp.items?.type === 'object') return true
@@ -270,12 +278,12 @@ const onClickNode = (prop: SchemaProp) => {
   useExistIf.value = typeof prop.existIf === 'object'
 }
 
-const onAddNode = (type: string) => {
+const onAddProp = (type: string) => {
   let child = builder.addProp(toRaw(data.currProp), type)
   data.currProp = child
 }
 
-const onRemoveNode = () => {
+const onRemoveProp = () => {
   let prev = builder.removeProp(toRaw(data.currProp))
   if (typeof prev === 'object') {
     data.currProp = prev
@@ -284,6 +292,112 @@ const onRemoveNode = () => {
   } else {
     props.onMessage('删除属性遇到未知错误')
   }
+}
+/**
+ * 节点是否可以向上移动
+ */
+const canMoveUp = (): boolean => {
+  let current = toRaw(data.currProp)
+  // 有子节点不允许移动
+  let lastChildIndex = builder.getLastChildIndex(current)
+  if (lastChildIndex !== -1) return false
+  // 当前节点在全局数组中的位置
+  const index = builder.getIndex(current)
+  if (index === -1) {
+    // 没有找到
+    return false
+  }
+  // 当前节点的父节点。
+  const parent = builder.getParent(current)
+  if (!parent) {
+    // 没有父属性，不允许移动
+    return false
+  }
+  const parentIndex = builder.getIndex(parent)
+  if (parentIndex === -1) return false
+
+  if (index === parentIndex + 1) {
+    // 已经是第一个节点，不允许上移
+    return false
+  }
+
+  return true
+}
+/**
+ * 节点是否可以向下移动
+ */
+const canMoveDown = (): boolean => {
+  let current = toRaw(data.currProp)
+  // 有子节点不允许移动
+  let lastChildIndex = builder.getLastChildIndex(current)
+  if (lastChildIndex !== -1) return false
+  // 当前节点的父节点。
+  const parent = builder.getParent(current)
+  if (!parent) {
+    // 没有父属性，不允许移动
+    return false
+  }
+  const lastIndex = builder.getLastChildIndex(parent)
+  if (lastIndex === -1) return false
+
+  // 当前节点在全局数组中的位置
+  const index = builder.getIndex(current)
+  if (index === -1) {
+    // 没有找到
+    return false
+  }
+  if (index === lastIndex) {
+    // 已经是最后一个节点，不允许上移
+    return false
+  }
+  return true
+}
+/**
+ * 是否允许删除
+ */
+const canRemove = (): boolean => {
+  let current = toRaw(data.currProp)
+  if (current === builder.props[0]) return false
+  let lastChildIndex = builder.getLastChildIndex(current)
+  if (lastChildIndex !== -1) return false
+
+  return true
+}
+/**
+ * 向上移动当前属性
+ * 
+ * 只允许在父节点中移动
+ */
+const onMoveUpProp = () => {
+  if (!canMoveUp()) return
+
+  let current = toRaw(data.currProp)
+  const index = builder.getIndex(current)
+
+  // 移动位置
+  //@ts-ignore
+  data.currProp = { name: '', attrs: {} }
+  const { props } = builder
+  props.splice(index, 1)
+  props.splice(index - 1, 0, current)
+  data.currProp = current
+}
+
+/**向下移动当前属性*/
+const onMoveDownProp = () => {
+  if (!canMoveDown()) return
+
+  let current = toRaw(data.currProp)
+  // 当前节点在全局数组中的位置
+  const index = builder.getIndex(current)
+
+  // 移动位置
+  //@ts-ignore
+  data.currProp = { name: '', attrs: {} }
+  const { props } = builder
+  props.splice(index, 1)
+  props.splice(index + 1, 0, current)
+  data.currProp = current
 }
 
 onMounted(() => {
