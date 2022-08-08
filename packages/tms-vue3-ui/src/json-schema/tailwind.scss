@@ -6,14 +6,17 @@
   .tvu-jse__property {
     @apply p-2;
     &.tvu-jse__property--active {
-      @apply bg-gray-200;
+      @apply bg-gray-200 border-r-2 border-red-500;
+    }
+    &.tvu-jse__property--highlight {
+      @apply bg-gray-100 border-r-2 border-red-500;
     }
   }
   .tvu-jse__property__actions {
     > div {
       @apply flex flex-row gap-2 mt-1;
       button {
-        @apply border-2 border-blue-500 rounded-md text-blue-500 bg-white px-2;
+        @apply border border-blue-500 rounded-md text-blue-500 bg-white px-2;
       }
     }
   }

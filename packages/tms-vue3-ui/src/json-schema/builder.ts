@@ -1,5 +1,8 @@
 import { SchemaIter, RawSchema, SchemaProp, DEFAULT_ROOT_NAME } from './model'
 
+import Debug from 'debug'
+const debug = Debug('json-schema')
+
 export { SchemaProp }
 
 export const Type2Format = {
@@ -144,15 +147,16 @@ export class JSONSchemaBuilder {
     })
   }
   /**
-   * 当前节点在全局数组中的位置
+   * 获得属性的全局索引
    */
   getIndex(prop: SchemaProp): number {
     return this.props.findIndex((other) => other.fullname === prop.fullname)
   }
   /**
-   * 指定属性下最后一个子节点的索引
+   * 获得属性最后一个后代属性的全局索引
+   * 如果没有后代属性，返回-1
    */
-  getLastChildIndex(prop: SchemaProp): number {
+  getEndIndex(prop: SchemaProp): number {
     let lastIndex = -1
     let child
     for (let i = 0; i < this.props.length; i++) {
@@ -165,11 +169,66 @@ export class JSONSchemaBuilder {
     return lastIndex
   }
   /**
-   * 是否可以在属性前添加属性
+   * 获得属性的前一个兄弟属性的全局索引
+   * @param prop
+   */
+  getPrevSiblingIndex(prop: SchemaProp): number {
+    /**path一样的就是兄弟属性。最远找到父节点结束。*/
+    const index = this.getIndex(prop)
+    if (index === -1) return -1 // 没有找到指定的属性
+
+    let siblingIndex = -1
+    for (let i = index - 1; i > 0; i--) {
+      if (this.props[i].path === prop.path) {
+        siblingIndex = i
+        break
+      } else if (
+        this.props[i].fullname === prop.path ||
+        this.props[i] + '[*]' === prop.path
+      ) {
+        // 已经到达父节点
+        break
+      }
+    }
+
+    return siblingIndex
+  }
+  /**
+   * 获得属性的后一个兄弟属性的全局索引
+   * @param prop
+   */
+  getNextSiblingIndex(prop: SchemaProp): number {
+    /**path一样的就是兄弟属性。最远找到父节点结束。*/
+    const index = this.getIndex(prop)
+    if (index === -1) return -1 // 没有找到指定的属性
+
+    let siblingIndex = -1
+    for (let i = index + 1; i < this.props.length; i++) {
+      if (this.props[i].path === prop.path) {
+        siblingIndex = i
+        break
+      } else if (this.props[i].path.indexOf(prop.path) !== 0) {
+        break
+      }
+    }
+
+    return siblingIndex
+  }
+  /**
+   * 是否可以在属性前添加兄弟属性
    * @param prop
    * @returns
    */
-  canInsert(prop: SchemaProp): boolean {
+  canAddBefore(prop: SchemaProp): boolean {
+    if (prop === this.props[0]) return false
+    return true
+  }
+  /**
+   * 是否可以在属性后添加兄弟属性
+   * @param prop
+   * @returns
+   */
+  canAddAfter(prop: SchemaProp): boolean {
     if (prop === this.props[0]) return false
     return true
   }
@@ -178,65 +237,22 @@ export class JSONSchemaBuilder {
    * @param prop
    */
   canMoveUp(prop: SchemaProp): boolean {
-    // 有子节点不允许移动
-    let lastChildIndex = this.getLastChildIndex(prop)
-    if (lastChildIndex !== -1) return false
-    // 当前节点在全局数组中的位置
-    const index = this.getIndex(prop)
-    if (index === -1) {
-      // 没有找到
-      return false
-    }
-    // 当前节点的父节点。
-    const parent = this.getParent(prop)
-    if (!parent) {
-      // 没有父属性，不允许移动
-      return false
-    }
-    const parentIndex = this.getIndex(parent)
-    if (parentIndex === -1) return false
-
-    if (index === parentIndex + 1) {
-      // 已经是第一个节点，不允许上移
-      return false
-    }
-
-    return true
+    const siblingIndex = this.getPrevSiblingIndex(prop)
+    return siblingIndex > 0
   }
   /**
    * 属性是否可以向后移动
    */
   canMoveDown(prop: SchemaProp): boolean {
-    // 有子节点不允许移动
-    let lastChildIndex = this.getLastChildIndex(prop)
-    if (lastChildIndex !== -1) return false
-    // 当前节点的父节点。
-    const parent = this.getParent(prop)
-    if (!parent) {
-      // 没有父属性，不允许移动
-      return false
-    }
-    const lastIndex = this.getLastChildIndex(parent)
-    if (lastIndex === -1) return false
-
-    // 当前节点在全局数组中的位置
-    const index = this.getIndex(prop)
-    if (index === -1) {
-      // 没有找到
-      return false
-    }
-    if (index === lastIndex) {
-      // 已经是最后一个节点，不允许上移
-      return false
-    }
-    return true
+    const siblingIndex = this.getNextSiblingIndex(prop)
+    return siblingIndex > 0
   }
   /**
    * 属性是否允许删除
    */
   canRemove(prop: SchemaProp): boolean {
     if (prop === this.props[0]) return false
-    let lastChildIndex = this.getLastChildIndex(prop)
+    let lastChildIndex = this.getEndIndex(prop)
     if (lastChildIndex !== -1) return false
 
     return true
@@ -244,7 +260,7 @@ export class JSONSchemaBuilder {
   /**
    * 在指定的属性下添加子属性
    */
-  addProp(parent: SchemaProp, type: string): SchemaProp {
+  addProp(parent: SchemaProp, type: string = 'properties'): SchemaProp {
     // 节点所在路径
     let path = parent.fullname
     if (parent.attrs.type === 'array') path += '[*]'
@@ -253,7 +269,7 @@ export class JSONSchemaBuilder {
     newProp.isPattern = type === 'patternProperties' ? true : false
 
     /**将新节点加入到适当位置*/
-    let lastIndex = this.getLastChildIndex(parent)
+    let lastIndex = this.getEndIndex(parent)
     if (lastIndex !== -1) {
       // 作为最后1个子节点
       this.props.splice(lastIndex + 1, 0, newProp)
@@ -266,11 +282,11 @@ export class JSONSchemaBuilder {
     return newProp
   }
   /**
-   * 在指定属性前添加属性
+   * 在指定属性前添加兄弟属性
    * @param sibling
    */
-  insertProp(sibling: SchemaProp): SchemaProp | undefined {
-    if (!this.canInsert(sibling)) return undefined
+  addPropBefore(sibling: SchemaProp): SchemaProp | undefined {
+    if (!this.canAddBefore(sibling)) return undefined
 
     const index = this.getIndex(sibling)
 
@@ -282,16 +298,39 @@ export class JSONSchemaBuilder {
     return newProp
   }
   /**
+   * 在指定属性前添加兄弟属性
+   * @param sibling
+   */
+  addPropAfter(sibling: SchemaProp): SchemaProp | undefined {
+    if (!this.canAddAfter(sibling)) return undefined
+
+    // 新兄弟属性插入位置
+    let index = this.getEndIndex(sibling)
+    if (index <= 0) {
+      index = this.getIndex(sibling)
+      if (index <= 0) return undefined
+    }
+
+    let newProp = new SchemaProp(sibling.path, 'newKey', 'string')
+    newProp.isPattern = sibling.isPattern
+
+    this.props.splice(index + 1, 0, newProp)
+
+    return newProp
+  }
+  /**
    * 删除指定的属性
    *
    * 根节点不允许删除
    */
   removeProp(prop: SchemaProp): SchemaProp | boolean {
-    let childIndex = this.props.indexOf(prop)
-    if (childIndex <= 0) return false
+    if (!this.canRemove(prop)) return false
 
-    let prev = this.props[childIndex - 1]
-    this.props.splice(childIndex, 1)
+    let index = this.props.indexOf(prop)
+    if (index <= 0) return false
+
+    let prev = this.props[index - 1]
+    this.props.splice(index, 1)
 
     return prev
   }
@@ -300,13 +339,21 @@ export class JSONSchemaBuilder {
    * @param prop
    */
   moveUp(prop: SchemaProp) {
-    if (!this.canMoveUp(prop)) return false
-    const index = this.getIndex(prop)
+    const siblingIndex = this.getPrevSiblingIndex(prop)
+    if (siblingIndex < 0) return false
 
-    // 移动位置
+    /**确定要移动的范围。属性及其子属性*/
+    // 移动的起始位置
+    const index = this.getIndex(prop)
+    const lastIndex = this.getEndIndex(prop)
+    // 要移动属性的数量
+    const number = lastIndex === -1 ? 1 : lastIndex - index + 1
+
+    // 向前移动
     const { props } = this
-    props.splice(index, 1)
-    props.splice(index - 1, 0, prop)
+    const moved = props.splice(index, number)
+    // 要移动到的位置
+    props.splice(siblingIndex, 0, ...moved)
 
     return true
   }
@@ -316,16 +363,27 @@ export class JSONSchemaBuilder {
    * @returns
    */
   moveDown(prop: SchemaProp) {
-    if (!this.canMoveDown(prop)) return false
+    const siblingIndex = this.getNextSiblingIndex(prop)
+    if (siblingIndex < 0) return false
 
     // 当前节点在全局数组中的位置
     const index = this.getIndex(prop)
+    const lastIndex = this.getEndIndex(prop)
+    // 要移动属性的数量
+    const number = lastIndex === -1 ? 1 : lastIndex - index + 1
 
-    // 移动位置
+    // 向后移动
     const { props } = this
-    props.splice(index, 1)
-    props.splice(index + 1, 0, prop)
+    const moved = props.splice(index, number)
+
+    props.splice(siblingIndex, 0, ...moved)
 
     return true
+  }
+  /**
+   * 返回所有属性的fullname
+   */
+  fullnames() {
+    return this.props.map((p) => p.fullname)
   }
 }

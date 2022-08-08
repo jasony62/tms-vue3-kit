@@ -2,18 +2,23 @@
   <div class="tvu-jse tvu-jse--layout-default">
     <!--属性列表部分-->
     <div class="tvu-jse__properties">
-      <div class="tvu-jse__property" :class="p === prop ? 'tvu-jse__property--active' : ''" v-for="p in nodes">
+      <div class="tvu-jse__property"
+        :class="{ 'tvu-jse__property--active': p === prop, 'tvu-jse__property--highlight': highlight(i) }"
+        v-for="(p, i) in nodes">
         <div class="tvu-jse__property__fullname" @click="onClickNode(p)">{{ p.fullname }}</div>
         <div class="tvu-jse__property__actions" v-if="p === prop">
           <div>
             <button @click="onRemoveProp" v-if="canRemove()">删除</button>
+            <button @click="onAddPropBefore" v-if="canAddBefore()">前插入</button>
+            <button @click="onAddPropAfter" v-if="canAddAfter()">后插入</button>
+          </div>
+          <div>
             <button @click="onMoveUpProp" v-if="canMoveUp()">上移</button>
             <button @click="onMoveDownProp" v-if="canMoveDown()">下移</button>
-            <button @click="onInsertProp" v-if="canInsert()">插入</button>
           </div>
           <div v-if="hasAddNode" class="flex flex-row gap-2">
-            <button @click="onAddProp('properties')">添加属性</button>
-            <button @click="onAddProp('patternProperties')">添加模板属性</button>
+            <button @click="onAddProp('properties')">添加子属性</button>
+            <button @click="onAddProp('patternProperties')">添加模板子属性</button>
           </div>
         </div>
       </div>
@@ -137,6 +142,10 @@ const props = defineProps({
 const builder = new JSONSchemaBuilder(props.rootName)
 const nodes = ref([] as SchemaProp[])
 const data = reactive({ currProp: { name: '', attrs: {} } as SchemaProp })
+// 当前属性的索引
+const activeIndex = computed(() => builder.getIndex(toRaw(data.currProp)))
+// 当前属性最后一个后代的索引
+const activeEndIndex = computed(() => activeIndex.value === 0 ? 0 : builder.getEndIndex(toRaw(data.currProp)))
 const choiceMode = ref('')
 const useAutofill = ref(false)
 const useExistIf = ref(false)
@@ -278,22 +287,18 @@ const onClickNode = (prop: SchemaProp) => {
   useAutofill.value = typeof prop.attrs.autofill === 'object'
   useExistIf.value = typeof prop.existIf === 'object'
 }
-
-const onAddProp = (type: string) => {
-  let child = builder.addProp(toRaw(data.currProp), type)
-  data.currProp = child
-}
 /**
- * 节点前插入节点
+ * 是否在高亮区域（属性及其后代）
  */
-const onInsertProp = () => {
-  const sibling = builder.insertProp(toRaw(data.currProp))
-  if (sibling) data.currProp = sibling
-}
+const highlight = (index: number): boolean => index > activeIndex.value && index <= activeEndIndex.value
 /**
  * 节点前是否可以插入节点
  */
-const canInsert = (): boolean => builder.canInsert(toRaw(data.currProp))
+const canAddBefore = (): boolean => builder.canAddBefore(toRaw(data.currProp))
+/**
+ * 节点后是否可以插入节点
+ */
+const canAddAfter = (): boolean => builder.canAddAfter(toRaw(data.currProp))
 /**
  * 节点是否可以向上移动
  */
@@ -307,9 +312,29 @@ const canMoveDown = (): boolean => builder.canMoveDown(toRaw(data.currProp))
  */
 const canRemove = (): boolean => builder.canRemove(toRaw(data.currProp))
 /**
+ * 在结尾添加子属性
+ * @param type 
+ */
+const onAddProp = (type: string) => {
+  let child = builder.addProp(toRaw(data.currProp), type)
+  data.currProp = child
+}
+/**
+ * 节点前插入节点
+ */
+const onAddPropBefore = () => {
+  const sibling = builder.addPropBefore(toRaw(data.currProp))
+  if (sibling) data.currProp = sibling
+}
+/**
+ * 节点后插入节点
+ */
+const onAddPropAfter = () => {
+  const sibling = builder.addPropAfter(toRaw(data.currProp))
+  if (sibling) data.currProp = sibling
+}
+/**
  * 向上移动当前属性
- * 
- * 只允许在父节点中移动
  */
 const onMoveUpProp = () => {
   let current = toRaw(data.currProp)
