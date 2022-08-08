@@ -33,6 +33,7 @@ export abstract class Field {
   autofillURL: string = '' // 当前值对应的自动填充参数，为了避免不必要接口调用
   autofillBody: any // 当前值对应的自动填充参数，为了避免不必要接口调用
   autofilled: boolean = false // 是否已经进行过填充
+  _children?: Field[] // 对象类型字段的子字段数组
 
   constructor(prop: SchemaProp, index = -1, name = '') {
     let { attrs } = prop
@@ -42,6 +43,9 @@ export abstract class Field {
       this.value = defVal !== undefined ? [...defVal] : value ? value : []
     } else {
       this.value = defVal ? defVal : value ? value : ''
+    }
+    if (type === 'object') {
+      this._children = []
     }
     this._prop = prop
     this._required = prop.attrs.required ?? false
@@ -131,6 +135,10 @@ export abstract class Field {
 
   get attachment() {
     return this._prop.attachment
+  }
+
+  get children() {
+    return this._children
   }
 
   isChildOf(parent: Field): boolean {

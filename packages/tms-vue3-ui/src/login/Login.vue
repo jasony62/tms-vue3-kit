@@ -86,6 +86,7 @@ schema?.forEach((item: SubmitDataItem) => {
 
 /**刷新验证码*/
 const refreshCaptcha = () => {
+  if (!captchaInput.value) return
   submitData[captchaInput.value.key] = ''
   if (elCaptcha?.value && typeof fnCaptcha === 'function') {
     fnCaptcha().then((response: CaptchaResponse) => {

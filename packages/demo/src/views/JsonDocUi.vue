@@ -9,7 +9,8 @@
       <option value="direct-json">JSON属性</option>
       <option value="autofill">自动填充</option>
       <option value="prop-dep">属性依赖</option>
-      <option value="files">文件</option>
+      <option value="files">文件（数组）</option>
+      <option value="file">文件（单个）</option>
     </select>
   </div>
   <div class="flex flex-row">
@@ -45,6 +46,7 @@ import 'tms-vue3-ui/dist/es/json-doc/style/tailwind.scss'
 import { nextTick, onMounted, reactive, ref, watch } from 'vue'
 import JSONEditor from 'jsoneditor'
 import 'jsoneditor/dist/jsoneditor.css'
+import RandExp from 'randexp'
 
 const jsonDocEditor = ref<{ editing: () => string, editDoc: DocAsArray } | null>(null)
 
@@ -158,14 +160,31 @@ const onAutofill = () => {
  * 从外部选择文件的方法
  * @param params
  */
-const onFileSelect = (params: any) => {
-  return new Promise((resolve) => {
+const onFileSelect = (fullename: string, field: Field) => {
+  if (field.type === 'object') {
+    const fileData: any = {}
+    if (field.children?.length) {
+      let randexp = new RandExp(/\w*/)
+      field.children.forEach((cf: Field) => {
+        let val: any
+        switch (cf.type) {
+          case 'number':
+            val = Math.floor(Math.random() * 1000)
+            break
+          default:
+            val = randexp.gen()
+        }
+        fileData[cf.name] = val
+      })
+    }
+    return Promise.resolve(fileData)
+  } else {
     /**这里需要返回文件属性中items.properties中定义的内容*/
-    resolve({
+    return Promise.resolve({
       name: 'onFileSelect返回文件名称',
       url: 'onFileSelect返回的文件地址',
     })
-  })
+  }
 }
 /**
  * 表单中文件上传方法

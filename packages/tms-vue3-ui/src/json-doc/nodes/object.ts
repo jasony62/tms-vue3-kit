@@ -52,6 +52,41 @@ const itemAddVNode = (ctx: FormContext, field: Field) => {
   return h('div', { class: ['tvu-jdoc__nest__actions'] }, addVNodes)
 }
 
+/**
+ * 执行选取文件操作
+ * @param ctx
+ * @param field
+ * @returns
+ */
+const itemPickVNode = (ctx: FormContext, field: Field) => {
+  let addVNode = h(
+    components.button.tag,
+    {
+      class: ['tvu-button'],
+      onClick: () => {
+        if (field.children?.length && typeof ctx.onFileSelect === 'function') {
+          ctx.onFileSelect(field.fullname, field).then((fileData: any) => {
+            debug(
+              `对象字段【${field.fullname}】选取文件：\n` +
+                JSON.stringify(fileData, null, 2)
+            )
+            // 设置初始值和添加项目必须在dom循环中完成，不能在promise外面初始化
+            field.children?.forEach((cf: Field) => {
+              if (typeof fileData[cf.name] !== undefined) {
+                ctx.editDoc.set(cf.fullname, fileData[cf.name], false)
+              }
+            })
+            ctx.editDoc.forceRender()
+          })
+        }
+      },
+    },
+    '选取文件'
+  )
+
+  return h('div', { class: ['tvu-jdoc__nest__actions'] }, addVNode)
+}
+
 export class ObjectNode extends FieldNode {
   private _children
 
@@ -80,6 +115,7 @@ export class ObjectNode extends FieldNode {
   }
   /**
    * 如果对象中包含可选属性，需要提供添加删除属性，修改属性名称的操作。
+   * 如果对象的格式是文件，需要支持选取文件操作
    */
   protected children(): VNode[] {
     const { ctx, field } = this
@@ -87,6 +123,15 @@ export class ObjectNode extends FieldNode {
 
     if (field.scheamProp.patternChildren?.length) {
       vnodes.push(itemAddVNode(ctx, field))
+    }
+
+    /**如果对象的格式是对象，添加选取文件操作*/
+    if (field.scheamProp.attrs.format === 'file') {
+      debug(
+        `对象字段【${field.fullname}】【format=file】，需要支持选取文件操作`
+      )
+      let pickFileVNode = itemPickVNode(ctx, field)
+      vnodes.push(pickFileVNode)
     }
 
     return vnodes
