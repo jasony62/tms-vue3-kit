@@ -28,9 +28,9 @@ function createField(
     case 'array':
       newField = ARRAY_KEYWORDS.some((kw) => prop.hasOwnProperty(kw))
         ? new FieldArray(prop, index, name)
-        : prop.items?.format === 'file'
-        ? new FieldFile(prop, index, name)
-        : new FieldObject(prop, index, name)
+        : // : prop.items?.format === 'file'
+          // ? new FieldFile(prop, index, name)
+          new FieldObject(prop, index, name)
       break
     case 'object':
       newField = new FieldObject(prop, index, name)

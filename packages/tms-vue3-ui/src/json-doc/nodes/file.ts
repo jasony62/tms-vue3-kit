@@ -183,7 +183,7 @@ export class FileNode extends FieldNode {
       itemVNodes.push(child)
       let itemActionsVNode = h(
         'div',
-        { class: ['jdoc__nest__item__actions'] },
+        { class: ['tvu-jdoc__nest__item__actions'] },
         [itemRemoveVNode(ctx, field, index)]
       )
       let itemNestVNode = h('div', { index, class: ['tvu-jdoc__nest__item'] }, [

@@ -17,7 +17,7 @@
     <div class="w-1/3 p-4">
       <json-doc v-if="loading === false" ref="jsonDocEditor" :key="caseName" :schema="testObj.schema"
         :value="testObj.data" :autofill-request="onAutofill" :on-file-download="onFileDownload"
-        :on-file-select="onFileSelect" :show-field-fullname="true" @jdoc-focus="onJdocFocus" @jdoc-blur="onJdocBlur">
+        :on-file-upload="onFileUpload" :show-field-fullname="true" @jdoc-focus="onJdocFocus" @jdoc-blur="onJdocBlur">
       </json-doc>
     </div>
     <div class="w-1/3">
@@ -157,10 +157,9 @@ const onAutofill = () => {
   }
 }
 /**
- * 从外部选择文件的方法
- * @param params
+ * 从外部文件服务选择文件的方法
  */
-const onFileSelect = (fullename: string, field: Field) => {
+const onFileSelect = (field: Field) => {
   if (field.type === 'object') {
     const fileData: any = {}
     if (field.children?.length) {
@@ -178,28 +177,32 @@ const onFileSelect = (fullename: string, field: Field) => {
       })
     }
     return Promise.resolve(fileData)
-  } else {
-    /**这里需要返回文件属性中items.properties中定义的内容*/
-    return Promise.resolve({
-      name: 'onFileSelect返回文件名称',
-      url: 'onFileSelect返回的文件地址',
-    })
   }
 }
 /**
  * 表单中文件上传方法
- * @param params
+ * 需要调用放上传文件，并返回文件信息
  */
-// const onFileUpload = (params: any) => {
-//   console.log('params', params)
-//   return new Promise((resolve) => {
-//     /**这里需要返回文件属性中items.properties中定义的内容*/
-//     resolve({
-//       name: 'onFileUpload返回文件名称',
-//       url: 'onFileUpload返回的文件地址',
-//     })
-//   })
-// }
+const onFileUpload = (field: Field, data: FormData) => {
+  if (field.type === 'object') {
+    const fileData: any = {}
+    if (field.children?.length) {
+      let randexp = new RandExp(/\w*/)
+      field.children.forEach((cf: Field) => {
+        let val: any
+        switch (cf.type) {
+          case 'number':
+            val = Math.floor(Math.random() * 1000)
+            break
+          default:
+            val = randexp.gen()
+        }
+        fileData[cf.name] = val
+      })
+    }
+    return Promise.resolve(fileData)
+  }
+}
 
 const onFileDownload = (name: string, url: string) => {
   alert(`下载文件：name=${name},url=${url}`)

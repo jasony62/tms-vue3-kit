@@ -1,6 +1,5 @@
 export const SampleSchema = {
   required: false,
-  default: [],
   type: 'object',
   properties: {
     files: {

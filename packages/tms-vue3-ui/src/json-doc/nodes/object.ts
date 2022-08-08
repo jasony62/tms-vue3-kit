@@ -7,7 +7,48 @@ import RandExp from 'randexp'
 import Debug from 'debug'
 
 const debug = Debug('json-doc:object')
-
+/**
+ * 根据提供的文件对象数据，更新表单中的文件字段数据
+ * @param field
+ * @param fileData
+ * @param ctx
+ */
+function _setNewFileData(field: Field, fileData: any, ctx: FormContext) {
+  field.children?.forEach((cf: Field) => {
+    if (typeof fileData[cf.name] !== undefined) {
+      ctx.editDoc.set(cf.fullname, fileData[cf.name], false)
+    }
+  })
+  ctx.editDoc.forceRender()
+}
+/**
+ * 选择本地文件并上传
+ */
+function _pickLocalFile(ctx: FormContext, field: Field, fileUpload: Function) {
+  const elInput = document.createElement('input')
+  elInput.setAttribute('type', 'file')
+  // const { accept, size } = field.scheamProp
+  // if (accept) elInput.setAttribute('accept', accept)
+  document.body.appendChild(elInput)
+  elInput.addEventListener('change', async (e: Event) => {
+    const target = e.target as HTMLInputElement
+    if (target.files?.length === 1) {
+      const file = target.files[0]
+      /**检查文件大小*/
+      // if (size && file.size / 1024 / 1024 > size) {
+      //   ctx.onMessage(`上传文件大小过大，超过${size}M`)
+      //   return
+      // }
+      /**用表单传递数据*/
+      const data = new FormData()
+      data.append('file', file)
+      fileUpload(field, data).then((fileData: any) => {
+        _setNewFileData(field, fileData, ctx)
+      })
+    }
+  })
+  elInput.click()
+}
 /**
  * 添加子属性操作
  * @param ctx
@@ -64,20 +105,18 @@ const itemPickVNode = (ctx: FormContext, field: Field) => {
     {
       class: ['tvu-button'],
       onClick: () => {
-        if (field.children?.length && typeof ctx.onFileSelect === 'function') {
-          ctx.onFileSelect(field.fullname, field).then((fileData: any) => {
+        if (!field.children?.length) return
+        if (typeof ctx.onFileSelect === 'function') {
+          ctx.onFileSelect(field).then((fileData: any) => {
             debug(
               `对象字段【${field.fullname}】选取文件：\n` +
                 JSON.stringify(fileData, null, 2)
             )
-            // 设置初始值和添加项目必须在dom循环中完成，不能在promise外面初始化
-            field.children?.forEach((cf: Field) => {
-              if (typeof fileData[cf.name] !== undefined) {
-                ctx.editDoc.set(cf.fullname, fileData[cf.name], false)
-              }
-            })
-            ctx.editDoc.forceRender()
+            _setNewFileData(field, fileData, ctx)
           })
+        } else if (typeof ctx.onFileUpload === 'function') {
+          /**提供了接收上传本地文件的方法*/
+          _pickLocalFile(ctx, field, ctx.onFileUpload)
         }
       },
     },
@@ -124,7 +163,6 @@ export class ObjectNode extends FieldNode {
     if (field.scheamProp.patternChildren?.length) {
       vnodes.push(itemAddVNode(ctx, field))
     }
-
     /**如果对象的格式是对象，添加选取文件操作*/
     if (field.scheamProp.attrs.format === 'file') {
       debug(

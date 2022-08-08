@@ -68,6 +68,7 @@ function createArrayItemNode(
     let { fullname, items } = prop
     // 给数组属性的items生成1个模拟属性，用name=[*]表示
     let itemProp = new SchemaProp(`${fullname}`, '[*]', items.type)
+    if (items.format) itemProp.attrs.format = items.format
     const itemFields = createArrayItemFields(ctx, field, itemProp)
     debug(
       `属性【${fullname}】生成数组项目【${items.type}】属性，生成【${itemFields.length}】个字段`

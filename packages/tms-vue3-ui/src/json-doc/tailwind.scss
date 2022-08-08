@@ -21,5 +21,8 @@
       @apply flex flex-col gap-2 ml-2 pl-2;
       border-left: 1px solid #ddd;
     }
+    .tvu-jdoc__nest__item__actions {
+      @apply p-2;
+    }
   }
 }

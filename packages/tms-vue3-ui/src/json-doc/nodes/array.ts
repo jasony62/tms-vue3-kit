@@ -3,7 +3,12 @@ import { components } from './index'
 import { FieldNode } from './fieldNode'
 import { Field } from '../fields'
 import { FormContext } from '../builder'
-
+/**
+ * 给数组添加项目
+ * @param ctx
+ * @param field
+ * @returns
+ */
 const itemAddVNode = (ctx: FormContext, field: Field) => {
   let addVNode = h(
     components.button.tag,
@@ -57,7 +62,7 @@ const itemInsertVNode = (ctx: FormContext, field: Field, index: number) => {
         }
       },
     },
-    '插入属性'
+    '插入项目'
   )
 }
 
@@ -72,7 +77,7 @@ const itemRemoveVNode = (ctx: FormContext, field: Field, index: number) => {
         ctx.editDoc.remove(fullname)
       },
     },
-    '删除属性'
+    '删除项目'
   )
 }
 /**
@@ -107,7 +112,7 @@ export class ArrayNode extends FieldNode {
       itemVNodes.push(child)
       let itemActionsVNode = h(
         'div',
-        { class: ['jdoc__nest__item__actions'] },
+        { class: ['tvu-jdoc__nest__item__actions'] },
         [itemInsertVNode(ctx, field, index), itemRemoveVNode(ctx, field, index)]
       )
       let itemNestVNode = h('div', { index, class: ['tvu-jdoc__nest__item'] }, [
