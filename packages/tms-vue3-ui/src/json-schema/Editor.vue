@@ -9,6 +9,7 @@
             <button @click="onRemoveProp" v-if="canRemove()">删除</button>
             <button @click="onMoveUpProp" v-if="canMoveUp()">上移</button>
             <button @click="onMoveDownProp" v-if="canMoveDown()">下移</button>
+            <button @click="onInsertProp" v-if="canInsert()">插入</button>
           </div>
           <div v-if="hasAddNode" class="flex flex-row gap-2">
             <button @click="onAddProp('properties')">添加属性</button>
@@ -282,7 +283,54 @@ const onAddProp = (type: string) => {
   let child = builder.addProp(toRaw(data.currProp), type)
   data.currProp = child
 }
-
+/**
+ * 节点前插入节点
+ */
+const onInsertProp = () => {
+  const sibling = builder.insertProp(toRaw(data.currProp))
+  if (sibling) data.currProp = sibling
+}
+/**
+ * 节点前是否可以插入节点
+ */
+const canInsert = (): boolean => builder.canInsert(toRaw(data.currProp))
+/**
+ * 节点是否可以向上移动
+ */
+const canMoveUp = (): boolean => builder.canMoveUp(toRaw(data.currProp))
+/**
+ * 节点是否可以向下移动
+ */
+const canMoveDown = (): boolean => builder.canMoveDown(toRaw(data.currProp))
+/**
+ * 节点是否允许删除
+ */
+const canRemove = (): boolean => builder.canRemove(toRaw(data.currProp))
+/**
+ * 向上移动当前属性
+ * 
+ * 只允许在父节点中移动
+ */
+const onMoveUpProp = () => {
+  let current = toRaw(data.currProp)
+  //@ts-ignore
+  data.currProp = { name: '', attrs: {} }
+  builder.moveUp(current)
+  data.currProp = current
+}
+/**
+ * 向下移动当前属性
+ */
+const onMoveDownProp = () => {
+  let current = toRaw(data.currProp)
+  //@ts-ignore
+  data.currProp = { name: '', attrs: {} }
+  builder.moveDown(current)
+  data.currProp = current
+}
+/**
+ * 删除节点
+ */
 const onRemoveProp = () => {
   let prev = builder.removeProp(toRaw(data.currProp))
   if (typeof prev === 'object') {
@@ -292,112 +340,6 @@ const onRemoveProp = () => {
   } else {
     props.onMessage('删除属性遇到未知错误')
   }
-}
-/**
- * 节点是否可以向上移动
- */
-const canMoveUp = (): boolean => {
-  let current = toRaw(data.currProp)
-  // 有子节点不允许移动
-  let lastChildIndex = builder.getLastChildIndex(current)
-  if (lastChildIndex !== -1) return false
-  // 当前节点在全局数组中的位置
-  const index = builder.getIndex(current)
-  if (index === -1) {
-    // 没有找到
-    return false
-  }
-  // 当前节点的父节点。
-  const parent = builder.getParent(current)
-  if (!parent) {
-    // 没有父属性，不允许移动
-    return false
-  }
-  const parentIndex = builder.getIndex(parent)
-  if (parentIndex === -1) return false
-
-  if (index === parentIndex + 1) {
-    // 已经是第一个节点，不允许上移
-    return false
-  }
-
-  return true
-}
-/**
- * 节点是否可以向下移动
- */
-const canMoveDown = (): boolean => {
-  let current = toRaw(data.currProp)
-  // 有子节点不允许移动
-  let lastChildIndex = builder.getLastChildIndex(current)
-  if (lastChildIndex !== -1) return false
-  // 当前节点的父节点。
-  const parent = builder.getParent(current)
-  if (!parent) {
-    // 没有父属性，不允许移动
-    return false
-  }
-  const lastIndex = builder.getLastChildIndex(parent)
-  if (lastIndex === -1) return false
-
-  // 当前节点在全局数组中的位置
-  const index = builder.getIndex(current)
-  if (index === -1) {
-    // 没有找到
-    return false
-  }
-  if (index === lastIndex) {
-    // 已经是最后一个节点，不允许上移
-    return false
-  }
-  return true
-}
-/**
- * 是否允许删除
- */
-const canRemove = (): boolean => {
-  let current = toRaw(data.currProp)
-  if (current === builder.props[0]) return false
-  let lastChildIndex = builder.getLastChildIndex(current)
-  if (lastChildIndex !== -1) return false
-
-  return true
-}
-/**
- * 向上移动当前属性
- * 
- * 只允许在父节点中移动
- */
-const onMoveUpProp = () => {
-  if (!canMoveUp()) return
-
-  let current = toRaw(data.currProp)
-  const index = builder.getIndex(current)
-
-  // 移动位置
-  //@ts-ignore
-  data.currProp = { name: '', attrs: {} }
-  const { props } = builder
-  props.splice(index, 1)
-  props.splice(index - 1, 0, current)
-  data.currProp = current
-}
-
-/**向下移动当前属性*/
-const onMoveDownProp = () => {
-  if (!canMoveDown()) return
-
-  let current = toRaw(data.currProp)
-  // 当前节点在全局数组中的位置
-  const index = builder.getIndex(current)
-
-  // 移动位置
-  //@ts-ignore
-  data.currProp = { name: '', attrs: {} }
-  const { props } = builder
-  props.splice(index, 1)
-  props.splice(index + 1, 0, current)
-  data.currProp = current
 }
 
 onMounted(() => {

@@ -165,6 +165,83 @@ export class JSONSchemaBuilder {
     return lastIndex
   }
   /**
+   * 是否可以在属性前添加属性
+   * @param prop
+   * @returns
+   */
+  canInsert(prop: SchemaProp): boolean {
+    if (prop === this.props[0]) return false
+    return true
+  }
+  /**
+   * 属性是否可以向前移动位置
+   * @param prop
+   */
+  canMoveUp(prop: SchemaProp): boolean {
+    // 有子节点不允许移动
+    let lastChildIndex = this.getLastChildIndex(prop)
+    if (lastChildIndex !== -1) return false
+    // 当前节点在全局数组中的位置
+    const index = this.getIndex(prop)
+    if (index === -1) {
+      // 没有找到
+      return false
+    }
+    // 当前节点的父节点。
+    const parent = this.getParent(prop)
+    if (!parent) {
+      // 没有父属性，不允许移动
+      return false
+    }
+    const parentIndex = this.getIndex(parent)
+    if (parentIndex === -1) return false
+
+    if (index === parentIndex + 1) {
+      // 已经是第一个节点，不允许上移
+      return false
+    }
+
+    return true
+  }
+  /**
+   * 属性是否可以向后移动
+   */
+  canMoveDown(prop: SchemaProp): boolean {
+    // 有子节点不允许移动
+    let lastChildIndex = this.getLastChildIndex(prop)
+    if (lastChildIndex !== -1) return false
+    // 当前节点的父节点。
+    const parent = this.getParent(prop)
+    if (!parent) {
+      // 没有父属性，不允许移动
+      return false
+    }
+    const lastIndex = this.getLastChildIndex(parent)
+    if (lastIndex === -1) return false
+
+    // 当前节点在全局数组中的位置
+    const index = this.getIndex(prop)
+    if (index === -1) {
+      // 没有找到
+      return false
+    }
+    if (index === lastIndex) {
+      // 已经是最后一个节点，不允许上移
+      return false
+    }
+    return true
+  }
+  /**
+   * 属性是否允许删除
+   */
+  canRemove(prop: SchemaProp): boolean {
+    if (prop === this.props[0]) return false
+    let lastChildIndex = this.getLastChildIndex(prop)
+    if (lastChildIndex !== -1) return false
+
+    return true
+  }
+  /**
    * 在指定的属性下添加子属性
    */
   addProp(parent: SchemaProp, type: string): SchemaProp {
@@ -189,6 +266,22 @@ export class JSONSchemaBuilder {
     return newProp
   }
   /**
+   * 在指定属性前添加属性
+   * @param sibling
+   */
+  insertProp(sibling: SchemaProp): SchemaProp | undefined {
+    if (!this.canInsert(sibling)) return undefined
+
+    const index = this.getIndex(sibling)
+
+    let newProp = new SchemaProp(sibling.path, 'newKey', 'string')
+    newProp.isPattern = sibling.isPattern
+
+    this.props.splice(index, 0, newProp)
+
+    return newProp
+  }
+  /**
    * 删除指定的属性
    *
    * 根节点不允许删除
@@ -201,5 +294,38 @@ export class JSONSchemaBuilder {
     this.props.splice(childIndex, 1)
 
     return prev
+  }
+  /**
+   * 向前移动属性位置
+   * @param prop
+   */
+  moveUp(prop: SchemaProp) {
+    if (!this.canMoveUp(prop)) return false
+    const index = this.getIndex(prop)
+
+    // 移动位置
+    const { props } = this
+    props.splice(index, 1)
+    props.splice(index - 1, 0, prop)
+
+    return true
+  }
+  /**
+   * 向后移动属性位置
+   * @param prop
+   * @returns
+   */
+  moveDown(prop: SchemaProp) {
+    if (!this.canMoveDown(prop)) return false
+
+    // 当前节点在全局数组中的位置
+    const index = this.getIndex(prop)
+
+    // 移动位置
+    const { props } = this
+    props.splice(index, 1)
+    props.splice(index + 1, 0, prop)
+
+    return true
   }
 }
