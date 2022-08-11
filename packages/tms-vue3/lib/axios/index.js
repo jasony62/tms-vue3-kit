@@ -187,7 +187,7 @@ class TmsAxios {
         });
     }
 }
-export { TmsAxios };
+export { TmsAxios, InterceptorRule };
 export default function install(app) {
     let TmsAxiosIns = TmsAxios.ins;
     TmsAxiosIns['newInterceptorRule'] = TmsAxios.newInterceptorRule;

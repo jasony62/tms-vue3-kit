@@ -208,6 +208,13 @@ class TmsAxios {
     onResponseRejected,
     onRetryAttempt,
     onResultFault,
+  }:{
+    requestParams?: any
+    requestHeaders?: any
+    onRequestRejected?: Function
+    onResponseRejected?: Function
+    onRetryAttempt?: Function
+    onResultFault?: Function
   }) {
     return new InterceptorRule({
       requestParams,
