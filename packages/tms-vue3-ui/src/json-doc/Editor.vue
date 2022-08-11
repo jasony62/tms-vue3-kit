@@ -90,15 +90,8 @@ export default defineComponent({
      */
     const editing = (isCheckValidity = true): any => {
       // if (isCheckValidity && !checkValidity()) return false
-      return jsonRawNames.value.length ? editDoc.build(jsonRawNames) : editDoc.build()
+      return editDoc.build()
     }
-
-    const editDoc = new DocAsArray(deepClone(props.value))
-    editDoc.renderCounter = ref(0) // 用于强制触发渲染
-
-    context.expose({ editing, editDoc })
-
-    const fields = new Map()
 
     let {
       schema,
@@ -109,6 +102,14 @@ export default defineComponent({
       onFileDownload,
       showFieldFullname
     } = props
+
+    const editDoc = new DocAsArray(deepClone(props.value), schema)
+    editDoc.renderCounter = ref(0) // 用于强制触发渲染
+
+    context.expose({ editing, editDoc })
+
+    const fields = new Map()
+
 
     const ctx = {
       editDoc,
@@ -129,17 +130,6 @@ export default defineComponent({
         internalInstance?.emit('jdocBlur', field)
       }
     }
-
-    const jsonRawNames = computed(() => {
-      let names = []
-      for (let name in schema.properties) {
-        const property = schema.properties[name]
-        if (property.type === 'json') {
-          names.push(name)
-        }
-      }
-      return names
-    })
 
     return () => {
       const fieldNames: string[] = []

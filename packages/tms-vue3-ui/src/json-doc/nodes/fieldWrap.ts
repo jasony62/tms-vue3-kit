@@ -78,7 +78,7 @@ const fieldRemoveVNode = (ctx: FormContext, field: Field) => {
         ctx.editDoc.remove(field.fullname)
       },
     },
-    '删除属性'
+    `删除-${field.name}`
   )
 }
 /**

@@ -34,7 +34,7 @@ const itemAddVNode = (ctx: FormContext, field: Field) => {
         }
       },
     },
-    '添加数组项目'
+    `添加项目-${field.name}`
   )
   return h('div', { class: ['tvu-jdoc__nest__actions'] }, addVNode)
 }
@@ -77,7 +77,7 @@ const itemRemoveVNode = (ctx: FormContext, field: Field, index: number) => {
         ctx.editDoc.remove(fullname)
       },
     },
-    '删除项目'
+    `删除-${field.name}[${index}]`
   )
 }
 /**

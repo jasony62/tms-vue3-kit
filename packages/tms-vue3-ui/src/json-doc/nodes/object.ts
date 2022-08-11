@@ -87,7 +87,7 @@ const itemAddVNode = (ctx: FormContext, field: Field) => {
           }
         },
       },
-      `添加-${childProp.attrs.title ?? childProp.name}`
+      `添加属性-${childProp.attrs.title ?? childProp.name}`
     )
   )
   return h('div', { class: ['tvu-jdoc__nest__actions'] }, addVNodes)

@@ -27,7 +27,7 @@ export class Input extends FieldNode {
         try {
           let newJson = JSON.parse(newValue)
           updatedValue = newJson
-          this.ctx.editDoc.set(fieldName, updatedValue)
+          this.ctx.editDoc.set(fieldName, updatedValue, true, true)
         } catch (e) {
           // 不更新文档
         }

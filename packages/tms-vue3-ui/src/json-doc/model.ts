@@ -1,22 +1,43 @@
 import _ from 'lodash'
 import Debug from 'debug'
+import { SchemaIter, SchemaProp } from '@/json-schema/model'
 
 const debug = Debug('json-doc')
+/**
+ *
+ * @param name 文档字段名称
+ */
+// function _findSchemaProp(
+//   name: string,
+//   schemas: Map<string, SchemaProp>
+// ): SchemaProp {
+//   let schemaProp
+//   let schemaNames = schemas.keys()
+//   for (let schemaName of schemaNames) {
+//     if (name === schemaName || name.replace(/[\d+]/g, '*') === schemaName) {
+//       schemaProp = schemas.get(schemaName)
+//       break
+//     }
+//   }
 
+//   if (schemaProp) return schemaProp
+
+//   throw Error(`文档中的字段${name}没有找到匹配的属性定义`)
+// }
 /**
  * 解析数组
  * @param parent
  */
-function* _parseArray(parent: DocProp): any {
+function* _parseArray(parent: DocProp, schemas: Map<string, SchemaProp>): any {
   let rawArr = parent.value
   for (let i = 0; i < rawArr.length; i++) {
     let value = rawArr[i]
     let prop = new DocProp(parent, i, value)
     yield prop
     if (Array.isArray(value)) {
-      yield* _parseArray(prop)
+      yield* _parseArray(prop, schemas)
     } else if (value !== null && typeof value === 'object') {
-      yield* _pasrseObj(prop)
+      yield* _pasrseObj(prop, schemas)
     }
   }
 }
@@ -24,7 +45,7 @@ function* _parseArray(parent: DocProp): any {
  * 解析对象
  * @param parent
  */
-function* _pasrseObj(parent: DocProp): any {
+function* _pasrseObj(parent: DocProp, schemas: Map<string, SchemaProp>): any {
   let rawObj = parent.value
   if (rawObj === null) return
   let keys = Object.keys(rawObj)
@@ -34,9 +55,14 @@ function* _pasrseObj(parent: DocProp): any {
     let prop = new DocProp(parent, key, value)
     yield prop
     if (Array.isArray(value)) {
-      yield* _parseArray(prop)
+      yield* _parseArray(prop, schemas)
     } else if (value !== null && typeof value === 'object') {
-      yield* _pasrseObj(prop)
+      // let schemaProp = _findSchemaProp(prop.name, schemas)
+      // /**
+      //  * json类型的字段不需要向下解析
+      //  */
+      // if (schemaProp.attrs.type !== 'json') yield* _pasrseObj(prop, schemas)
+      yield* _pasrseObj(prop, schemas)
     }
   }
 }
@@ -52,9 +78,15 @@ export const DEFAULT_ROOT_NAME = ''
 export class DocIter {
   _rawDoc
   _rootName
+  _schemas
 
-  constructor(rawDoc: any, rootName = DEFAULT_ROOT_NAME) {
+  constructor(
+    rawDoc: any,
+    schemas: Map<string, SchemaProp>,
+    rootName = DEFAULT_ROOT_NAME
+  ) {
     this._rawDoc = rawDoc
+    this._schemas = schemas
     this._rootName = rootName
   }
 
@@ -68,7 +100,7 @@ export class DocIter {
   *[Symbol.iterator]() {
     let prop = new DocProp(undefined, this._rootName, this._rawDoc)
     yield prop
-    yield* _pasrseObj(prop)
+    yield* _pasrseObj(prop, this._schemas)
   }
 }
 
@@ -146,6 +178,7 @@ class DocProp {
       if (child._children.length) {
         throw Error(`要删除的属性【${child.name}】包含子属性，不允许删除`)
       }
+      this._value.splice(key, 1)
       this._children.splice(key, 1)
     } else if (typeof key === 'string') {
       let child = this._children.find((c) => c.key === key)
@@ -153,6 +186,7 @@ class DocProp {
         if (child._children.length) {
           throw Error(`要删除的属性【${child.name}】包含子属性，不允许删除`)
         }
+        delete this._value[key]
         this._children.splice(this._children.indexOf(child), 1)
       }
     }
@@ -174,15 +208,23 @@ function nameToRegExp(name: string): string {
  */
 export class DocAsArray {
   _rawDoc
+  _rawSchema
   _properties: DocProp[] // 文档的属性
+  _schemas = new Map<string, SchemaProp>()
   renderCounter: any // 用于出发渲染
 
-  constructor(rawDoc: any = {}, rootName = DEFAULT_ROOT_NAME) {
-    let iter = new DocIter(rawDoc, rootName)
+  constructor(rawDoc: any = {}, schema: any, rootName = DEFAULT_ROOT_NAME) {
+    this._rawDoc = rawDoc
+    this._rawSchema = schema
+
+    let iterSchema = new SchemaIter(JSON.parse(JSON.stringify(schema)))
+    for (let prop of iterSchema) this._schemas.set(prop.fullname, prop)
+
+    let iter = new DocIter(rawDoc, this._schemas, rootName)
     let props = Array.from(iter)
     this._properties = props ?? []
+
     this.renderCounter = { value: 0 }
-    this._rawDoc = rawDoc
   }
 
   get rawDoc() {
@@ -222,16 +264,11 @@ export class DocAsArray {
   /**
    * 构造对象
    */
-  build(rawSchema?: any): any {
+  build(): any {
     let obj = {}
     this._properties.forEach((prop, index) => {
       if (index === 0) return
       let val = this.get(prop.name)
-      if (rawSchema && rawSchema.length) {
-        rawSchema.forEach((schema: string) => {
-          if (schema === prop.name) val = val ? JSON.parse(val) : {}
-        })
-      }
       _.set(obj, prop.name, val)
     })
     return obj
@@ -292,7 +329,7 @@ export class DocAsArray {
     }
     // 需要添加子字段。插入的位置需要控制吗？
     if (newProp && typeof value === 'object' && Object.keys(value).length) {
-      let iter = new DocIter(value, newProp.name)
+      let iter = new DocIter(value, this._rawSchema, newProp.name)
       Array.from(iter).forEach((child) => this._properties.push(child))
     }
 
@@ -328,7 +365,7 @@ export class DocAsArray {
 
     // 需要添加子字段。插入的位置需要控制吗？
     if (newProp && typeof value === 'object' && Object.keys(value).length) {
-      let iter = new DocIter(value, newProp.name)
+      let iter = new DocIter(value, this._rawSchema, newProp.name)
       Array.from(iter).forEach((child) => this._properties.push(child))
     }
 
@@ -386,12 +423,22 @@ export class DocAsArray {
    * @param value
    * @returns
    */
-  set(name: string, value: any, needRender = true) {
+  set(name: string, value: any, needRender = true, isJsonType = false) {
     let { prop } = this.findByName(name)
     if (prop === undefined) {
       this.appendAt('', value, name)
     } else {
       prop.value = value
+      /**
+       * 如果是json类型字段，删除子节点
+       * 应该在生成文档迭代器时应该根据schema定义解决这个问题
+       */
+      let i = prop._children.length - 1
+      while (i >= 0) {
+        let child = prop._children[i]
+        this.remove(child.name, false)
+        i--
+      }
     }
 
     if (needRender) this.renderCounter.value++

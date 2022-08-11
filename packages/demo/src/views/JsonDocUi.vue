@@ -11,6 +11,7 @@
       <option value="prop-dep">属性依赖</option>
       <option value="files">文件（数组）</option>
       <option value="file">文件（单个）</option>
+      <option value="rcsbot">rcsbot</option>
     </select>
   </div>
   <div class="flex flex-row">
@@ -103,17 +104,15 @@ const onJdocFocus = (field: Field) => {
           if (child) elJsonEditor.value.removeChild(child)
           // @ts-ignore
           jsonEditor = new JSONEditor(elJsonEditor.value, options)
-          jsonEditor.set(jsonDocEditor.value?.editDoc.get(field.fullname))
+          let fieldValue = jsonDocEditor.value?.editDoc.get(field.fullname)
+          jsonEditor.set(fieldValue ?? '')
         }
       })
     }
   }
 }
 
-const onJdocBlur = (field: Field) => {
-  console.log(`字段【${field.fullname}】失去输入焦点`)
-  // activeField.value = undefined
-}
+const onJdocBlur = (field: Field) => { }
 
 const updateJson = () => {
   if (activeField.value) {
