@@ -6,12 +6,12 @@ if (window) {
     };
     window.onunhandledrejection = function (evt) {
         if (evt.promise) {
-            evt.promise.then(undefined, err => {
+            evt.promise.then(undefined, (err) => {
                 if (err instanceof TmsIgnorableError) {
-                    console.log('可忽略。。。');
+                    console.log("可忽略。。。");
                 }
                 else {
-                    console.error('err rejection', err);
+                    console.error("err rejection", err);
                 }
             });
         }
@@ -34,14 +34,14 @@ class VueErrorHandler {
      * @param {function} options.handler 指定的错误处理方式，替代默认处理
      */
     constructor(options) {
-        if (typeof options === 'object') {
-            if (typeof options.handler === 'function') {
+        if (typeof options === "object") {
+            if (typeof options.handler === "function") {
                 this.outerHandler = options.handler;
             }
-            if (typeof options.before === 'function') {
+            if (typeof options.before === "function") {
                 this.beforeHandler = options.before;
             }
-            if (typeof options.after === 'function') {
+            if (typeof options.after === "function") {
                 this.afterHandler = options.after;
             }
         }
@@ -69,7 +69,7 @@ class VueErrorHandler {
                 await this.afterHandler(error, vm, info);
         }
         catch (e) {
-            console.error('处理错误时发生异常！', e);
+            console.error("处理错误时发生异常！", e);
         }
     }
 }
