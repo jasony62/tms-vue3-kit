@@ -49,5 +49,6 @@ export default function install(app, { router }) {
     let routerHistory = new TmsRouterHistory();
     if (router)
         routerHistory.watch(router);
+        console.log('app', app)
     app.config.globalProperties.$tmsRouterHistory = routerHistory;
 }

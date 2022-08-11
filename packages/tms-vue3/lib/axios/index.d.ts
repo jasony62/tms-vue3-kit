@@ -71,13 +71,13 @@ declare class TmsAxios {
      * @return {InterceptorRule} 规则对象
      */
     static newInterceptorRule({ requestParams, requestHeaders, onRequestRejected, onResponseRejected, onRetryAttempt, onResultFault, }: {
-        requestParams: any;
-        requestHeaders: any;
-        onRequestRejected: any;
-        onResponseRejected: any;
-        onRetryAttempt: any;
-        onResultFault: any;
+        requestParams?: any;
+        requestHeaders?: any;
+        onRequestRejected?: Function;
+        onResponseRejected?: Function;
+        onRetryAttempt?: Function;
+        onResultFault?: Function;
     }): InterceptorRule;
 }
-export { TmsAxios };
+export { TmsAxios, InterceptorRule };
 export default function install(app: any): void;
