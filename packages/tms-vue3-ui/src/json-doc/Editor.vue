@@ -7,7 +7,7 @@ import { Field } from './fields'
 import { DocAsArray } from './model'
 import Debug from 'debug'
 
-const debug = Debug('json-doc')
+const debug = Debug('json-doc:editor')
 
 type FileSelectArgs = {
   fullname: string // 文件对应的字段名称
@@ -104,6 +104,7 @@ export default defineComponent({
     } = props
 
     const editDoc = new DocAsArray(deepClone(props.value), schema)
+    debug(`初始文档属性列表\n` + JSON.stringify(editDoc.properties, null, 2))
     editDoc.renderCounter = ref(0) // 用于强制触发渲染
 
     context.expose({ editing, editDoc })

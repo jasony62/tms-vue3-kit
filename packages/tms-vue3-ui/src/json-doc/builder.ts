@@ -1,11 +1,11 @@
 import { h, VNode } from 'vue'
 import { SchemaIter, RawSchema, SchemaProp } from '@/json-schema/model'
 import { createField, Field } from './fields'
-import { FieldWrap, FormNode, components, prepareFieldNode } from './nodes'
+import { FieldWrap, components, prepareFieldNode } from './nodes'
 import { DocAsArray } from './model'
 import Debug from 'debug'
 
-const debug = Debug('json-doc')
+const debug = Debug('json-doc:builder')
 
 function createWrapClass(labelAndDescNodes: VNode): VNode {
   // if (this.fieldWrapClass) {

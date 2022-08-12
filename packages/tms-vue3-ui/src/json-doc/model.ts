@@ -2,7 +2,7 @@ import _ from 'lodash'
 import Debug from 'debug'
 import { SchemaIter, SchemaProp } from '@/json-schema/model'
 
-const debug = Debug('json-doc')
+const debug = Debug('json-doc:model')
 /**
  *
  * @param name 文档字段名称
@@ -197,6 +197,17 @@ class DocProp {
     let children = this._children.length
     return { name, value, children }
   }
+  /**
+   * 根据属性的名称，返回父属性的名称
+   * @param name 属性名称
+   */
+  static parsePathAndKey(name: string) {
+    // 去掉属性名称中最后的部分
+    if (!name) throw Error('属性名称为空，无法计算父属性名称')
+    let parts = name.split('.')
+    let key = parts.splice(-1, 1)
+    return { path: parts.join('.'), key: key[0] }
+  }
 }
 
 function nameToRegExp(name: string): string {
@@ -209,6 +220,7 @@ function nameToRegExp(name: string): string {
 export class DocAsArray {
   _rawDoc
   _rawSchema
+  _rootName
   _properties: DocProp[] // 文档的属性
   _schemas = new Map<string, SchemaProp>()
   renderCounter: any // 用于出发渲染
@@ -216,6 +228,7 @@ export class DocAsArray {
   constructor(rawDoc: any = {}, schema: any, rootName = DEFAULT_ROOT_NAME) {
     this._rawDoc = rawDoc
     this._rawSchema = schema
+    this._rootName = rootName
 
     let iterSchema = new SchemaIter(JSON.parse(JSON.stringify(schema)))
     for (let prop of iterSchema) this._schemas.set(prop.fullname, prop)
@@ -284,7 +297,7 @@ export class DocAsArray {
     let newProp
     let { index: parentIndex, prop: parent } = this.findByName(name)
     if (parent === undefined) {
-      let msg = `指定的属性【${key}】的父属性【${name}】不存在，添加默认值`
+      let msg = `指定的属性【${key}】的父属性【${name}】不存在，需要添加默认值`
       debug(msg)
       if (typeof key === 'string') this.set(name, {}, false)
       else this.set(name, [], false)
@@ -318,14 +331,14 @@ export class DocAsArray {
       newProp = new DocProp(parent, key, value)
       this._properties.splice(lastChildIndex, 0, newProp)
       debug(
-        `属性【${name}】在【${lastChildIndex}】添加子字段【${newProp.name}】`
+        `属性【${name}】在存储位置【${lastChildIndex}】添加子字段【${newProp.name}】`
       )
     } else if ((key ?? true) || typeof key === 'number') {
       /**数组添加项目*/
       let index = parent._children.length
       newProp = new DocProp(parent, index, value)
       this._properties.push(newProp)
-      debug(`属性【${name}】在位置添加子属性【${newProp.name}】`)
+      debug(`属性【${name}】添加子属性【${newProp.name}】`)
     }
     // 需要添加子字段。插入的位置需要控制吗？
     if (newProp && typeof value === 'object' && Object.keys(value).length) {
@@ -423,15 +436,22 @@ export class DocAsArray {
    * @param value
    * @returns
    */
-  set(name: string, value: any, needRender = true, isJsonType = false) {
+  set(name: string, value: any, needRender = true) {
     let { prop } = this.findByName(name)
     if (prop === undefined) {
-      this.appendAt('', value, name)
+      let { path, key } = DocProp.parsePathAndKey(name)
+      debug(`属性${name}的父属性名称${path}`)
+      this.appendAt(path, value, key)
     } else {
       prop.value = value
+      /**修改父对象 */
+      let { _parent } = prop
+      if (_parent) {
+        _.set(_parent.value, name, value)
+        debug(`修改属性${prop.name}在父属性中的值${value}`)
+      }
       /**
-       * 如果是json类型字段，删除子节点
-       * 应该在生成文档迭代器时应该根据schema定义解决这个问题
+       * 如果属性有子节点需要把节点都清除等待重建
        */
       let i = prop._children.length - 1
       while (i >= 0) {

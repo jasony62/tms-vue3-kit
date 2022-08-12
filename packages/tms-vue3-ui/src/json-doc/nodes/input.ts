@@ -4,7 +4,7 @@ import { components } from '.'
 import { Field } from '../fields'
 import Debug from 'debug'
 
-const debug = Debug('json-doc:input')
+const debug = Debug('json-doc:nodes:input')
 /**
  * text/json/radiogroup
  */
@@ -27,7 +27,7 @@ export class Input extends FieldNode {
         try {
           let newJson = JSON.parse(newValue)
           updatedValue = newJson
-          this.ctx.editDoc.set(fieldName, updatedValue, true, true)
+          this.ctx.editDoc.set(fieldName, updatedValue)
         } catch (e) {
           // 不更新文档
         }
