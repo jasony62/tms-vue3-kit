@@ -11,6 +11,7 @@
       <option value="prop-dep">属性依赖</option>
       <option value="files">文件（数组）</option>
       <option value="file">文件（单个）</option>
+      <option value="defval">默认值</option>
       <option value="rcsbot">rcsbot</option>
     </select>
   </div>
@@ -77,7 +78,6 @@ function loadTestData() {
 const options = reactive({
   mode: 'code',
   search: false,
-  transform: false,
 })
 
 let jsonEditor: any = null

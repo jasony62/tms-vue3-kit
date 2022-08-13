@@ -179,6 +179,13 @@ function createFieldNode(
   const field = createField(ctx, prop, joint.field)
   const vnode = createFieldWrapNode(ctx, field)
   debug(`属性【${prop.fullname}】生成字段【${field.fullname}】，生成节点`)
+  /**处理默认值*/
+  if (prop.attrs.default) {
+    debug(
+      `字段【${field.fullname}】的属性【${prop.fullname}】有默认值，需要更新文档`
+    )
+    ctx.editDoc.set(field.fullname, prop.attrs.default, false)
+  }
 
   return { field, vnode }
 }

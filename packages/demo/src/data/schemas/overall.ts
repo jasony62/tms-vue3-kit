@@ -11,7 +11,7 @@ export const SampleSchema = {
     nickname: {
       title: '昵称',
       type: 'string',
-      required: true
+      required: true,
     },
     additionalName: {
       title: '其他名称（基础类型数组）',
@@ -238,4 +238,4 @@ export const SampleSchema = {
   },
 }
 
-export const SampleData = { name: 'overall' }
+export const SampleData = {}

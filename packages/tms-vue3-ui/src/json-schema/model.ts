@@ -1,4 +1,7 @@
 import _ from 'lodash'
+import Debug from 'debug'
+
+const debug = Debug('json-schema:model')
 
 export type EnumGroup = {
   id: any
@@ -107,16 +110,20 @@ export class SchemaProp {
     return /\[\*\]$/.test(this.path)
   }
 }
-
+/**
+ * 数组项目定义
+ */
 export type SchemaItem = {
   type: string
-  properties?: any
+  properties?: { [k: string]: RawSchema }
   format?: string
   formatAttrs?: { [k: string]: any } // 这个要保留吗？
   $ref?: any
   enum?: any
 }
-
+/**
+ * JSONSchema定义
+ */
 export type RawSchema = {
   name?: string
   type: string
@@ -145,7 +152,9 @@ export type RawSchema = {
   initialName?: string
 }
 
-/**如果属性在父属性的properties里，那么就给父属性设置默认值*/
+/**
+ * 如果属性在父属性的properties里，那么就给父属性设置默认值
+ */
 function _setDefaultValue(
   newProp: SchemaProp,
   defVal: any,
@@ -216,6 +225,8 @@ function* _parseOne(
   mandatory?: boolean,
   isPatternProperty = false
 ): any {
+  const log = debug.extend('_parseOne')
+  log(`开始解析属性【${name}】`)
   let path = ''
   if (parents.length) {
     path = parents[0].fullname
@@ -289,21 +300,28 @@ function* _parseOne(
   let requiredSet = Array.isArray(required) ? required : []
 
   if (rawProp.type === 'object') {
-    parents.splice(0, 0, newProp)
     /*处理对象属性下的子属性*/
     if (typeof properties === 'object') {
       /**属性的子属性*/
-      yield* _parseChildren(properties, parents, requiredSet)
+      yield* _parseChildren(properties, [newProp, ...parents], requiredSet)
     }
     if (typeof patternProperties === 'object') {
       /**属性的模板子属性*/
-      yield* _parseChildren(patternProperties, parents, requiredSet, true)
+      yield* _parseChildren(
+        patternProperties,
+        [newProp, ...parents],
+        requiredSet,
+        true
+      )
     }
   } else if (rawProp.type === 'array') {
     // 处理数组属性下的子属性
     if (typeof items === 'object' && typeof items.properties === 'object') {
-      parents.splice(0, 0, newProp)
-      yield* _parseChildren(items.properties, parents, requiredSet)
+      yield* _parseChildren(
+        items.properties,
+        [newProp, ...parents],
+        requiredSet
+      )
     }
   }
 }
