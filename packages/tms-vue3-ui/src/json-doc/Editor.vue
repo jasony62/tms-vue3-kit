@@ -103,7 +103,7 @@ export default defineComponent({
       showFieldFullname
     } = props
 
-    const editDoc = new DocAsArray(deepClone(props.value), schema)
+    const editDoc = new DocAsArray(deepClone(props.value))
     debug(`初始文档属性列表\n` + JSON.stringify(editDoc.properties, null, 2))
     editDoc.renderCounter = ref(0) // 用于强制触发渲染
 

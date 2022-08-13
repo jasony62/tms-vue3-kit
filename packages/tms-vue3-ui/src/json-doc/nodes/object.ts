@@ -63,26 +63,32 @@ const itemAddVNode = (ctx: FormContext, field: Field) => {
         name: childProp.fullname,
         class: ['tvu-button'],
         onClick: () => {
+          /**生成字段名称*/
           let randexp = new RandExp(new RegExp(childProp.name))
           randexp.max = 8
           let newKey = randexp.gen()
+          let defVal = field.value
           debug(
             `字段【${field.fullname}】执行【添加${
               childProp.attrs.title ?? childProp.name
-            }属性】，随机属性名：${newKey}`
+            }属性】，随机属性名：${newKey}，默认值：\n${JSON.stringify(
+              defVal,
+              null,
+              2
+            )}`
           )
           switch (childProp.attrs.type) {
             case 'string':
-              ctx.editDoc.appendAt(field.fullname, '', newKey)
+              ctx.editDoc.appendAt(field.fullname, defVal, newKey)
               break
             case 'json':
-              ctx.editDoc.appendAt(field.fullname, '', newKey)
+              ctx.editDoc.appendAt(field.fullname, defVal, newKey)
               break
             case 'object':
-              ctx.editDoc.appendAt(field.fullname, {}, newKey)
+              ctx.editDoc.appendAt(field.fullname, defVal, newKey)
               break
             case 'array':
-              ctx.editDoc.appendAt(field.fullname, [], newKey)
+              ctx.editDoc.appendAt(field.fullname, defVal, newKey)
               break
           }
         },

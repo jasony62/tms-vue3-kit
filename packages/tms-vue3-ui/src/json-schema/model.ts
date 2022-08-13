@@ -1,3 +1,5 @@
+import _ from 'lodash'
+
 export type EnumGroup = {
   id: any
   label: string
@@ -110,7 +112,7 @@ export type SchemaItem = {
   type: string
   properties?: any
   format?: string
-  formatAttrs?: { [k: string]: any }
+  formatAttrs?: { [k: string]: any } // 这个要保留吗？
   $ref?: any
   enum?: any
 }
@@ -143,10 +145,53 @@ export type RawSchema = {
   initialName?: string
 }
 
+/**如果属性在父属性的properties里，那么就给父属性设置默认值*/
+function _setDefaultValue(
+  newProp: SchemaProp,
+  defVal: any,
+  parents: SchemaProp[],
+  isPatternProperty: boolean
+) {
+  let name = newProp.name
+  if (parents.length) {
+    let parent = parents[0]
+    let { type, default: pDefVal } = parent.attrs
+    if (isPatternProperty === false && type === 'object') {
+      if (pDefVal && typeof pDefVal === 'object') {
+        // 父属性有默认值，在父属性的默认值上设置当前属性的默认值
+        pDefVal[name] = defVal
+      } else {
+        parent.attrs.default = { [name]: defVal }
+        let child = parent
+        for (let i = 1; i < parents.length; i++) {
+          let p = parents[i]
+          if (
+            p.attrs.type === 'object' &&
+            !p.patternChildren?.includes(child)
+          ) {
+            if (p.attrs.default && typeof p.attrs.default === 'object') {
+              // 如果父属性已经有默认值，更新默认值，停止查找
+              p.attrs.default[child.name] = child.attrs.default
+              break
+            } else {
+              // 如果父属性没有默认值，设置默认值，继续查找
+              p.attrs.default = { [child.name]: child.attrs.default }
+              child = p
+            }
+          } else {
+            // 父属性不是对象，或者属性是模板属性，结束
+            break
+          }
+        }
+      }
+    }
+  }
+  newProp.attrs.default = defVal
+}
 /**依次处理子属性*/
 function* _parseChildren(
   properties: { [k: string]: RawSchema },
-  parent: SchemaProp,
+  parents: SchemaProp[],
   requiredSet?: string[],
   isPatternProperty = false
 ) {
@@ -156,7 +201,7 @@ function* _parseChildren(
     yield* _parseOne(
       key,
       properties[key],
-      parent,
+      parents,
       requiredSet?.includes(key),
       isPatternProperty
     )
@@ -167,21 +212,22 @@ function* _parseChildren(
 function* _parseOne(
   name: string,
   rawProp: any,
-  parent?: SchemaProp,
+  parents: SchemaProp[],
   mandatory?: boolean,
   isPatternProperty = false
 ): any {
   let path = ''
-  if (parent) {
-    path = parent.fullname
-    if (parent.attrs.type === 'array') path += '[*]'
+  if (parents.length) {
+    path = parents[0].fullname
+    if (parents[0].attrs.type === 'array') path += '[*]'
   }
 
   let newProp = new SchemaProp(path, name)
 
   if (mandatory) newProp.attrs.required = mandatory
   newProp.isPattern = isPatternProperty
-  if (isPatternProperty) parent?.patternChildren?.push(newProp)
+  if (parents.length && isPatternProperty)
+    parents[0].patternChildren?.push(newProp)
 
   let { properties, patternProperties, items, required, existIf } = rawProp
 
@@ -198,6 +244,7 @@ function* _parseOne(
         newProp.items = { type: items.type }
         Object.keys(items).forEach((key) => {
           if (key === 'properties') return
+          //@ts-ignore
           Object.assign(newProp.items, { [key]: items[key] })
         })
       case 'attachment':
@@ -211,10 +258,12 @@ function* _parseOne(
       case 'anyOf':
       case 'enum':
       case 'enumGroups':
-      case 'default':
       case 'autofill':
       case 'initialName':
         Object.assign(newProp.attrs, { [key]: rawProp[key] })
+        break
+      case 'default':
+        _setDefaultValue(newProp, rawProp.default, parents, isPatternProperty)
         break
       default:
         Object.assign(newProp.attrs, { [key]: rawProp[key] })
@@ -240,19 +289,21 @@ function* _parseOne(
   let requiredSet = Array.isArray(required) ? required : []
 
   if (rawProp.type === 'object') {
+    parents.splice(0, 0, newProp)
     /*处理对象属性下的子属性*/
     if (typeof properties === 'object') {
       /**属性的子属性*/
-      yield* _parseChildren(properties, newProp, requiredSet)
+      yield* _parseChildren(properties, parents, requiredSet)
     }
     if (typeof patternProperties === 'object') {
       /**属性的模板子属性*/
-      yield* _parseChildren(patternProperties, newProp, requiredSet, true)
+      yield* _parseChildren(patternProperties, parents, requiredSet, true)
     }
   } else if (rawProp.type === 'array') {
     // 处理数组属性下的子属性
     if (typeof items === 'object' && typeof items.properties === 'object') {
-      yield* _parseChildren(items.properties, newProp, requiredSet)
+      parents.splice(0, 0, newProp)
+      yield* _parseChildren(items.properties, parents, requiredSet)
     }
   }
 }
@@ -282,6 +333,6 @@ export class SchemaIter {
    */
   *[Symbol.iterator]() {
     // 从根属性开始遍历
-    yield* _parseOne(this._rootName, this._rawSchema)
+    yield* _parseOne(this._rootName, this._rawSchema, [])
   }
 }

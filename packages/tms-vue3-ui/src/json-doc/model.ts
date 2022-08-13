@@ -1,43 +1,22 @@
 import _ from 'lodash'
 import Debug from 'debug'
-import { SchemaIter, SchemaProp } from '@/json-schema/model'
 
 const debug = Debug('json-doc:model')
-/**
- *
- * @param name 文档字段名称
- */
-// function _findSchemaProp(
-//   name: string,
-//   schemas: Map<string, SchemaProp>
-// ): SchemaProp {
-//   let schemaProp
-//   let schemaNames = schemas.keys()
-//   for (let schemaName of schemaNames) {
-//     if (name === schemaName || name.replace(/[\d+]/g, '*') === schemaName) {
-//       schemaProp = schemas.get(schemaName)
-//       break
-//     }
-//   }
 
-//   if (schemaProp) return schemaProp
-
-//   throw Error(`文档中的字段${name}没有找到匹配的属性定义`)
-// }
 /**
  * 解析数组
  * @param parent
  */
-function* _parseArray(parent: DocProp, schemas: Map<string, SchemaProp>): any {
+function* _parseArray(parent: DocProp): any {
   let rawArr = parent.value
   for (let i = 0; i < rawArr.length; i++) {
     let value = rawArr[i]
     let prop = new DocProp(parent, i, value)
     yield prop
     if (Array.isArray(value)) {
-      yield* _parseArray(prop, schemas)
+      yield* _parseArray(prop)
     } else if (value !== null && typeof value === 'object') {
-      yield* _pasrseObj(prop, schemas)
+      yield* _pasrseObj(prop)
     }
   }
 }
@@ -45,7 +24,7 @@ function* _parseArray(parent: DocProp, schemas: Map<string, SchemaProp>): any {
  * 解析对象
  * @param parent
  */
-function* _pasrseObj(parent: DocProp, schemas: Map<string, SchemaProp>): any {
+function* _pasrseObj(parent: DocProp): any {
   let rawObj = parent.value
   if (rawObj === null) return
   let keys = Object.keys(rawObj)
@@ -55,14 +34,9 @@ function* _pasrseObj(parent: DocProp, schemas: Map<string, SchemaProp>): any {
     let prop = new DocProp(parent, key, value)
     yield prop
     if (Array.isArray(value)) {
-      yield* _parseArray(prop, schemas)
+      yield* _parseArray(prop)
     } else if (value !== null && typeof value === 'object') {
-      // let schemaProp = _findSchemaProp(prop.name, schemas)
-      // /**
-      //  * json类型的字段不需要向下解析
-      //  */
-      // if (schemaProp.attrs.type !== 'json') yield* _pasrseObj(prop, schemas)
-      yield* _pasrseObj(prop, schemas)
+      yield* _pasrseObj(prop)
     }
   }
 }
@@ -78,15 +52,9 @@ export const DEFAULT_ROOT_NAME = ''
 export class DocIter {
   _rawDoc
   _rootName
-  _schemas
 
-  constructor(
-    rawDoc: any,
-    schemas: Map<string, SchemaProp>,
-    rootName = DEFAULT_ROOT_NAME
-  ) {
+  constructor(rawDoc: any, rootName = DEFAULT_ROOT_NAME) {
     this._rawDoc = rawDoc
-    this._schemas = schemas
     this._rootName = rootName
   }
 
@@ -100,7 +68,7 @@ export class DocIter {
   *[Symbol.iterator]() {
     let prop = new DocProp(undefined, this._rootName, this._rawDoc)
     yield prop
-    yield* _pasrseObj(prop, this._schemas)
+    yield* _pasrseObj(prop)
   }
 }
 
@@ -216,24 +184,19 @@ function nameToRegExp(name: string): string {
 
 /**
  * 将文档转换为数组表示
+ * 因为模板属性（patternProperties）和数组子项目属性的定义和文档对象的属性是1对多的关系，不便于进行处理。引入DocAsArray为文档对象建立索引，方便与属性定义对应。
  */
 export class DocAsArray {
   _rawDoc
-  _rawSchema
   _rootName
   _properties: DocProp[] // 文档的属性
-  _schemas = new Map<string, SchemaProp>()
   renderCounter: any // 用于出发渲染
 
-  constructor(rawDoc: any = {}, schema: any, rootName = DEFAULT_ROOT_NAME) {
+  constructor(rawDoc: any = {}, rootName = DEFAULT_ROOT_NAME) {
     this._rawDoc = rawDoc
-    this._rawSchema = schema
     this._rootName = rootName
 
-    let iterSchema = new SchemaIter(JSON.parse(JSON.stringify(schema)))
-    for (let prop of iterSchema) this._schemas.set(prop.fullname, prop)
-
-    let iter = new DocIter(rawDoc, this._schemas, rootName)
+    let iter = new DocIter(rawDoc, rootName)
     let props = Array.from(iter)
     this._properties = props ?? []
 
@@ -287,6 +250,21 @@ export class DocAsArray {
     return obj
   }
   /**
+   * 根据属性的值添加子属性
+   * @param prop 属性
+   */
+  private _addSubProps(prop: DocProp): number {
+    let num = 0
+    let iter = new DocIter(prop.value, prop.name)
+    Array.from(iter)
+      .slice(1)
+      .forEach((child) => {
+        this._properties.push(child)
+        num++
+      })
+    return num
+  }
+  /**
    * 给属性追加子属性
    *
    * @param name 属性的名称
@@ -294,11 +272,11 @@ export class DocAsArray {
    * @param key 子属性的名称
    */
   appendAt(name: string, value: any, key?: string, needRender = true) {
+    const log = debug.extend('appendAt')
     let newProp
     let { index: parentIndex, prop: parent } = this.findByName(name)
     if (parent === undefined) {
-      let msg = `指定的属性【${key}】的父属性【${name}】不存在，需要添加默认值`
-      debug(msg)
+      log(`指定的属性【${key}】的父属性【${name}】不存在，需要添加父属性`)
       if (typeof key === 'string') this.set(name, {}, false)
       else this.set(name, [], false)
       let indexAndProp = this.findByName(name)
@@ -310,7 +288,7 @@ export class DocAsArray {
         )
     }
 
-    debug(
+    log(
       `属性【${key ?? true}】的父文档属性【${name}】存储位置【${parentIndex}】`
     )
 
@@ -330,24 +308,25 @@ export class DocAsArray {
       }
       newProp = new DocProp(parent, key, value)
       this._properties.splice(lastChildIndex, 0, newProp)
-      debug(
-        `属性【${name}】在存储位置【${lastChildIndex}】添加子字段【${newProp.name}】`
+      log(
+        `属性【${name}】在存储位置【${lastChildIndex}】添加子属性【${newProp.name}】`
       )
     } else if ((key ?? true) || typeof key === 'number') {
       /**数组添加项目*/
       let index = parent._children.length
       newProp = new DocProp(parent, index, value)
       this._properties.push(newProp)
-      debug(`属性【${name}】添加子属性【${newProp.name}】`)
+      log(`属性【${name}】添加子属性【${newProp.name}】`)
     }
     // 需要添加子字段。插入的位置需要控制吗？
     if (newProp && typeof value === 'object' && Object.keys(value).length) {
-      let iter = new DocIter(value, this._rawSchema, newProp.name)
-      Array.from(iter).forEach((child) => this._properties.push(child))
+      let num = this._addSubProps(newProp)
+      log(`属性【${newProp.name}】的值是对象，生成并添加【${num}】个子属性`)
     }
 
     if (needRender) this.renderCounter.value++
   }
+
   /**
    * 给属性添加兄弟属性
    * @param name
@@ -355,6 +334,7 @@ export class DocAsArray {
    * @param key
    */
   insertAt(name: string, value: any, key?: string, needRender = true) {
+    const log = debug.extend('insertAt')
     let { prop } = this.findByName(name)
     if (prop === undefined) throw Error(`指定的兄弟属性【${name}】不存在`)
 
@@ -378,8 +358,8 @@ export class DocAsArray {
 
     // 需要添加子字段。插入的位置需要控制吗？
     if (newProp && typeof value === 'object' && Object.keys(value).length) {
-      let iter = new DocIter(value, this._rawSchema, newProp.name)
-      Array.from(iter).forEach((child) => this._properties.push(child))
+      let num = this._addSubProps(newProp)
+      log(`属性【${newProp.name}】的值是对象，生成并添加【${num}】个子属性`)
     }
 
     if (needRender) this.renderCounter.value++
@@ -437,10 +417,11 @@ export class DocAsArray {
    * @returns
    */
   set(name: string, value: any, needRender = true) {
+    const log = debug.extend('set')
     let { prop } = this.findByName(name)
     if (prop === undefined) {
       let { path, key } = DocProp.parsePathAndKey(name)
-      debug(`属性${name}的父属性名称${path}`)
+      log(`属性【${name}】在文档中不存在，在它的父属性【${path}】中进行追加`)
       this.appendAt(path, value, key)
     } else {
       prop.value = value
@@ -448,7 +429,10 @@ export class DocAsArray {
       let { _parent } = prop
       if (_parent) {
         _.set(_parent.value, name, value)
-        debug(`修改属性${prop.name}在父属性中的值${value}`)
+        log(
+          `修改属性【${prop.name}】在父属性中的值\n` +
+            JSON.stringify(value, null, 2)
+        )
       }
       /**
        * 如果属性有子节点需要把节点都清除等待重建
@@ -458,6 +442,11 @@ export class DocAsArray {
         let child = prop._children[i]
         this.remove(child.name, false)
         i--
+      }
+      // 需要添加子字段。插入的位置需要控制吗？
+      if (typeof value === 'object' && Object.keys(value).length) {
+        let num = this._addSubProps(prop)
+        log(`属性【${prop.name}】的值是对象，生成并添加【${num}】个子属性`)
       }
     }
 
@@ -492,5 +481,11 @@ export class DocAsArray {
     prop.key = newKey
 
     if (needRender) this.renderCounter.value++
+  }
+  /**
+   * 输出所有属性的key，便于调试
+   */
+  names() {
+    return this.properties.map((p) => p.name)
   }
 }

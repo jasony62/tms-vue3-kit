@@ -1,7 +1,7 @@
 import { SchemaIter, RawSchema, SchemaProp, DEFAULT_ROOT_NAME } from './model'
 
 import Debug from 'debug'
-const debug = Debug('json-schema')
+const debug = Debug('json-schema:builder')
 
 export { SchemaProp }
 
@@ -134,6 +134,13 @@ export class JSONSchemaBuilder {
     }
 
     return rootObj
+  }
+  /**
+   * 根据名称返回匹配的属性
+   * @param name 指定的属性名称
+   */
+  get(fullname: string) {
+    return this.props.find((prop) => prop.fullname === fullname)
   }
   /**
    * 返回指定节点的父节点

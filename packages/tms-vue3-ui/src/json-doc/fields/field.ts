@@ -38,11 +38,14 @@ export abstract class Field {
   constructor(prop: SchemaProp, index = -1, name = '') {
     let { attrs } = prop
     /**设置默认值*/
-    let { type, default: defVal, value } = attrs
+    let { type, default: defVal } = attrs
     if (type === 'array') {
-      this.value = defVal !== undefined ? [...defVal] : value ? value : []
+      this.value = Array.isArray(defVal) ? [...defVal] : []
+    } else if (type === 'object') {
+      this.value =
+        defVal && typeof defVal === 'object' ? Object.assign({}, defVal) : {}
     } else {
-      this.value = defVal ? defVal : value ? value : ''
+      this.value = defVal ? defVal : ''
     }
     if (type === 'object') {
       this._children = []
