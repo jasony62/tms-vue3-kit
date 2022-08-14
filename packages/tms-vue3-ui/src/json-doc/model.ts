@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import Debug from 'debug'
-import { RawSchema, SchemaIter } from '@/json-schema/model'
+import { RawSchema, SchemaIter, SchemaProp } from '@/json-schema/model'
 
 const debug = Debug('json-doc:model')
 
@@ -243,14 +243,13 @@ export class DocAsArray {
    *
    * 如果指定了schema参数，属性必须与schema匹配，不匹配的将清除
    *
-   * //TODO 实现方式应该优化，复制每个属性的值没有意义。所有的属性的值都是指向了一个对象上的值。只有叶级属性赋值才有意义（json类型的数据处理有问题，需要先解决才行。）。
    */
   build(schema?: RawSchema): any {
     let log = debug.extend('build')
-    let fullRegExps: RegExp[] = []
+    let schemaProps: SchemaProp[] = []
     if (schema) {
       const iter = new SchemaIter(schema)
-      for (let prop of iter) fullRegExps.push(prop.fullRegExp)
+      for (let prop of iter) schemaProps.push(prop)
     }
 
     const handleDocProp = (prop: DocProp, index: number) => {
@@ -260,20 +259,39 @@ export class DocAsArray {
       _.set(obj, prop.name, val)
     }
 
-    let obj = {}
-    if (fullRegExps.length) {
-      this._properties.forEach((prop, index) => {
-        // if (prop._children.length) {
-        //   log(`文档属性【${prop.name}】不是叶节点，跳过`)
-        //   return
-        // }
-        let re = fullRegExps.find((re) => re.test(prop.name))
-        if (re) {
-          log(`文档属性【${prop.name}】匹配的属性定义【${re.toString()}】`)
-          handleDocProp(prop, index)
+    const jsonDocPropNames: string[] = [] // json字段的名称
+    const obj = {}
+    if (schemaProps.length) {
+      this._properties.forEach((docProp, index) => {
+        let jsonParentName = jsonDocPropNames.find(
+          (n) => docProp.name.indexOf(n) === 0
+        )
+        if (jsonParentName) {
+          log(
+            `文档属性【${docProp.name}】是json类型的文档属性【${jsonParentName}】的值，跳过`
+          )
+          return
+        }
+        let schemaProp = schemaProps.find((schemaProp) =>
+          schemaProp.fullRegExp.test(docProp.name)
+        )
+        if (schemaProp) {
+          log(
+            `文档属性【${docProp.name}】匹配的属性定义【${schemaProp.fullname}】`
+          )
+          if (schemaProp.attrs.type === 'json') {
+            log(`文档属性【${docProp.name}】是json类型，需要处理下层节点`)
+            jsonDocPropNames.push(docProp.name)
+          } else {
+            if (docProp._children.length) {
+              log(`文档属性【${docProp.name}】不是叶节点，跳过`)
+              return
+            }
+          }
+          handleDocProp(docProp, index)
         } else {
-          log(`文档属性【${prop.name}】未找到匹配的属性定义，从文档中清除`)
-          if (_.has(obj, prop.name)) _.unset(obj, prop.name)
+          log(`文档属性【${docProp.name}】未找到匹配的属性定义，从文档中清除`)
+          if (_.has(obj, docProp.name)) _.unset(obj, docProp.name)
         }
       })
     } else this._properties.forEach(handleDocProp)
