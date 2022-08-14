@@ -128,9 +128,10 @@ export const SampleData = {
   description: '测试录入脚本',
   hears: ['关键字2'],
   script: {
-    default123: [
+    default: [
       {
         channelData: {
+          individual: false,
           destinationAddress: ['sip:alice@osips', 'sip:bob@osips'],
           messageList: [
             {

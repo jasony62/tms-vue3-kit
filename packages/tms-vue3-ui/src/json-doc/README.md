@@ -138,8 +138,6 @@ return createElement('div', nodes)
 </div>
 ```
 
-sub 是个奇怪的东西！
-
 对象
 
 对象指定了名字`name`，和属性`key`不一样
@@ -149,8 +147,6 @@ fields 是嵌套的
 如果指定了 name 就不是按照层级关系，会和 root 并列，不影响数据对象的命名，也不影响显示顺序
 
 通过 default 指定默认值
-
-添加\$sub
 
 formNode.root
 

@@ -75,8 +75,8 @@ export type SchemaPropAttrs = {
 }
 /**单个属性定义*/
 export class SchemaProp {
-  path: string
-  name: string
+  _path: string
+  _name: string
   attrs: SchemaPropAttrs
   existIf: ExistIfRuleSet | undefined
   items?: { type: string; [k: string]: any }
@@ -85,11 +85,24 @@ export class SchemaProp {
   patternChildren: SchemaProp[] | undefined
 
   constructor(path: string, name: string, type?: string) {
-    this.path = path
-    this.name = name
+    this._path = path
+    this._name = name
     this.attrs = { type: type ?? '', required: false }
   }
 
+  get path() {
+    return this._path
+  }
+
+  get name() {
+    return this._name
+  }
+
+  set name(val) {
+    this._name = val
+  }
+
+  /**属性定义的完整名称*/
   get fullname(): string {
     // 数组中项目为简单类型是，属性没有名字
     if (!this.name) return this.path
@@ -98,6 +111,31 @@ export class SchemaProp {
     let fullname = this.path + (this.name === '[*]' ? '' : '.') + this.name
 
     return fullname
+  }
+
+  /**属性定义完整名称的正则表达式，用于检查文档属性是否匹配*/
+  get fullRegExp(): RegExp {
+    let log = debug.extend('fullRegExp')
+    let { fullname } = this
+    let re = fullname
+      .replace(/^\^/, '')
+      .replace(/\$$/, '')
+      .replace(/\.\^/g, '.')
+      .replace(/\$\./g, '.')
+      .replace(/\$\[/g, '[')
+      .replaceAll('[*]', '\\[\\d+\\]')
+      .replace(new RegExp('\\.', 'g'), '\\.')
+    if (this.attrs.type === 'array' && this.items?.type !== 'object') {
+      log(
+        `属性定义【${fullname}】为数组类型，数组项目的类型不是对象，需要解决子项目属性匹配`
+      )
+      re += '(\\[\\d+\\])?'
+    }
+    re = '^' + re + '$'
+
+    log(`属性定义【${fullname}】的正则表达式为【${re}】`)
+
+    return new RegExp(re)
   }
 
   /**如果需要去掉路径中的[*]获得父属性名称*/

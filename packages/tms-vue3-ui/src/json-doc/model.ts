@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import Debug from 'debug'
+import { RawSchema, SchemaIter } from '@/json-schema/model'
 
 const debug = Debug('json-doc:model')
 
@@ -239,14 +240,44 @@ export class DocAsArray {
   }
   /**
    * 构造对象
+   *
+   * 如果指定了schema参数，属性必须与schema匹配，不匹配的将清除
+   *
+   * //TODO 实现方式应该优化，复制每个属性的值没有意义。所有的属性的值都是指向了一个对象上的值。只有叶级属性赋值才有意义（json类型的数据处理有问题，需要先解决才行。）。
    */
-  build(): any {
-    let obj = {}
-    this._properties.forEach((prop, index) => {
+  build(schema?: RawSchema): any {
+    let log = debug.extend('build')
+    let fullRegExps: RegExp[] = []
+    if (schema) {
+      const iter = new SchemaIter(schema)
+      for (let prop of iter) fullRegExps.push(prop.fullRegExp)
+    }
+
+    const handleDocProp = (prop: DocProp, index: number) => {
       if (index === 0) return
       let val = this.get(prop.name)
+      val = _.cloneDeep(val)
       _.set(obj, prop.name, val)
-    })
+    }
+
+    let obj = {}
+    if (fullRegExps.length) {
+      this._properties.forEach((prop, index) => {
+        // if (prop._children.length) {
+        //   log(`文档属性【${prop.name}】不是叶节点，跳过`)
+        //   return
+        // }
+        let re = fullRegExps.find((re) => re.test(prop.name))
+        if (re) {
+          log(`文档属性【${prop.name}】匹配的属性定义【${re.toString()}】`)
+          handleDocProp(prop, index)
+        } else {
+          log(`文档属性【${prop.name}】未找到匹配的属性定义，从文档中清除`)
+          if (_.has(obj, prop.name)) _.unset(obj, prop.name)
+        }
+      })
+    } else this._properties.forEach(handleDocProp)
+
     return obj
   }
   /**

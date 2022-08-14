@@ -49,10 +49,6 @@ export default defineComponent({
      */
     showFieldFullname: { type: Boolean, default: false },
     /**
-     * 是否需要显示表单按钮
-     */
-    requireButtons: { type: Boolean, default: () => true },
-    /**
      * 接收处理内部消息提醒的方法
      */
     onMessage: {
@@ -88,12 +84,11 @@ export default defineComponent({
     /**
      * 返回表单中正在编辑的数据
      */
-    const editing = (isCheckValidity = true): any => {
-      // if (isCheckValidity && !checkValidity()) return false
-      return editDoc.build()
+    const editing = (matchSchema = true): any => {
+      return editDoc.build(matchSchema === true ? schema : null)
     }
 
-    let {
+    const {
       schema,
       onMessage,
       autofillRequest,
@@ -110,7 +105,6 @@ export default defineComponent({
     context.expose({ editing, editDoc })
 
     const fields = new Map()
-
 
     const ctx = {
       editDoc,
