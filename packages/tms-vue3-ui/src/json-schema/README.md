@@ -68,6 +68,12 @@ oneOf
 
 `field`
 
+# 类
+
+JSONSchemaBuilder
+
+用一维数组结构存储有层级关系的`JSONSchema`，通过`flatten`和`unflatten`实现对象和数组之间的转换。
+
 # 备忘
 
 修改属性类型

@@ -20,6 +20,9 @@
             <button @click="onAddProp('properties')">添加子属性</button>
             <button @click="onAddProp('patternProperties')">添加模板子属性</button>
           </div>
+          <div v-if="canAddJSONSchema()">
+            <button @click="pasteJSONSchema(p)">粘贴子定义</button>
+          </div>
         </div>
       </div>
     </div>
@@ -90,7 +93,7 @@
       <component v-if="choiceMode" is="TvuJseEnumConfig" :field-attrs="attrs" :field-attrs-type="choiceMode">
       </component>
       <!--默认值-->
-      <tvu-form-item class="tvu-jse__field" label="默认值" v-if="!choiceMode">
+      <tvu-form-item class="tvu-jse__field" label="默认值" v-if="attrs.type !== 'object' && attrs.type !== 'array' && !choiceMode">
         <tvu-input v-model="attrs.default"></tvu-input>
       </tvu-form-item>
       <tvu-form-item class="tvu-jse__field">
@@ -120,7 +123,7 @@ import File from './formats/File.vue'
 import TvuJseEnumConfig from './EnumConfig.vue'
 import TvuJseAttachment from './Attachment.vue'
 import TvuJseAutofill from './Autofill.vue'
-import { computed, onMounted, reactive, ref, toRaw } from 'vue'
+import { computed, nextTick, onMounted, reactive, ref, toRaw } from 'vue'
 import { PropAutofillRunPolicy, PropAutofillTarget } from './model'
 
 export default {
@@ -312,6 +315,13 @@ const canMoveDown = (): boolean => builder.canMoveDown(toRaw(data.currProp))
  */
 const canRemove = (): boolean => builder.canRemove(toRaw(data.currProp))
 /**
+ * 节点是否可以粘贴子定义
+ */
+const canAddJSONSchema = (): boolean => {
+  if (!builder.canAddJSONSchema(toRaw(data.currProp))) return false
+  return true
+}
+/**
  * 在结尾添加子属性
  * @param type 
  */
@@ -364,6 +374,21 @@ const onRemoveProp = () => {
     props.onMessage('根节点不允许删除')
   } else {
     props.onMessage('删除属性遇到未知错误')
+  }
+}
+/**
+ * 从粘贴板获得数据，在指定属性下添加子定义
+ */
+const pasteJSONSchema = async (prop: SchemaProp) => {
+  const clipText = await navigator.clipboard.readText()
+  try {
+    let rawSchema = JSON.parse(clipText)
+    let newProps = builder.addJSONSchema(toRaw(data.currProp), rawSchema)
+    if (Array.isArray(newProps) && newProps.length) {
+      data.currProp = newProps[0]
+    }
+  } catch (e: any) {
+    props.onMessage('粘贴内容作为属性子定义错误：' + e.message)
   }
 }
 

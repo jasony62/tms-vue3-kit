@@ -38,7 +38,7 @@ const propToRaw = (prop: SchemaProp, parent: any): any => {
   return rawProp
 }
 /**
- *
+ * JSONSchema构造器
  */
 export class JSONSchemaBuilder {
   props: SchemaProp[]
@@ -53,15 +53,18 @@ export class JSONSchemaBuilder {
   get rootName() {
     return this._rootName
   }
-
-  /**将对象变为数组*/
+  /**
+   * 将JSONSchema对象变为数组
+   */
   flatten(root: RawSchema): JSONSchemaBuilder {
     const iter = new SchemaIter(root, this.rootName)
     this.props = Array.from(iter)
     return this
   }
-
-  // 恢复成层级结构
+  /**
+   * 生成JSONSchema对象
+   * 只有简单类型的属性有默认值，需求清除在父属性上记录的默认值
+   */
   unflatten() {
     if (this.props.length === 0) throw Error('[props]为空，无法进行数据转换')
 
@@ -71,6 +74,7 @@ export class JSONSchemaBuilder {
 
     // 处理根节点/
     const rootObj = propToRaw(root, null)
+    if (Object.hasOwn(rootObj, 'default')) delete rootObj.default
 
     for (let i = 1; i < this.props.length; i++) {
       let prop = this.props[i]
@@ -122,6 +126,9 @@ export class JSONSchemaBuilder {
 
       /**在父对象中添加当前属性 */
       let newProp = propToRaw(prop, parent)
+      if (newProp.type === 'object' || newProp.type === 'array') {
+        if (Object.hasOwn(newProp, 'default')) delete newProp.default
+      }
       /**加入父属性 */
       if (typeof prop.isPattern === 'boolean' && prop.isPattern === true) {
         if (typeof parent.patternProperties === 'undefined')
@@ -166,7 +173,7 @@ export class JSONSchemaBuilder {
   getEndIndex(prop: SchemaProp): number {
     let lastIndex = -1
     let child
-    for (let i = 0; i < this.props.length; i++) {
+    for (let i = 1; i < this.props.length; i++) {
       child = this.props[i]
       if (child.path.indexOf(prop.fullname) === 0) {
         lastIndex = i
@@ -265,6 +272,31 @@ export class JSONSchemaBuilder {
     return true
   }
   /**
+   * 在指定的属性下添加定义
+   * 需满足如下条件：
+   * 1、指定属性的类型必须是object，或者，类型是array且子项目的类型是object
+   * 2、属性下没有属性
+   *
+   * @param prop 指定的属性
+   * @returns
+   */
+  canAddJSONSchema(prop: SchemaProp): boolean {
+    if (this.getEndIndex(prop) !== -1) {
+      debug(`属性【${prop.fullname}】有子属性，不能添加定义`)
+      return false
+    }
+    if (prop.attrs.type !== 'object' && prop.attrs.type !== 'arry') {
+      debug(`属性【${prop.fullname}】的类型不是对象或数组，不能添加定义`)
+      return false
+    }
+    if (prop.attrs.type === 'arry' && prop.items?.type !== 'object') {
+      debug(`属性【${prop.fullname}】的子项目类型不是对象，不能添加定义`)
+      return false
+    }
+
+    return true
+  }
+  /**
    * 在指定的属性下添加子属性
    */
   addProp(parent: SchemaProp, type: string = 'properties'): SchemaProp {
@@ -287,6 +319,33 @@ export class JSONSchemaBuilder {
     }
 
     return newProp
+  }
+  /**
+   * 在指定的属性下添加属性定义
+   * 必须满足添加条件
+   *
+   * @param parent 指定的属性
+   * @param rawSchema
+   * @returns 添加的数量
+   */
+  addJSONSchema(parent: SchemaProp, rawSchema: RawSchema): SchemaProp[] {
+    if (!this.canAddJSONSchema(parent)) return []
+
+    /**解析属性定义*/
+    const builder = new JSONSchemaBuilder(parent.fullname)
+    builder.flatten(rawSchema)
+    let newProps = builder.props
+    if (newProps.length <= 1) return []
+
+    /**去掉根属性*/
+    newProps.shift()
+
+    /**添加子定义的位置*/
+    let index = this.getIndex(parent) + 1
+    debug(`属性【${parent.fullname}】在存储位置【${index}】添加子定义`)
+    this.props.splice(index, 0, ...newProps)
+
+    return newProps
   }
   /**
    * 在指定属性前添加兄弟属性

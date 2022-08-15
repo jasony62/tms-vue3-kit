@@ -16,6 +16,7 @@
             <option value="prop-dep">属性依赖</option>
             <option value="enum-dep">选项依赖</option>
             <option value="rcsbot">rcsbot</option>
+            <option value="paste">粘贴子自定</option>
           </select>
         </div>
         <div>
@@ -85,7 +86,7 @@ const onUploadFile = (file: { name: any }) => {
 }
 
 const onMessage = (msg: string) => {
-  alert(`报错了:${msg}`,)
+  alert(`提示：${msg}`)
 }
 
 const getResult = () => {

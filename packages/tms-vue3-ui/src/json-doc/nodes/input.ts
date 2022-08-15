@@ -51,6 +51,7 @@ export class Input extends FieldNode {
       `字段【${fieldName}】的值为：\n${JSON.stringify(fieldValue, null, 2)}`
     )
     let { type } = attrOrProps
+    console.log('aaaa', attrOrProps)
 
     const onInput = (event: any) => {
       const newValue = event && event.target ? event.target.value : event

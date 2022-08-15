@@ -146,4 +146,59 @@ describe('处理JSONSchema', () => {
       }
     }
   })
+  it('测试添加定义', () => {
+    const rawSchema_0 = {
+      type: 'object',
+    }
+    const builder_0 = new JSONSchemaBuilder()
+    builder_0.flatten(rawSchema_0)
+    expect(builder_0.props).toHaveLength(1)
+    const rootProp = builder_0.props[0]
+
+    const rawSchema_1 = {
+      type: 'object',
+      properties: {
+        name: {
+          type: 'string',
+        },
+        address: {
+          type: 'object',
+        },
+        age: {
+          type: 'number',
+        },
+      },
+    }
+    let newProps = builder_0.addJSONSchema(rootProp, rawSchema_1)
+    expect(newProps.length).toBe(3)
+    expect(builder_0.props).toHaveLength(4)
+    expect(builder_0.fullnames()).toEqual(['', 'name', 'address', 'age'])
+
+    const rawSchema_2 = {
+      type: 'object',
+      properties: {
+        city: {
+          type: 'string',
+        },
+        district: {
+          type: 'string',
+        },
+        street: {
+          type: 'string',
+        },
+      },
+    }
+    newProps = builder_0.addJSONSchema(builder_0.props[2], rawSchema_2)
+    expect(newProps.length).toBe(3)
+    expect(builder_0.props).toHaveLength(7)
+    expect(builder_0.fullnames()).toEqual([
+      '',
+      'name',
+      'address',
+      'address.city',
+      'address.district',
+      'address.street',
+      'age',
+    ])
+  })
 })
