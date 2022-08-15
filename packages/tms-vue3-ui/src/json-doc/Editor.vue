@@ -23,7 +23,7 @@ type FileUploadArgs = {
 export default defineComponent({
   props: {
     /**
-     * The JSON Schema object. Use the `v-if` directive to load asynchronous schema.
+     * The JSON Schema object.
      */
     schema: { type: Object as PropType<RawSchema>, required: true },
     /**
@@ -32,14 +32,6 @@ export default defineComponent({
      * @default {}
      */
     value: { type: Object, default: () => ({}) },
-    /**
-     * This property indicates whether the value of the control can be automatically completed by the browser. Possible values are: `off` and `on`.
-     */
-    autoComplete: { type: String, default: 'off' },
-    /**
-     * This Boolean attribute indicates that the form is not to be validated when submitted.
-     */
-    noValidate: { type: Boolean, default: false },
     /**
      * Define the inputs wrapping class. Leave `undefined` to disable input wrapping.
      */

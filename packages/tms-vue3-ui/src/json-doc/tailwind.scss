@@ -8,6 +8,9 @@
     .tvu-jdoc__field-fullname {
       @apply text-gray-300;
     }
+    input.tvu-jdoc__field-input:read-only {
+      @apply bg-gray-100;
+    }
   }
 
   .tvu-jdoc__field-name {

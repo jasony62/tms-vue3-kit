@@ -4,6 +4,12 @@ export const SampleSchema = {
   description: '基本示例',
   type: 'object',
   properties: {
+    test: {
+      title: '只读字段',
+      type: 'string',
+      readonly: true,
+      default: 'hello',
+    },
     name: {
       title: '姓名',
       type: 'string',
