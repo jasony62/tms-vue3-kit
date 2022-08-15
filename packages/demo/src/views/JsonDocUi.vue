@@ -13,6 +13,7 @@
       <option value="file">文件（单个）</option>
       <option value="defval">默认值</option>
       <option value="rcsbot">rcsbot</option>
+      <option value="rcssugg">rcssugg</option>
     </select>
   </div>
   <div class="flex flex-row">

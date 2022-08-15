@@ -89,14 +89,16 @@ function createArrayItemNode(
   }
 }
 
-/**根据文档数据生成可选属性的字段*/
+/**
+ * 根据文档数据生成可选属性的字段
+ */
 function createOptionalFields(
   ctx: FormContext,
   prop: SchemaProp,
   joint: StackJoint
 ): Field[] {
   /*需要根据数据对象的值决定是否生成字段和节点*/
-  const fieldValue = ctx.editDoc.get(prop.parentFullname)
+  const fieldValue = ctx.editDoc.get(joint.field.fullname)
   let keys: string[] = []
   if (typeof fieldValue === 'object') {
     let re: RegExp
@@ -147,7 +149,9 @@ type FieldVNodePair = {
   index?: number // 在父节点中的位置
 }
 
-/**生成字段和节点*/
+/**
+ * 生成字段和节点
+ */
 function createOptionalFieldNode(
   ctx: FormContext,
   prop: SchemaProp,
@@ -155,7 +159,7 @@ function createOptionalFieldNode(
 ): FieldVNodePair[] {
   /**创建和当前属性对应的field*/
   debug(
-    `属性【${prop.fullname}】是正则表达式定义的可选属性，需要根据文档数据生成字段`
+    `【${joint.field.fullname}】字段下的属性【${prop.fullname}】是正则表达式定义的可选属性，需要根据文档数据生成字段`
   )
   const fields = createOptionalFields(ctx, prop, joint)
   if (fields.length) {
