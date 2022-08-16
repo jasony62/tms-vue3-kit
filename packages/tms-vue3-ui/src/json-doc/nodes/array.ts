@@ -3,6 +3,53 @@ import { components } from './index'
 import { FieldNode } from './fieldNode'
 import { Field } from '../fields'
 import { FormContext } from '../builder'
+import Debug from 'debug'
+
+const debug = Debug('json-doc:nodes:array')
+
+/**
+ * 执行粘贴操作
+ * 如果黏贴的数据是对象，作为数组的项目进行追加
+ * 如果黏贴的数据是数组，那么数组终端项目作为依次被添加
+ * @param ctx
+ * @param field
+ * @returns
+ */
+const itemPasteVNode = (ctx: FormContext, field: Field) => {
+  let pasteVNode = h(
+    components.button.tag,
+    {
+      class: ['tvu-button'],
+      onClick: async () => {
+        function setDocData(clipData: any) {
+          if (Array.isArray(clipData) && clipData.length) {
+            clipData.forEach((item) =>
+              ctx.editDoc.appendAt(field.fullname, item)
+            )
+          } else ctx.editDoc.appendAt(field.fullname, clipData)
+        }
+        if (typeof ctx.onPaste === 'function') {
+          /**调用方提供数据*/
+          ctx.onPaste(field).then((clipData: any) => setDocData(clipData))
+        } else {
+          /**从粘贴板中获取数据，添加到文档中*/
+          const clipText = await navigator.clipboard.readText()
+          try {
+            let clipData = JSON.parse(clipText)
+            setDocData(clipData)
+          } catch (e: any) {
+            ctx.onMessage(
+              `粘贴内容填充字段【${field.fullname}】失败：` + e.message
+            )
+          }
+        }
+      },
+    },
+    `黏贴-${field.name}`
+  )
+
+  return pasteVNode
+}
 /**
  * 给数组添加项目
  * @param ctx
@@ -36,7 +83,7 @@ const itemAddVNode = (ctx: FormContext, field: Field) => {
     },
     `添加项目-${field.name}`
   )
-  return h('div', { class: ['tvu-jdoc__nest__actions'] }, addVNode)
+  return addVNode
 }
 
 const itemInsertVNode = (ctx: FormContext, field: Field, index: number) => {
@@ -122,6 +169,18 @@ export class ArrayNode extends FieldNode {
       itemNestVNodes.push(itemNestVNode)
     })
 
-    return [...itemNestVNodes, itemAddVNode(ctx, field)]
+    /**字段范围的操作*/
+    const fieldActionVNodes = []
+    if (ctx.enablePaste === true) {
+      debug(`对象字段【${field.fullname}】需要支持黏贴操作`)
+      let pasteVNode = itemPasteVNode(ctx, field)
+      fieldActionVNodes.push(pasteVNode)
+    }
+    fieldActionVNodes.push(itemAddVNode(ctx, field))
+
+    return [
+      ...itemNestVNodes,
+      h('div', { class: ['tvu-jdoc__nest__actions'] }, fieldActionVNodes),
+    ]
   }
 }

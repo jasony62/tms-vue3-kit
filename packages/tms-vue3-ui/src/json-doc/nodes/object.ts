@@ -99,7 +99,7 @@ const itemAddVNode = (ctx: FormContext, field: Field) => {
   return h('div', { class: ['tvu-jdoc__nest__actions'] }, addVNodes)
 }
 /**
- * 执行选取文件操作
+ * 执行粘贴操作
  * @param ctx
  * @param field
  * @returns
@@ -128,7 +128,7 @@ const itemPasteVNode = (ctx: FormContext, field: Field) => {
         }
       },
     },
-    `黏贴-${field.name}`
+    `黏贴${field.name ? '-' + field.name : '全部'}`
   )
 
   return pasteVNode

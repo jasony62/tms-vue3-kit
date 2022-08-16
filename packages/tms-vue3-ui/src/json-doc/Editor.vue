@@ -9,11 +9,6 @@ import Debug from 'debug'
 
 const debug = Debug('json-doc:editor')
 
-type FileSelectArgs = {
-  fullname: string // 文件对应的字段名称
-  fileld: Field
-}
-
 type FileUploadArgs = {
   fullname: string // 文件对应的字段名称
   data: string // base64编码的文件内容
@@ -68,7 +63,7 @@ export default defineComponent({
      * 选择文件的方法
      */
     onFileSelect: {
-      type: Function as PropType<(args: FileSelectArgs) => Promise<any>>,
+      type: Function as PropType<(field: Field) => Promise<any>>,
     },
     /**
      * 上传文件并返回文件信息的方法

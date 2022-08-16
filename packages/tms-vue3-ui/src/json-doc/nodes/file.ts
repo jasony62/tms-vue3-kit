@@ -110,7 +110,7 @@ const itemPickVNode = (ctx: FormContext, field: Field) => {
         /**只能在数组中添加文件*/
         if ((fieldValue ?? true) || Array.isArray(fieldValue)) {
           if (typeof ctx.onFileSelect === 'function') {
-            ctx.onFileSelect(field.fullname, field).then((fileData: any) => {
+            ctx.onFileSelect(field).then((fileData: any) => {
               // 设置初始值和添加项目必须在dom循环中完成，不能在promise外面初始化
               const fieldValue = ctx.editDoc.init(field.fullname, [])
               if (Array.isArray(fieldValue))
