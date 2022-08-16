@@ -6,7 +6,7 @@ import { components } from '.'
 import RandExp from 'randexp'
 import Debug from 'debug'
 
-const debug = Debug('json-doc:object')
+const debug = Debug('json-doc:nodes:object')
 /**
  * 根据提供的文件对象数据，更新表单中的文件字段数据
  * @param field
@@ -98,6 +98,41 @@ const itemAddVNode = (ctx: FormContext, field: Field) => {
   )
   return h('div', { class: ['tvu-jdoc__nest__actions'] }, addVNodes)
 }
+/**
+ * 执行选取文件操作
+ * @param ctx
+ * @param field
+ * @returns
+ */
+const itemPasteVNode = (ctx: FormContext, field: Field) => {
+  let pasteVNode = h(
+    components.button.tag,
+    {
+      class: ['tvu-button'],
+      onClick: async () => {
+        if (typeof ctx.onPaste === 'function') {
+          ctx.onPaste(field).then((clipData: any) => {
+            ctx.editDoc.set(field.fullname, clipData)
+          })
+        } else {
+          /**从粘贴板中获取数据，添加到文档中*/
+          const clipText = await navigator.clipboard.readText()
+          try {
+            let clipData = JSON.parse(clipText)
+            ctx.editDoc.set(field.fullname, clipData)
+          } catch (e: any) {
+            ctx.onMessage(
+              `粘贴内容填充字段【${field.fullname}】失败：` + e.message
+            )
+          }
+        }
+      },
+    },
+    `黏贴-${field.name}`
+  )
+
+  return pasteVNode
+}
 
 /**
  * 执行选取文件操作
@@ -106,7 +141,7 @@ const itemAddVNode = (ctx: FormContext, field: Field) => {
  * @returns
  */
 const itemPickVNode = (ctx: FormContext, field: Field) => {
-  let addVNode = h(
+  let pickVNode = h(
     components.button.tag,
     {
       class: ['tvu-button'],
@@ -128,8 +163,7 @@ const itemPickVNode = (ctx: FormContext, field: Field) => {
     },
     '选取文件'
   )
-
-  return h('div', { class: ['tvu-jdoc__nest__actions'] }, addVNode)
+  return pickVNode
 }
 
 export class ObjectNode extends FieldNode {
@@ -166,8 +200,16 @@ export class ObjectNode extends FieldNode {
     const { ctx, field } = this
     const vnodes = this._children ? [...this._children] : []
 
+    /**添加子属性操作*/
     if (field.scheamProp.patternChildren?.length) {
       vnodes.push(itemAddVNode(ctx, field))
+    }
+    /**如果开放paste操作，添加按钮*/
+    const actionVNodes = []
+    if (ctx.enablePaste === true) {
+      debug(`对象字段【${field.fullname}】需要支持黏贴操作`)
+      let pasteVNode = itemPasteVNode(ctx, field)
+      actionVNodes.push(pasteVNode)
     }
     /**如果对象的格式是对象，添加选取文件操作*/
     if (field.scheamProp.attrs.format === 'file') {
@@ -175,7 +217,12 @@ export class ObjectNode extends FieldNode {
         `对象字段【${field.fullname}】【format=file】，需要支持选取文件操作`
       )
       let pickFileVNode = itemPickVNode(ctx, field)
-      vnodes.push(pickFileVNode)
+      actionVNodes.push(pickFileVNode)
+    }
+    if (actionVNodes.length) {
+      vnodes.push(
+        h('div', { class: ['tvu-jdoc__nest__actions'] }, actionVNodes)
+      )
     }
 
     return vnodes

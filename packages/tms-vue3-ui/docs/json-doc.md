@@ -46,6 +46,17 @@
 | jdocFocus |      | -    |
 | jdocBlur  |      | -    |
 
+## 粘贴
+
+支持对`object`类型的字段，通过黏贴操作对子字段进行赋值。
+
+```json
+{
+  "areaCode": "010",
+  "phoneNumber": "12345"
+}
+```
+
 ## 上传文件
 
 # 单元测试

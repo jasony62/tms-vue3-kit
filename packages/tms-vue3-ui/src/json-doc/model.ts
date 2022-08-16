@@ -107,12 +107,20 @@ class DocProp {
   set key(val: string | number) {
     this._initialKey = val
   }
-
+  /**
+   * 属性在父属性中的名称或索引
+   *
+   * 如果是索引（数字类型），那么要返回属性在父属性中的实际位置。如果不能在父属性中找到，抛错误。
+   */
   get key() {
     let { _initialKey } = this
     if (typeof _initialKey === 'number') {
       let index = this._parent ? this._parent._children.indexOf(this) : -1
       if (index === -1) {
+        debug(
+          `获得文档属性的key异常：_initialKey=${this._initialKey},_parent?._children.length=${this._parent?._children.length},_value=${this._value}\n` +
+            JSON.stringify(this._parent, null, 2)
+        )
         throw Error(
           `error ${this._initialKey}/${this._parent?._children.length}/${this._value}`
         )
@@ -122,7 +130,10 @@ class DocProp {
 
     return this._initialKey
   }
-
+  /**
+   * 文档属性的全路径名称
+   * 名称需要动态计算，因为父属性的名称会变（父属性是模板属性），属性在父属性中索引有可能改变（父属性是数组）
+   */
   get name(): string {
     let { _parent, key } = this
     if (_parent?.name) {
@@ -239,16 +250,18 @@ export class DocAsArray {
     return { index, prop }
   }
   /**
-   * 构造对象
+   * 根据记录的文档属性构造文档对象
    *
    * 如果指定了schema参数，属性必须与schema匹配，不匹配的将清除
    *
+   * @param rawSchema 指定的原始属性定义
+   * @returns
    */
-  build(schema?: RawSchema): any {
+  build(rawSchema?: RawSchema): any {
     let log = debug.extend('build')
     let schemaProps: SchemaProp[] = []
-    if (schema) {
-      const iter = new SchemaIter(schema)
+    if (rawSchema) {
+      const iter = new SchemaIter(rawSchema)
       for (let prop of iter) schemaProps.push(prop)
     }
 
@@ -262,6 +275,7 @@ export class DocAsArray {
     const jsonDocPropNames: string[] = [] // json字段的名称
     const obj = {}
     if (schemaProps.length) {
+      /**检查是否为schema中定义的属性字段*/
       this._properties.forEach((docProp, index) => {
         let jsonParentName = jsonDocPropNames.find(
           (n) => docProp.name.indexOf(n) === 0
@@ -420,7 +434,6 @@ export class DocAsArray {
    */
   remove(name: string, needRender = true) {
     let { index, prop } = this.findByName(name)
-
     if (prop === undefined) return undefined
 
     let { _parent, key } = prop
@@ -439,6 +452,8 @@ export class DocAsArray {
 
     // 触发重新渲染
     if (needRender) this.renderCounter.value++
+
+    return true
   }
   /**
    * 返回指定字段的值。如果指定的属性有子属性，使用子属性的值构造属性的值。

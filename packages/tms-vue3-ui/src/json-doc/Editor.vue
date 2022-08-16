@@ -41,6 +41,11 @@ export default defineComponent({
      */
     showFieldFullname: { type: Boolean, default: false },
     /**
+     * 是否支持黏贴操作
+     * 对象字段可以通过黏贴操作快速对子字段进行赋值
+     */
+    enablePaste: { type: Boolean, default: false },
+    /**
      * 接收处理内部消息提醒的方法
      */
     onMessage: {
@@ -53,6 +58,12 @@ export default defineComponent({
      * 通过动态数据
      */
     autofillRequest: { type: Function },
+    /**
+     * 黏贴操作回调函数
+     */
+    onPaste: {
+      type: Function
+    },
     /**
      * 选择文件的方法
      */
@@ -82,8 +93,10 @@ export default defineComponent({
 
     const {
       schema,
+      enablePaste,
       onMessage,
       autofillRequest,
+      onPaste,
       onFileUpload,
       onFileSelect,
       onFileDownload,
@@ -102,8 +115,10 @@ export default defineComponent({
       editDoc,
       fields,
       schema,
+      enablePaste,
       onMessage,
       autofillRequest,
+      onPaste,
       onFileUpload,
       onFileSelect,
       onFileDownload,

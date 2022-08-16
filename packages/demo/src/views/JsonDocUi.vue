@@ -13,13 +13,14 @@
       <option value="file">文件（单个）</option>
       <option value="defval">默认值</option>
       <option value="rcsbot">rcsbot</option>
+      <option value="rcscard">rcscard</option>
       <option value="rcssugg">rcssugg</option>
     </select>
   </div>
   <div class="flex flex-row">
     <div class="w-1/3 p-4">
       <json-doc v-if="loading === false" ref="jsonDocEditor" :key="caseName" :schema="testObj.schema"
-        :value="testObj.data" :autofill-request="onAutofill" :on-file-download="onFileDownload"
+        :value="testObj.data" :enable-paste="true" :autofill-request="onAutofill" :on-file-download="onFileDownload"
         :on-file-upload="onFileUpload" :show-field-fullname="true" @jdoc-focus="onJdocFocus" @jdoc-blur="onJdocBlur">
       </json-doc>
     </div>
