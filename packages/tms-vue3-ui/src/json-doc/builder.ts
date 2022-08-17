@@ -378,15 +378,15 @@ class Stack {
       let joint = this.joints[i]
       let { field } = joint
       let isParent = false
-      if (field.scheamProp.isPattern) {
+      if (field.schemaProp.isPattern) {
         // 可选属性
-        isParent = field.scheamProp.fullname === childProp.path
+        isParent = field.schemaProp.fullname === childProp.path
       } else if (childProp.isArrayItem) {
-        isParent = `${field.scheamProp.fullname}` === childProp.path
+        isParent = `${field.schemaProp.fullname}` === childProp.path
       } else {
         if (childProp.path === field.fullname) {
           isParent = true
-        } else if (childProp.path === field.scheamProp.fullname) {
+        } else if (childProp.path === field.schemaProp.fullname) {
           isParent = true
         }
       }
@@ -395,7 +395,7 @@ class Stack {
         topJoints.push(joint)
         let msg = `属性【${childProp.fullname}】是`
         msg += field.fullname
-          ? `字段【${field.fullname}】字段属性【${field.scheamProp.fullname}】`
+          ? `字段【${field.fullname}】字段属性【${field.schemaProp.fullname}】`
           : '根字段'
         msg += `的子属性`
         debug(msg)

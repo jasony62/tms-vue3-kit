@@ -116,7 +116,7 @@ export abstract class FieldNode extends Node {
     const { field } = this
 
     // 没有指定自动填充数据规则
-    if (!field.scheamProp.attrs.autofill) return
+    if (!field.schemaProp.attrs.autofill) return
 
     // 如果字段是等待渲染的状态，该次渲染就不需要再次通过api获取的数据
     if (field.waitingRender) {
@@ -124,7 +124,7 @@ export abstract class FieldNode extends Node {
       return
     }
 
-    const rule = field.scheamProp.attrs.autofill
+    const rule = field.schemaProp.attrs.autofill
 
     /**只在创建时调用1次*/
     if (rule.runPolicy === 'onCreate' && field.autofilled === true) {

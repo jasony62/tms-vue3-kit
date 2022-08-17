@@ -86,6 +86,17 @@ export abstract class Field {
       return fullname
     }
   }
+
+  get shortname() {
+    if (this.index !== -1) {
+      let pname = this.path.split('.').pop()
+      if (pname) return pname.replace(/\[\*\]$/, `[${this._index}]`)
+      else return this.name
+    } else {
+      return this.name
+    }
+  }
+
   /**字段在文档对象中的深度*/
   get depth() {
     let fn = this.fullname
@@ -128,7 +139,7 @@ export abstract class Field {
     this._visible = val
   }
 
-  get scheamProp() {
+  get schemaProp() {
     return this._prop
   }
 

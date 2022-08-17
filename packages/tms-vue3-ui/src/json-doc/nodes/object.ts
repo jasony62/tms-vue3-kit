@@ -27,7 +27,7 @@ function _setNewFileData(field: Field, fileData: any, ctx: FormContext) {
 function _pickLocalFile(ctx: FormContext, field: Field, fileUpload: Function) {
   const elInput = document.createElement('input')
   elInput.setAttribute('type', 'file')
-  // const { accept, size } = field.scheamProp
+  // const { accept, size } = field.schemaProp
   // if (accept) elInput.setAttribute('accept', accept)
   document.body.appendChild(elInput)
   elInput.addEventListener('change', async (e: Event) => {
@@ -56,7 +56,7 @@ function _pickLocalFile(ctx: FormContext, field: Field, fileUpload: Function) {
  * @returns
  */
 const itemAddVNode = (ctx: FormContext, field: Field) => {
-  let addVNodes = field.scheamProp.patternChildren?.map((childProp) =>
+  let addVNodes = field.schemaProp.patternChildren?.map((childProp) =>
     h(
       components.button.tag,
       {
@@ -128,7 +128,7 @@ const itemPasteVNode = (ctx: FormContext, field: Field) => {
         }
       },
     },
-    `黏贴${field.name ? '-' + field.name : '全部'}`
+    `黏贴${field.shortname ? '-' + field.shortname : '全部'}`
   )
 
   return pasteVNode
@@ -201,7 +201,7 @@ export class ObjectNode extends FieldNode {
     const vnodes = this._children ? [...this._children] : []
 
     /**添加子属性操作*/
-    if (field.scheamProp.patternChildren?.length) {
+    if (field.schemaProp.patternChildren?.length) {
       vnodes.push(itemAddVNode(ctx, field))
     }
     /**如果开放paste操作，添加按钮*/
@@ -212,7 +212,7 @@ export class ObjectNode extends FieldNode {
       actionVNodes.push(pasteVNode)
     }
     /**如果对象的格式是对象，添加选取文件操作*/
-    if (field.scheamProp.attrs.format === 'file') {
+    if (field.schemaProp.attrs.format === 'file') {
       debug(
         `对象字段【${field.fullname}】【format=file】，需要支持选取文件操作`
       )

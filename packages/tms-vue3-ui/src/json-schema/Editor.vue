@@ -29,13 +29,13 @@
     <!--属性编辑部分-->
     <div class="tvu-jse__property-fields">
       <tvu-form-item class="tvu-jse__field" label="键值">
-        <tvu-input v-model.trim="prop.name" :disabled="prop.name === props.rootName && prop.path === ''"></tvu-input>
+        <tvu-input v-model.trim="prop.name" :disabled="prop.name === rootName && prop.path === ''"></tvu-input>
       </tvu-form-item>
       <tvu-form-item class="tvu-jse__field" label="初始名称" v-if="prop.isPattern">
         <tvu-input v-model.trim="attrs.initialName"></tvu-input>
       </tvu-form-item>
       <tvu-form-item class="tvu-jse__field" label="类型">
-        <tvu-select v-model="attrs.type" :disabled="forbidden" @change="onChangeType">
+        <tvu-select v-model="attrs.type" :disabled="disableChangeType" @change="onChangeType">
           <tvu-option label="integer" value="integer"></tvu-option>
           <tvu-option label="number" value="number"></tvu-option>
           <tvu-option label="string" value="string"></tvu-option>
@@ -93,7 +93,8 @@
       <component v-if="choiceMode" is="TvuJseEnumConfig" :field-attrs="attrs" :field-attrs-type="choiceMode">
       </component>
       <!--默认值-->
-      <tvu-form-item class="tvu-jse__field" label="默认值" v-if="attrs.type !== 'object' && attrs.type !== 'array' && !choiceMode">
+      <tvu-form-item class="tvu-jse__field" label="默认值"
+        v-if="attrs.type !== 'object' && attrs.type !== 'array' && !choiceMode">
         <tvu-input v-model="attrs.default"></tvu-input>
       </tvu-form-item>
       <tvu-form-item class="tvu-jse__field">
@@ -123,7 +124,7 @@ import File from './formats/File.vue'
 import TvuJseEnumConfig from './EnumConfig.vue'
 import TvuJseAttachment from './Attachment.vue'
 import TvuJseAutofill from './Autofill.vue'
-import { computed, nextTick, onMounted, reactive, ref, toRaw } from 'vue'
+import { computed, onMounted, reactive, ref, toRaw } from 'vue'
 import { PropAutofillRunPolicy, PropAutofillTarget } from './model'
 
 export default {
@@ -136,7 +137,7 @@ export default {
 <script setup lang="ts">
 
 const props = defineProps({
-  schema: { type: Object, default: {} },
+  schema: { type: Object, default: { type: 'object' } },
   rootName: { type: String, default: '$' },
   onMessage: { type: Function, default(msg: string) { alert(msg) } },
   onUpload: Function,
@@ -197,7 +198,9 @@ const itemsFormats = computed(() => {
     : null
 })
 
-let forbidden = computed(() => {
+/**禁止修改属性类型*/
+const disableChangeType = computed(() => {
+  if (data.currProp.name === props.rootName) return true
   const { type } = attrs.value
   if (type === 'object' || (type === 'array' && data.currProp?.items?.type === 'object')) {
     const idx = nodes.value.findIndex((node: SchemaProp) => node.parentFullname === data.currProp.fullname)

@@ -15,7 +15,7 @@ const uploadLocalFile = (
   let fullname = field.fullname
   const elInput = document.createElement('input')
   elInput.setAttribute('type', 'file')
-  const { accept, size, limit } = field.scheamProp.items?.formatAttrs
+  const { accept, size, limit } = field.schemaProp.items?.formatAttrs
   if (limit && fieldValue?.length >= limit) {
     ctx.onMessage(`限制上传${limit}文件`)
     return

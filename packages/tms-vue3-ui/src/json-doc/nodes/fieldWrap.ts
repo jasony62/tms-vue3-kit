@@ -16,9 +16,9 @@ const fieldNameVNode = (ctx: FormContext, field: Field) => {
     value: field.name,
     onInput: (event: any) => {
       const newName = event && event.target ? event.target.value : event
-      if (field.scheamProp.isPattern) {
+      if (field.schemaProp.isPattern) {
         // 如果是正则表达式定义的属性名，检查名称是否符合要求
-        if (!new RegExp(field.scheamProp.name).test(newName)) {
+        if (!new RegExp(field.schemaProp.name).test(newName)) {
           if (inp.el) inp.el.value = field.name
           return
         }
@@ -29,7 +29,7 @@ const fieldNameVNode = (ctx: FormContext, field: Field) => {
 
   return h(
     'div',
-    { name: field.scheamProp.name, class: ['tvu-jdoc__field-name'] },
+    { name: field.schemaProp.name, class: ['tvu-jdoc__field-name'] },
     [inp]
   )
 }
@@ -42,11 +42,11 @@ const fieldInsertVNode = (ctx: FormContext, field: Field) => {
       name: fullname,
       class: ['tvu-button'],
       onClick: () => {
-        let randexp = new RandExp(new RegExp(field.scheamProp.name))
+        let randexp = new RandExp(new RegExp(field.schemaProp.name))
         randexp.max = 8
         let newKey = randexp.gen()
         debug(`执行【插入属性】，随机属性名：${newKey}`)
-        switch (field.scheamProp.attrs.type) {
+        switch (field.schemaProp.attrs.type) {
           case 'string':
             ctx.editDoc.insertAt(fullname, '', newKey)
             break
@@ -78,7 +78,7 @@ const fieldRemoveVNode = (ctx: FormContext, field: Field) => {
         ctx.editDoc.remove(field.fullname)
       },
     },
-    `删除-${field.name}`
+    `删除-${field.shortname}`
   )
 }
 /**
@@ -117,7 +117,7 @@ export class FieldWrap extends Node {
       )
     }
     /**如果属性名称是用户定义的，需要显示给用户，并且允许进行编辑*/
-    if (field.scheamProp.isPattern) {
+    if (field.schemaProp.isPattern) {
       children.push(fieldNameVNode(ctx, field))
     }
 
@@ -133,7 +133,7 @@ export class FieldWrap extends Node {
       )
     }
     /**属性是可扩展属性*/
-    if (field.scheamProp.isPattern) {
+    if (field.schemaProp.isPattern) {
       let actions = h(
         'div',
         {
@@ -162,7 +162,7 @@ export class FieldWrap extends Node {
     if (field.required) {
       Object.assign(options, { 'data-required-field': 'true' })
     }
-    if (field.scheamProp.isPattern) {
+    if (field.schemaProp.isPattern) {
       Object.assign(options, { 'data-optinal-field': 'true' })
     }
     // if (field.visible === false) {

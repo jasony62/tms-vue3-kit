@@ -72,7 +72,7 @@ export class Input extends FieldNode {
     inpOps.onBlur = () => {
       this.ctx.onNodeBlur(field)
     }
-    if (field.scheamProp.attrs.readonly === true) {
+    if (field.schemaProp.attrs.readonly === true) {
       inpOps.readonly = true
     }
     /**设置核选框的值*/
@@ -112,7 +112,7 @@ export class Input extends FieldNode {
       if (field.itemType) {
         let props: { [k: string]: any } = {
           type: field.itemType,
-          name: field.name,
+          name: field.fullname,
           value: item.value,
           label: item.label,
         }

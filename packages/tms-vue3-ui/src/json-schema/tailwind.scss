@@ -31,6 +31,9 @@
     textarea {
       min-width: 1rem;
       @apply w-full;
+      &:disabled {
+        @apply bg-gray-100;
+      }
     }
   }
 
