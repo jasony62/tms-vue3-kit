@@ -4,7 +4,6 @@ import { Input } from './input'
 import { Select } from './select'
 import { Textarea } from './textarea'
 import { Checkboxgroup } from './checkboxgroup'
-import { FileNode } from './file'
 import { DateTime } from './dateTime'
 import { ArrayNode } from './array'
 import { ObjectNode } from './object'
@@ -55,8 +54,6 @@ function prepareFieldNode(
       return new Select(ctx, field)
     case 'checkboxgroup':
       return new Checkboxgroup(ctx, field)
-    case 'file':
-      return new FileNode(ctx, field, children)
     case 'array':
       return new ArrayNode(ctx, field, children)
     case 'object':
@@ -75,7 +72,6 @@ export {
   Select,
   Textarea,
   Checkboxgroup,
-  FileNode,
   ArrayNode,
   ObjectNode,
   FieldWrap,

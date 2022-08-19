@@ -67,7 +67,12 @@ const fieldInsertVNode = (ctx: FormContext, field: Field) => {
     '插入属性'
   )
 }
-
+/**
+ * 删除属性操作
+ * @param ctx
+ * @param field
+ * @returns
+ */
 const fieldRemoveVNode = (ctx: FormContext, field: Field) => {
   return h(
     components.button.tag,
@@ -75,6 +80,7 @@ const fieldRemoveVNode = (ctx: FormContext, field: Field) => {
       name: field.fullname,
       class: ['tvu-button'],
       onClick: () => {
+        if (field.isOneOf) ctx.oneOfSelected.delete(field.fullname)
         ctx.editDoc.remove(field.fullname)
       },
     },
@@ -143,12 +149,22 @@ export class FieldWrap extends Node {
       )
       children.push(actions)
     }
+    if (field.isOneOf) {
+      let actions = h(
+        'div',
+        {
+          class: ['tvu-jdoc__field-actions'],
+        },
+        [fieldRemoveVNode(ctx, field)]
+      )
+      children.push(actions)
+    }
 
     return children
   }
 
   createElem(): VNode {
-    const { field } = this
+    const { ctx, field } = this
 
     // 获得子节点的内容
     let children = this.children()
@@ -168,6 +184,21 @@ export class FieldWrap extends Node {
     // if (field.visible === false) {
     //   options.class.push('tvu-jdoc__field--hide')
     // }
+
+    // 设置排他属性字段是否出现
+    if (field.isOneOf) {
+      let selected = false
+      if (!ctx.oneOfSelected.has(field.fullname)) {
+        let fieldValue = ctx.editDoc.get(field.fullname)
+        selected = fieldValue ?? false ? true : false
+        if (selected) ctx.oneOfSelected.add(field.fullname)
+      } else {
+        selected = true
+      }
+      Object.assign(options, {
+        'data-one-of-field-selected': selected,
+      })
+    }
 
     this._vnode = h(this.rawArgs.tag, options, vnodes)
 

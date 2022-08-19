@@ -1,4 +1,3 @@
-import { SchemaProp } from '../../src/json-schema/model'
 import { JSONSchemaBuilder } from '@/json-schema/builder'
 
 const SampleSchema = {
@@ -20,13 +19,13 @@ const SampleSchema = {
 }
 
 describe('根属性类型是数组', () => {
-  // it('解析schema', () => {
-  //   const builder = new JSONSchemaBuilder()
-  //   builder.flatten(SampleSchema)
-  //   const expectNames = ['', '[*].name', '[*].title', '[*].age']
-  //   expect(builder.fullnames()).toEqual(expectNames)
-  //   console.log(builder.props)
-  // })
+  it('解析schema', () => {
+    const builder = new JSONSchemaBuilder()
+    builder.flatten(SampleSchema)
+    const expectNames = ['', '[*].name', '[*].title', '[*].age']
+    expect(builder.fullnames()).toEqual(expectNames)
+    console.log(builder.props)
+  })
   it('新建schema', () => {
     const builder = new JSONSchemaBuilder('$')
     builder.flatten({ type: 'array' })

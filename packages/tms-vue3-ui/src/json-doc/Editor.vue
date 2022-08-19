@@ -104,11 +104,15 @@ export default defineComponent({
 
     context.expose({ editing, editDoc })
 
-    const fields = new Map()
+    /**全局保存所有的字段，方便查找*/
+    const fields = new Map<string, Field>()
+    /**根据文档数据和用户选择，全局保存所有的oneOf字段选择状态*/
+    const oneOfSelected = new Set<string>()
 
     const ctx = {
       editDoc,
       fields,
+      oneOfSelected,
       schema,
       enablePaste,
       onMessage,

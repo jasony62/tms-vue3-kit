@@ -68,22 +68,7 @@ const itemAddVNode = (ctx: FormContext, field: Field) => {
       onClick: () => {
         // 需要考虑默认值
         const fieldValue = ctx.editDoc.init(fullname, [])
-        if (Array.isArray(fieldValue)) {
-          // TODO: 需要用默认值设置
-          switch (field.itemSchemaType) {
-            case 'string':
-              ctx.editDoc.appendAt(fullname, '')
-              break
-            case 'object':
-              ctx.editDoc.appendAt(fullname, {})
-              break
-            case 'array':
-              ctx.editDoc.appendAt(fullname, [])
-              break
-            default:
-              ctx.editDoc.appendAt(fullname, undefined)
-          }
-        }
+        if (Array.isArray(fieldValue)) ctx.editDoc.appendAt(fullname, defVal)
       },
     },
     `添加项目${shortname ? '-' + shortname : ''}`
@@ -99,19 +84,7 @@ const itemInsertVNode = (ctx: FormContext, field: Field, index: number) => {
       name: fullname,
       class: ['tvu-button'],
       onClick: () => {
-        switch (field.itemSchemaType) {
-          case 'string':
-            ctx.editDoc.insertAt(fullname, '')
-            break
-          case 'object':
-            ctx.editDoc.insertAt(fullname, {})
-            break
-          case 'array':
-            ctx.editDoc.insertAt(fullname, [])
-            break
-          default:
-            ctx.editDoc.insertAt(fullname, undefined)
-        }
+        ctx.editDoc.insertAt(fullname, field.value)
       },
     },
     '插入项目'

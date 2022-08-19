@@ -44,9 +44,12 @@ export abstract class Field {
     } else if (type === 'object') {
       this.value =
         defVal && typeof defVal === 'object' ? Object.assign({}, defVal) : {}
-    } else {
+    } else if (type === 'string') {
       this.value = defVal ? defVal : ''
+    } else {
+      this.value = undefined
     }
+
     if (type === 'object') {
       this._children = []
     }
@@ -154,7 +157,10 @@ export abstract class Field {
   get children() {
     return this._children
   }
-
+  /**是否为排他属性的字段*/
+  get isOneOf() {
+    return this._prop.isOneOf ?? false
+  }
   isChildOf(parent: Field): boolean {
     if (
       parent.fullname === this.path ||

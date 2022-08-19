@@ -71,6 +71,9 @@ function createArrayItemNode(
     // 给数组属性的items生成1个模拟属性，用name=[*]表示
     let itemProp = new SchemaProp(`${fullname}`, '[*]', items.type)
     if (items.format) itemProp.attrs.format = items.format
+    // 需要传递和子属性中哪些是oneOf
+    itemProp.isOneOfChildren = prop.isOneOfChildren
+
     const itemFields = createArrayItemFields(ctx, field, itemProp)
     debug(
       `属性【${fullname}】生成数组项目【${items.type}】属性，生成【${itemFields.length}】个字段`
@@ -670,7 +673,8 @@ export type FormContext = {
   editDoc: DocAsArray
   schema: RawSchema
   onMessage: Function
-  fields?: Map<String, Field> // 保存表单中的field对象，避免每一次渲染都重新生成
+  fields: Map<string, Field> // 保存表单中的field对象，避免每一次渲染都重新生成
+  oneOfSelected: Set<string> // 保存选中的oneOf字段
   enablePaste?: boolean
   autofillRequest?: Function
   onPaste?: Function

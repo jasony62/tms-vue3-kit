@@ -364,13 +364,11 @@ class Field {
 class FieldText
 class FieldObject
 class FieldArray
-class FieldFile
 
 Field<|--FieldText
 Field<|--FieldBoolean
 Field<|--FieldObject
 Field<|--FieldArray
-Field<|--FieldFile
 ```
 
 ## 表单节点类图

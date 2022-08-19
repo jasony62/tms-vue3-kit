@@ -78,6 +78,9 @@
       <tvu-form-item class="tvu-jse__field">
         <tvu-checkbox v-model="attrs.required" label="必填"></tvu-checkbox>
       </tvu-form-item>
+      <tvu-form-item class="tvu-jse__field" v-if="activeIndex > 0">
+        <tvu-checkbox v-model="prop.isOneOf" label="isOneOf"></tvu-checkbox>
+      </tvu-form-item>
       <!--特定格式类型对应的扩展属性-->
       <component v-if="items" :is="compFormatAttrs" v-model:formatAttrs="items.formatAttrs"></component>
       <!--选项设置相关-->

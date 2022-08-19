@@ -7,6 +7,7 @@ import RandExp from 'randexp'
 import Debug from 'debug'
 
 const debug = Debug('json-doc:nodes:object')
+
 /**
  * 根据提供的文件对象数据，更新表单中的文件字段数据
  * @param field
@@ -48,6 +49,52 @@ function _pickLocalFile(ctx: FormContext, field: Field, fileUpload: Function) {
     }
   })
   elInput.click()
+}
+/**
+ * 选择使用的oneOf（排他）属性
+ * @param ctx
+ * @param field
+ */
+const selectOneOfVNode = (ctx: FormContext, field: Field) => {
+  const options = field.schemaProp.isOneOfChildren?.map((child) => {
+    return h(
+      'option',
+      { value: child.name },
+      `${child.attrs.title || child.name}`
+    )
+  })
+
+  options?.splice(
+    0,
+    0,
+    h('option', { selected: true }, '--选择oneOf属性定义--')
+  )
+
+  return h(
+    'select',
+    {
+      class: ['tvu-input', 'tvu-jdoc__one-of-select'],
+      onChange: (event: any) => {
+        const propName = event && event.target ? event.target.value : event
+        if (propName) {
+          /**清除已选字段的选中状态*/
+          field.schemaProp.isOneOfChildren?.forEach((child) => {
+            let childFullname = `${field.fullname ? field.fullname + '.' : ''}${
+              child.name
+            }`
+            let childField = ctx.fields?.get(childFullname)
+            if (childField) {
+              propName === childField.name
+                ? ctx.oneOfSelected.add(childFullname)
+                : ctx.oneOfSelected.delete(childFullname)
+            }
+          })
+          ctx.editDoc.forceRender()
+        }
+      },
+    },
+    options
+  )
 }
 /**
  * 添加子属性操作
@@ -200,10 +247,22 @@ export class ObjectNode extends FieldNode {
     const { ctx, field } = this
     const vnodes = this._children ? [...this._children] : []
 
-    /**添加子属性操作*/
-    if (field.schemaProp.patternChildren?.length) {
+    const { schemaProp } = field
+    const { patternChildren, isOneOfChildren } = schemaProp
+    /**添加模板属性操作*/
+    if (patternChildren?.length) {
       vnodes.push(itemAddVNode(ctx, field))
     }
+    /**选择oneOf属性操作*/
+    if (Array.isArray(isOneOfChildren) && isOneOfChildren.length) {
+      let hasSelected = isOneOfChildren.some((childProp) => {
+        let fullname =
+          (field.fullname ? field.fullname + '.' : '') + childProp.name
+        return ctx.oneOfSelected.has(fullname)
+      })
+      if (!hasSelected) vnodes.push(selectOneOfVNode(ctx, field))
+    }
+
     /**如果开放paste操作，添加按钮*/
     const actionVNodes = []
     if (ctx.enablePaste === true) {

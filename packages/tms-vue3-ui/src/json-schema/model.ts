@@ -54,7 +54,9 @@ export type ExistIfRuleSet = {
   allOf?: ExistIfRuleSet[]
   oneOf?: ExistIfRuleSet[]
 }
-
+/**
+ * 属性定义携带的基础信息
+ */
 export type SchemaPropAttrs = {
   type: string
   title?: string
@@ -73,7 +75,9 @@ export type SchemaPropAttrs = {
   [k: string]: any
   initialName?: string
 }
-/**单个属性定义*/
+/**
+ * 单个属性定义
+ */
 export class SchemaProp {
   _path: string
   _name: string
@@ -83,11 +87,14 @@ export class SchemaProp {
   attachment?: any
   isPattern = false //  是否是由正则表达式定义名称的子属性
   patternChildren: SchemaProp[] | undefined
+  isOneOf = false // 在父属性中是否为排他属性
+  isOneOfChildren: SchemaProp[]
 
   constructor(path: string, name: string, type?: string) {
     this._path = path
     this._name = name
-    this.attrs = { type: type ?? '', required: false }
+    this.attrs = { type: type ?? '' }
+    this.isOneOfChildren = [] // 需要被子属性引用，需要预先创建
   }
 
   get path() {
@@ -318,6 +325,12 @@ function* _parseOne(
         break
       case 'default':
         _setDefaultValue(newProp, rawProp.default, parents, isPatternProperty)
+        break
+      case 'isOneOf':
+        if (parents.length && rawProp.isOneOf === true) {
+          newProp.isOneOf = true
+          parents[0].isOneOfChildren.push(newProp)
+        }
         break
       default:
         Object.assign(newProp.attrs, { [key]: rawProp[key] })

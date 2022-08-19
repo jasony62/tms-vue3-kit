@@ -3,7 +3,6 @@ import { Field, ARRAY_KEYWORDS } from './field'
 import { FieldBoolean } from './boolean'
 import { FieldText } from './text'
 import { FieldArray } from './array'
-import { FieldFile } from './file'
 import { FieldObject } from './object'
 import { FormContext } from '../builder'
 
@@ -84,6 +83,5 @@ export {
   FieldBoolean,
   FieldText,
   FieldArray,
-  FieldFile,
   FieldObject,
 }

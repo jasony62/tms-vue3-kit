@@ -439,7 +439,12 @@ export class DocAsArray {
    */
   remove(name: string, needRender = true) {
     let { index, prop } = this.findByName(name)
-    if (prop === undefined) return undefined
+    if (prop === undefined) {
+      debug(`字段【${name}】不存在，无法执行删除操作`)
+      // 触发重新渲染
+      if (needRender) this.renderCounter.value++
+      return undefined
+    }
 
     let { _parent, key } = prop
 

@@ -21,7 +21,7 @@ export const Type2Format = {
 } as { [k: string]: { value: string; label: string }[] }
 
 const propToRaw = (prop: SchemaProp, parent: any): any => {
-  let { items, existIf } = prop
+  let { items, existIf, isOneOf } = prop
 
   let rawProp: any = {
     ...prop.attrs,
@@ -34,6 +34,8 @@ const propToRaw = (prop: SchemaProp, parent: any): any => {
   if (existIf) {
     rawProp.existIf = existIf
   }
+
+  if (isOneOf) rawProp.isOneOf = isOneOf
 
   return rawProp
 }

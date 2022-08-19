@@ -11,6 +11,9 @@
     input.tvu-jdoc__field-input:read-only {
       @apply bg-gray-100;
     }
+    [data-one-of-field-selected='false'] {
+      display: none;
+    }
   }
 
   .tvu-jdoc__field-name {
