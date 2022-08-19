@@ -163,7 +163,7 @@ class DocProp {
       if (child._children.length) {
         throw Error(`要删除的属性【${child.name}】包含子属性，不允许删除`)
       }
-      this._value.splice(key, 1)
+      if (this._value) this._value.splice(key, 1)
       this._children.splice(key, 1)
     } else if (typeof key === 'string') {
       let child = this._children.find((c) => c.key === key)
@@ -171,7 +171,7 @@ class DocProp {
         if (child._children.length) {
           throw Error(`要删除的属性【${child.name}】包含子属性，不允许删除`)
         }
-        delete this._value[key]
+        if (this._value) delete this._value[key]
         this._children.splice(this._children.indexOf(child), 1)
       }
     }

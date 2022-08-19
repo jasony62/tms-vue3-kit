@@ -348,8 +348,10 @@ export class JSONSchemaBuilder {
     let newProps = builder.props
     if (newProps.length <= 1) return []
 
-    /**去掉根属性*/
-    newProps.shift()
+    /**去掉根属性，与指定属性合并*/
+    let newRootProp = newProps.shift()
+    Object.assign(parent.attrs, newRootProp?.attrs)
+    if (newRootProp?.items) parent.items = newRootProp.items
 
     /**添加子定义的位置*/
     let index = this.getIndex(parent) + 1
