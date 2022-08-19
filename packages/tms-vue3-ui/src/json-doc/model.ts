@@ -139,8 +139,13 @@ class DocProp {
     if (_parent?.name) {
       return _parent.name + (typeof key === 'number' ? `[${key}]` : `.${key}`)
     } else {
+      /**根节点*/
       if (typeof key === 'string') return key
-      else throw Error('')
+      else if (typeof key === 'number') return `[${key}]`
+      else {
+        let msg = `属性名称【${key}】的类型错误`
+        throw Error(msg)
+      }
     }
   }
 
@@ -269,11 +274,11 @@ export class DocAsArray {
       if (index === 0) return
       let val = this.get(prop.name)
       val = _.cloneDeep(val)
-      _.set(obj, prop.name, val)
+      _.set(output, prop.name, val)
     }
 
+    const output = Array.isArray(this._rawDoc) ? [] : {}
     const jsonDocPropNames: string[] = [] // json字段的名称
-    const obj = {}
     if (schemaProps.length) {
       /**检查是否为schema中定义的属性字段*/
       this._properties.forEach((docProp, index) => {
@@ -305,12 +310,12 @@ export class DocAsArray {
           handleDocProp(docProp, index)
         } else {
           log(`文档属性【${docProp.name}】未找到匹配的属性定义，从文档中清除`)
-          if (_.has(obj, docProp.name)) _.unset(obj, docProp.name)
+          if (_.has(output, docProp.name)) _.unset(output, docProp.name)
         }
       })
     } else this._properties.forEach(handleDocProp)
 
-    return obj
+    return output
   }
   /**
    * 根据属性的值添加子属性

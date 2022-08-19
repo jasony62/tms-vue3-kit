@@ -16,6 +16,7 @@ const debug = Debug('json-doc:nodes:array')
  * @returns
  */
 const itemPasteVNode = (ctx: FormContext, field: Field) => {
+  const { shortname, fullname } = field
   let pasteVNode = h(
     components.button.tag,
     {
@@ -24,31 +25,29 @@ const itemPasteVNode = (ctx: FormContext, field: Field) => {
         const log = debug.extend('onPaste')
         function setDocData(clipData: any) {
           if (Array.isArray(clipData) && clipData.length) {
-            clipData.forEach((item) =>
-              ctx.editDoc.appendAt(field.fullname, item)
-            )
-          } else ctx.editDoc.appendAt(field.fullname, clipData)
+            clipData.forEach((item) => ctx.editDoc.appendAt(fullname, item))
+          } else ctx.editDoc.appendAt(fullname, clipData)
         }
         if (typeof ctx.onPaste === 'function') {
           /**调用方提供数据*/
-          log(`字段【${field.fullname}】调用外部方法执行粘贴数据操作`)
-          ctx.onPaste(field).then((clipData: any) => setDocData(clipData))
+          log(`字段【${fullname}】调用外部方法执行粘贴数据操作`)
+          ctx.onPaste(field).then((clipData: any) => {
+            if (clipData ?? false) setDocData(clipData)
+          })
         } else {
           /**从粘贴板中获取数据，添加到文档中*/
-          log(`字段【${field.fullname}】调用内部方法执行粘贴数据操作`)
+          log(`字段【${fullname}】调用内部方法执行粘贴数据操作`)
           const clipText = await navigator.clipboard.readText()
           try {
             let clipData = JSON.parse(clipText)
             setDocData(clipData)
           } catch (e: any) {
-            ctx.onMessage(
-              `粘贴内容填充字段【${field.fullname}】失败：` + e.message
-            )
+            ctx.onMessage(`粘贴内容填充字段【${fullname}】失败：` + e.message)
           }
         }
       },
     },
-    `黏贴-${field.shortname}`
+    `黏贴${shortname ? '-' + shortname : ''}`
   )
 
   return pasteVNode
@@ -60,31 +59,34 @@ const itemPasteVNode = (ctx: FormContext, field: Field) => {
  * @returns
  */
 const itemAddVNode = (ctx: FormContext, field: Field) => {
+  const { fullname, shortname, value: defVal } = field
   let addVNode = h(
     components.button.tag,
     {
-      name: field.fullname,
+      name: fullname,
       class: ['tvu-button'],
       onClick: () => {
-        const fieldValue = ctx.editDoc.init(field.fullname, [])
+        // 需要考虑默认值
+        const fieldValue = ctx.editDoc.init(fullname, [])
         if (Array.isArray(fieldValue)) {
+          // TODO: 需要用默认值设置
           switch (field.itemSchemaType) {
             case 'string':
-              ctx.editDoc.appendAt(field.fullname, '')
+              ctx.editDoc.appendAt(fullname, '')
               break
             case 'object':
-              ctx.editDoc.appendAt(field.fullname, {})
+              ctx.editDoc.appendAt(fullname, {})
               break
             case 'array':
-              ctx.editDoc.appendAt(field.fullname, [])
+              ctx.editDoc.appendAt(fullname, [])
               break
             default:
-              ctx.editDoc.appendAt(field.fullname, undefined)
+              ctx.editDoc.appendAt(fullname, undefined)
           }
         }
       },
     },
-    `添加项目-${field.shortname}`
+    `添加项目${shortname ? '-' + shortname : ''}`
   )
   return addVNode
 }

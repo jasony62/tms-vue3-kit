@@ -172,12 +172,22 @@ export class JSONSchemaBuilder {
    */
   getEndIndex(prop: SchemaProp): number {
     let lastIndex = -1
+
+    let propIndex = this.getIndex(prop)
+    // 根属性，最后一个属性的索引或失败
+    if (propIndex === 0) return this.props.length - 1 || -1
+
+    const { fullname } = prop
+    let re = new RegExp(
+      `^${fullname
+        .replace('$', '\\$')
+        .replace(/\[\*\]/g, '\\[\\*\\]')
+        .replaceAll('.', '\\.')}\\b`
+    )
     let child
-    for (let i = 1; i < this.props.length; i++) {
+    for (let i = propIndex + 1; i < this.props.length; i++) {
       child = this.props[i]
-      if (child.path.indexOf(prop.fullname) === 0) {
-        lastIndex = i
-      }
+      if (re.test(child.path)) lastIndex = i
     }
 
     return lastIndex
@@ -298,6 +308,7 @@ export class JSONSchemaBuilder {
   }
   /**
    * 在指定的属性下添加子属性
+   * 如果父属性的类型是数组，那么，新属性的path等于父属性的fullname+[*]
    */
   addProp(parent: SchemaProp, type: string = 'properties'): SchemaProp {
     // 节点所在路径
@@ -376,7 +387,6 @@ export class JSONSchemaBuilder {
       index = this.getIndex(sibling)
       if (index <= 0) return undefined
     }
-
     let newProp = new SchemaProp(sibling.path, 'newKey', 'string')
     newProp.isPattern = sibling.isPattern
 

@@ -5,6 +5,7 @@
       <div class="w-1/2">
         <div>
           <select v-model="caseName">
+            <option value="empty">从头制作</option>
             <option value="overall">整体示例</option>
             <option value="array-simple">数组的项目简单类型</option>
             <option value="array-object">数组的项目是对象</option>

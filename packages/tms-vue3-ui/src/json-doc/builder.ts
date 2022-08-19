@@ -59,11 +59,13 @@ function createArrayItemNode(
   stack: Stack,
   field: Field,
   prop: SchemaProp,
-  ctx: FormContext
+  ctx: FormContext,
+  joint: StackJoint
 ) {
-  const joint = stack.newJoint(field, -1)
-  debug(`属性【${prop.fullname}】生成字段【${field.fullname}】放入堆栈`)
-  /**如果数组中的项目是简单类型，生成字段*/
+  // const joint = stack.newJoint(field, -1)
+  // debug(
+  //   `属性【${prop.fullname}】生成字段【${field.fullname}】放入堆栈，生成连接节点`
+  // )
   if (prop.items?.type) {
     let { fullname, items } = prop
     // 给数组属性的items生成1个模拟属性，用name=[*]表示
@@ -376,13 +378,13 @@ class Stack {
     const topJoints = []
     for (let i = this.joints.length - 1; i >= 0; i--) {
       let joint = this.joints[i]
-      let { field } = joint
+      let { field } = joint // 上层节点的字段对象
       let isParent = false
       if (field.schemaProp.isPattern) {
         // 可选属性
         isParent = field.schemaProp.fullname === childProp.path
       } else if (childProp.isArrayItem) {
-        isParent = `${field.schemaProp.fullname}` === childProp.path
+        isParent = field.schemaProp.fullname === childProp.path
       } else {
         if (childProp.path === field.fullname) {
           isParent = true
@@ -419,30 +421,36 @@ class Stack {
   /**
    * 将创建的节点放入堆栈中的父字段
    *
-   * @param atHeader 是为了解决一个属性有多个字段的情况。这个多个字段是逆序加入的到父节点中的。父节点中用childrenIndex记录。有漏洞？
+   * @param atHeader 是为了解决一个属性有多个字段的情况。这多个字段是逆序加入的到父节点中的。父节点中用childrenIndex记录。有漏洞？
    */
   addNode(pair: FieldVNodePair, parent: StackJoint, atHeader = false) {
-    if (parent) {
+    if (!parent) return
+
+    if (typeof pair.index === 'number') {
+      /**指定了节点的添加位置*/
+      parent.childNames.splice(pair.index, 0, pair.field.name)
+      parent.children.splice(pair.index, 0, pair.vnode)
+      this.fieldNames.splice(pair.index, 0, pair.field.fullname)
       debug(
-        `字段【${parent.field.fullname}】添加子节点【${pair.field.fullname}】`
+        `字段【${parent.field.fullname}】在位置【${pair.index}】，添加子节点【${pair.field.fullname}】`
       )
-      if (typeof pair.index === 'number') {
-        /**指定了节点的添加位置*/
-        parent.childNames.splice(pair.index, 0, pair.field.name)
-        parent.children.splice(pair.index, 0, pair.vnode)
-        this.fieldNames.splice(pair.index, 0, pair.field.fullname)
-      } else if (atHeader) {
-        if (parent.childrenIndex === -1) {
-          parent.childrenIndex = parent.children.length
-        }
-        parent.childNames.splice(parent.childrenIndex, 0, pair.field.name)
-        parent.children.splice(parent.childrenIndex, 0, pair.vnode)
-        this.fieldNames.splice(0, 0, pair.field.fullname)
-      } else {
-        parent.childNames.push(pair.field.name)
-        parent.children.push(pair.vnode)
-        this.fieldNames.push(pair.field.fullname)
+    } else if (atHeader) {
+      if (parent.childrenIndex === -1) {
+        parent.childrenIndex = parent.children.length
       }
+      parent.childNames.splice(parent.childrenIndex, 0, pair.field.name)
+      parent.children.splice(parent.childrenIndex, 0, pair.vnode)
+      this.fieldNames.splice(0, 0, pair.field.fullname)
+      debug(
+        `字段【${parent.field.fullname}】在头部，添加子节点【${pair.field.fullname}】`
+      )
+    } else {
+      parent.childNames.push(pair.field.name)
+      parent.children.push(pair.vnode)
+      this.fieldNames.push(pair.field.fullname)
+      debug(
+        `字段【${parent.field.fullname}】在尾部，添加子节点【${pair.field.fullname}】`
+      )
     }
   }
 
@@ -492,8 +500,17 @@ export function build(ctx: FormContext, fieldNames?: string[]): VNode {
     /**处理根节点*/
     if (prop.name === iter.rootName) {
       const rootField = createField(ctx, prop)
-      stack.newJoint(rootField, -1)
       debug(`----属性【${prop.fullname}】生成根字段，放入堆栈----`)
+      if (prop.attrs.type === 'object') {
+        stack.newJoint(rootField, -1)
+      } else if (prop.attrs.type === 'array') {
+        debug('根节点类型是数组，生成items节点')
+        const joint = stack.newJoint(rootField, -1)
+        debug(
+          `属性【${prop.fullname}】生成字段【${rootField.fullname}】放入堆栈，生成连接节点`
+        )
+        createArrayItemNode(stack, rootField, prop, ctx, joint)
+      }
       continue
     }
 
@@ -502,7 +519,7 @@ export function build(ctx: FormContext, fieldNames?: string[]): VNode {
     // 当前属性的父字段。如果父属性是可选属性，可能有多个父字段。
     const parentJoints = stack.propParent(prop)
     if (parentJoints.length === 0) {
-      debug(`属性【${prop.fullname}】父字段不存在，跳过`)
+      debug(`属性【${prop.fullname}】的父字段不存在，跳过`)
       continue
     } else {
       debug(`属性【${prop.fullname}】有${parentJoints.length}个父字段`)
@@ -543,13 +560,21 @@ export function build(ctx: FormContext, fieldNames?: string[]): VNode {
           let fields = createOptionalFields(ctx, prop, parentJoint)
           debug(`属性【${prop.fullname}】生成${fields.length}个可选字段`)
           fields.forEach((field) => {
-            createArrayItemNode(stack, field, prop, ctx)
+            const joint = stack.newJoint(field, parentJoint.children.length)
+            debug(
+              `属性【${prop.fullname}】的字段【${field.fullname}】，生成连接节点并放入堆栈，在父节点中的位置【${joint.indexInParent}】`
+            )
+            createArrayItemNode(stack, field, prop, ctx, joint)
           })
         })
       } else {
         parentJoints.forEach((parentJoint) => {
           const field = createField(ctx, prop, parentJoint.field)
-          createArrayItemNode(stack, field, prop, ctx)
+          const joint = stack.newJoint(field, parentJoint.children.length)
+          debug(
+            `属性【${prop.fullname}】生成字段【${field.fullname}】放入堆栈；生成连接节点，在父节点中的位置【${joint.indexInParent}】`
+          )
+          createArrayItemNode(stack, field, prop, ctx, joint)
         })
       }
     } else {
@@ -585,6 +610,7 @@ class Builder {
 
   constructor(ctx: FormContext, fieldNames?: string[]) {
     this._uid = ++_uid
+    if (!ctx.fields) ctx.fields = new Map<string, Field>()
     this.ctx = ctx
     this.fieldNames = fieldNames
   }
@@ -642,18 +668,18 @@ let mapBuilders = new Map()
 
 export type FormContext = {
   editDoc: DocAsArray
-  fields: Map<String, Field> // 保存表单中的field对象，避免每一次渲染都重新生成
   schema: RawSchema
-  enablePaste: boolean
   onMessage: Function
+  fields?: Map<String, Field> // 保存表单中的field对象，避免每一次渲染都重新生成
+  enablePaste?: boolean
   autofillRequest?: Function
   onPaste?: Function
   onFileUpload?: Function
   onFileSelect?: Function
   onFileDownload?: Function
   showFieldFullname?: Boolean
-  onNodeFocus: (field: Field) => void
-  onNodeBlur: (field: Field) => void
+  onNodeFocus?: (field: Field) => void
+  onNodeBlur?: (field: Field) => void
 }
 
 /**

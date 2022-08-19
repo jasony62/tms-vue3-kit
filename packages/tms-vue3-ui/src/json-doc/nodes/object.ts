@@ -119,7 +119,7 @@ const itemPasteVNode = (ctx: FormContext, field: Field) => {
           const clipText = await navigator.clipboard.readText()
           try {
             let clipData = JSON.parse(clipText)
-            ctx.editDoc.set(field.fullname, clipData)
+            if (clipData ?? false) ctx.editDoc.set(field.fullname, clipData)
           } catch (e: any) {
             ctx.onMessage(
               `粘贴内容填充字段【${field.fullname}】失败：` + e.message

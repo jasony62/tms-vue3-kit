@@ -25,8 +25,5 @@ export const SampleSchema = {
 }
 
 export const SampleData = {
-  experiences: [
-    { time: '2001', content: 'beijing' },
-    { time: '2002', content: 'shanghai' },
-  ],
+  experiences: [],
 }

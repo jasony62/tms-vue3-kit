@@ -66,12 +66,14 @@ export class Input extends FieldNode {
       class: ['tvu-jdoc__field-input tvu-input'],
     }
     inpOps.onInput = onInput
-    inpOps.onFocus = () => {
-      this.ctx.onNodeFocus(field)
-    }
-    inpOps.onBlur = () => {
-      this.ctx.onNodeBlur(field)
-    }
+    if (typeof this.ctx.onNodeFocus === 'function')
+      inpOps.onFocus = () => {
+        if (this.ctx.onNodeFocus) this.ctx.onNodeFocus(field)
+      }
+    if (typeof this.ctx.onNodeBlur === 'function')
+      inpOps.onBlur = () => {
+        if (this.ctx.onNodeBlur) this.ctx.onNodeBlur(field)
+      }
     if (field.schemaProp.attrs.readonly === true) {
       inpOps.readonly = true
     }

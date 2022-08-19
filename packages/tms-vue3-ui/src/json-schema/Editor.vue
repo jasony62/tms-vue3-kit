@@ -200,7 +200,6 @@ const itemsFormats = computed(() => {
 
 /**禁止修改属性类型*/
 const disableChangeType = computed(() => {
-  if (data.currProp.name === props.rootName) return true
   const { type } = attrs.value
   if (type === 'object' || (type === 'array' && data.currProp?.items?.type === 'object')) {
     const idx = nodes.value.findIndex((node: SchemaProp) => node.parentFullname === data.currProp.fullname)

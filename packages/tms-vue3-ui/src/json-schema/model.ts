@@ -102,12 +102,16 @@ export class SchemaProp {
     this._name = val
   }
 
-  /**属性定义的完整名称*/
+  /**
+   * 属性定义的完整名称
+   * 数组中项目为简单类型是，属性没有名字
+   * 如果根属性是数组，那么根节点的路径名称是[*]
+   */
   get fullname(): string {
-    // 数组中项目为简单类型是，属性没有名字
     if (!this.name) return this.path
-    if (!this.path) return this.name
 
+    if (!this.path) return this.name
+    /**属性的类型是数组*/
     let fullname = this.path + (this.name === '[*]' ? '' : '.') + this.name
 
     return fullname
@@ -266,6 +270,7 @@ function* _parseOne(
   const log = debug.extend('_parseOne')
   log(`开始解析属性【${name}】`)
   let path = ''
+
   if (parents.length) {
     path = parents[0].fullname
     if (parents[0].attrs.type === 'array') path += '[*]'

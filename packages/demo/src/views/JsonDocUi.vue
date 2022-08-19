@@ -4,6 +4,7 @@
       <option value="overall">整体示例</option>
       <option value="array-simple">数组的项目简单类型</option>
       <option value="array-object">数组的项目是对象</option>
+      <option value="root-array">根字段类型是数组</option>
       <option value="object-map-object">对象有可选属性，属性类型是对象</option>
       <option value="object-map-array">对象有可选属性，属性类型是数组</option>
       <option value="direct-json">JSON属性</option>
@@ -15,6 +16,7 @@
       <option value="rcsbot">rcsbot</option>
       <option value="rcscard">rcscard</option>
       <option value="rcssugg">rcssugg</option>
+      <option value="rcsreply">rcsreply</option>
     </select>
   </div>
   <div class="flex flex-row">
