@@ -47,7 +47,7 @@
         </tvu-select>
       </tvu-form-item>
       <tvu-form-item v-if="attrs.type === 'array' && items" class="tvu-jse__field" label="子对象类型">
-        <tvu-select v-model="items.type">
+        <tvu-select v-model="items.type" :disabled="disableChangeItemType">
           <tvu-option label="integer" value="integer"></tvu-option>
           <tvu-option label="number" value="number"></tvu-option>
           <tvu-option label="string" value="string"></tvu-option>
@@ -207,6 +207,17 @@ const disableChangeType = computed(() => {
   if (type === 'object' || (type === 'array' && data.currProp?.items?.type === 'object')) {
     const idx = nodes.value.findIndex((node: SchemaProp) => node.parentFullname === data.currProp.fullname)
     if (idx !== -1) return true
+  }
+  return false
+})
+/**禁止修改子项目属性类型*/
+const disableChangeItemType = computed(() => {
+  if (data.currProp.items) {
+    const { type } = data.currProp.items
+    if (type === 'object') {
+      const idx = nodes.value.findIndex((node: SchemaProp) => node.parentFullname === data.currProp.fullname)
+      if (idx !== -1) return true
+    }
   }
   return false
 })

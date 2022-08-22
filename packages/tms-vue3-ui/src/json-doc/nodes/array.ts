@@ -71,7 +71,7 @@ const itemAddVNode = (ctx: FormContext, field: Field) => {
         if (Array.isArray(fieldValue)) ctx.editDoc.appendAt(fullname, defVal)
       },
     },
-    `添加项目${shortname ? '-' + shortname : ''}`
+    `添加${shortname ? '-' + shortname : ''}`
   )
   return addVNode
 }
@@ -87,7 +87,7 @@ const itemInsertVNode = (ctx: FormContext, field: Field, index: number) => {
         ctx.editDoc.insertAt(fullname, field.value)
       },
     },
-    '插入项目'
+    '插入'
   )
 }
 

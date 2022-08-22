@@ -102,12 +102,13 @@ const selectOneOfVNode = (ctx: FormContext, field: Field) => {
  * @param field
  * @returns
  */
-const itemAddVNode = (ctx: FormContext, field: Field) => {
+const propAddVNode = (ctx: FormContext, field: Field) => {
   let addVNodes = field.schemaProp.patternChildren?.map((childProp) =>
     h(
       components.button.tag,
       {
         name: childProp.fullname,
+        title: childProp.name,
         class: ['tvu-button'],
         onClick: () => {
           /**生成字段名称*/
@@ -140,7 +141,7 @@ const itemAddVNode = (ctx: FormContext, field: Field) => {
           }
         },
       },
-      `添加属性-${childProp.attrs.title ?? childProp.name}`
+      `添加-${childProp.attrs.title ?? childProp.name}`
     )
   )
   return h('div', { class: ['tvu-jdoc__nest__actions'] }, addVNodes)
@@ -151,7 +152,7 @@ const itemAddVNode = (ctx: FormContext, field: Field) => {
  * @param field
  * @returns
  */
-const itemPasteVNode = (ctx: FormContext, field: Field) => {
+const propPasteVNode = (ctx: FormContext, field: Field) => {
   let pasteVNode = h(
     components.button.tag,
     {
@@ -251,7 +252,7 @@ export class ObjectNode extends FieldNode {
     const { patternChildren, isOneOfChildren } = schemaProp
     /**添加模板属性操作*/
     if (patternChildren?.length) {
-      vnodes.push(itemAddVNode(ctx, field))
+      vnodes.push(propAddVNode(ctx, field))
     }
     /**选择oneOf属性操作*/
     if (Array.isArray(isOneOfChildren) && isOneOfChildren.length) {
@@ -267,7 +268,7 @@ export class ObjectNode extends FieldNode {
     const actionVNodes = []
     if (ctx.enablePaste === true) {
       debug(`对象字段【${field.fullname}】需要支持黏贴操作`)
-      let pasteVNode = itemPasteVNode(ctx, field)
+      let pasteVNode = propPasteVNode(ctx, field)
       actionVNodes.push(pasteVNode)
     }
     /**如果对象的格式是对象，添加选取文件操作*/
