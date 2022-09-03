@@ -59,6 +59,16 @@ schema.type 有 6 种有效的 type，需要设置成对应的 field.type
 
 `schema.defalut`或者`schema.attrs.value`
 
+| 类型    | 初始值 |     |
+| ------- | ------ | --- |
+| boolean | false  |     |
+| integer | 0      |     |
+| number  | 0      |     |
+| string  | ''     |     |
+| object  | {}     |     |
+| array   | []     |     |
+| json    |        |     |
+
 # render 阶段
 
 替换默认组件

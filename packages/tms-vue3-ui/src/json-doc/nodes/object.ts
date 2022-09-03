@@ -97,12 +97,13 @@ const selectOneOfVNode = (ctx: FormContext, field: Field) => {
   )
 }
 /**
- * 添加子属性操作
+ * 添加模板子属性操作
  * @param ctx
  * @param field
  * @returns
  */
 const propAddVNode = (ctx: FormContext, field: Field) => {
+  /**给每个模板属性创建一个添加字段操作*/
   let addVNodes = field.schemaProp.patternChildren?.map((childProp) =>
     h(
       components.button.tag,
@@ -111,34 +112,17 @@ const propAddVNode = (ctx: FormContext, field: Field) => {
         title: childProp.name,
         class: ['tvu-button'],
         onClick: () => {
-          /**生成字段名称*/
-          let randexp = new RandExp(new RegExp(childProp.name))
-          randexp.max = 8
-          let newKey = randexp.gen()
-          let defVal = field.value
+          /**生成字段名称和初始值*/
+          const { fullname } = field
+          const { name, attrs } = childProp
+          const newKey = Field.initialKey(name)
+          const initVal = Field.initialVal(attrs.default, attrs.type)
           debug(
-            `字段【${field.fullname}】执行【添加${
-              childProp.attrs.title ?? childProp.name
-            }属性】，随机属性名：${newKey}，默认值：\n${JSON.stringify(
-              defVal,
-              null,
-              2
-            )}`
+            `字段【${fullname}】执行【添加${
+              attrs.title ?? name
+            }属性】，随机属性名：${newKey}，初始值：${JSON.stringify(initVal)}`
           )
-          switch (childProp.attrs.type) {
-            case 'string':
-              ctx.editDoc.appendAt(field.fullname, defVal, newKey)
-              break
-            case 'json':
-              ctx.editDoc.appendAt(field.fullname, defVal, newKey)
-              break
-            case 'object':
-              ctx.editDoc.appendAt(field.fullname, defVal, newKey)
-              break
-            case 'array':
-              ctx.editDoc.appendAt(field.fullname, defVal, newKey)
-              break
-          }
+          ctx.editDoc.appendAt(fullname, initVal, newKey)
         },
       },
       `添加-${childProp.attrs.title ?? childProp.name}`

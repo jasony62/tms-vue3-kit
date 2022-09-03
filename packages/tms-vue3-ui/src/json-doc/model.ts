@@ -482,6 +482,7 @@ export class DocAsArray {
         )
       }
     }
+
     return prop?.value
   }
   /**
@@ -525,18 +526,6 @@ export class DocAsArray {
     }
 
     if (needRender) this.renderCounter.value++
-  }
-  /**
-   *
-   * @param name
-   * @param defaultValue
-   * @returns
-   */
-  init(name: string, defaultValue: any): any {
-    let val = this.get(name)
-    if (val !== undefined) return val
-    this.appendAt('', defaultValue, name)
-    return defaultValue
   }
   /**
    * 修改属性名称

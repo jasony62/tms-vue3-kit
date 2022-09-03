@@ -1,4 +1,3 @@
-import RandExp from 'randexp'
 import { h, VNode } from 'vue'
 import { FormContext } from '../builder'
 import { Field } from '../fields'
@@ -33,7 +32,12 @@ const fieldNameVNode = (ctx: FormContext, field: Field) => {
     [inp]
   )
 }
-
+/**
+ * 在前面插入兄弟字段
+ * @param ctx
+ * @param field
+ * @returns
+ */
 const fieldInsertVNode = (ctx: FormContext, field: Field) => {
   let { fullname } = field
   return h(
@@ -42,26 +46,11 @@ const fieldInsertVNode = (ctx: FormContext, field: Field) => {
       name: fullname,
       class: ['tvu-button'],
       onClick: () => {
-        let randexp = new RandExp(new RegExp(field.schemaProp.name))
-        randexp.max = 8
-        let newKey = randexp.gen()
+        const { name, attrs } = field.schemaProp
+        const newKey = Field.initialKey(name)
+        const initVal = Field.initialVal(attrs.default, attrs.type)
         debug(`执行【插入属性】，随机属性名：${newKey}`)
-        switch (field.schemaProp.attrs.type) {
-          case 'string':
-            ctx.editDoc.insertAt(fullname, '', newKey)
-            break
-          case 'json':
-            ctx.editDoc.insertAt(fullname, '', newKey)
-            break
-          case 'object':
-            ctx.editDoc.insertAt(fullname, {}, newKey)
-            break
-          case 'array':
-            ctx.editDoc.insertAt(fullname, [], newKey)
-            break
-          default:
-            ctx.editDoc.insertAt(fullname, undefined, newKey)
-        }
+        ctx.editDoc.insertAt(fullname, initVal, newKey)
       },
     },
     '插入属性'

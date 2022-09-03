@@ -1,3 +1,4 @@
+import RandExp from 'randexp'
 import { SchemaProp, SchemaPropAttrs } from '@/json-schema/model'
 
 export const ARRAY_KEYWORDS: (keyof SchemaPropAttrs)[] = [
@@ -169,5 +170,42 @@ export abstract class Field {
       return true
     }
     return false
+  }
+  /**
+   * 生成模板属性字段的键值
+   * @param patternName
+   * @returns
+   */
+  static initialKey(patternName: string): string {
+    let randexp = new RandExp(new RegExp(patternName))
+    randexp.max = 8
+    let newKey = randexp.gen()
+    return newKey
+  }
+  /**
+   * 根据指定的默认值和数据的类型计算初始值
+   * @param assignedValue
+   * @param valueType
+   * @returns
+   */
+  static initialVal(assignedValue: any, valueType: string): any {
+    switch (valueType) {
+      case 'boolean':
+        return assignedValue === true ? true : false
+      case 'integer':
+        return isNaN(parseInt(assignedValue)) ? 0 : parseInt(assignedValue)
+      case 'number':
+        return isNaN(parseFloat(assignedValue)) ? 0 : parseFloat(assignedValue)
+      case 'string':
+        return typeof assignedValue === 'string' ? assignedValue : ''
+      case 'object':
+        return assignedValue && typeof assignedValue === 'object'
+          ? assignedValue
+          : {}
+      case 'array':
+        return Array.isArray(assignedValue) ? assignedValue : []
+    }
+
+    return assignedValue
   }
 }

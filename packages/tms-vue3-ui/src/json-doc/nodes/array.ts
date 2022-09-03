@@ -53,29 +53,46 @@ const itemPasteVNode = (ctx: FormContext, field: Field) => {
   return pasteVNode
 }
 /**
- * 给数组添加项目
+ * 给数组添加子项目
  * @param ctx
  * @param field
  * @returns
  */
 const itemAddVNode = (ctx: FormContext, field: Field) => {
-  const { fullname, shortname, value: defVal } = field
+  const { fullname, shortname, schemaProp } = field
   let addVNode = h(
     components.button.tag,
     {
       name: fullname,
       class: ['tvu-button'],
       onClick: () => {
-        // 需要考虑默认值
-        const fieldValue = ctx.editDoc.init(fullname, [])
-        if (Array.isArray(fieldValue)) ctx.editDoc.appendAt(fullname, defVal)
+        /**保证当前字段的值是数组*/
+        let fieldValue = ctx.editDoc.get(fullname)
+        if (fieldValue === undefined || fieldValue === null) {
+          ctx.editDoc.set(fullname, [], false)
+          fieldValue = ctx.editDoc.get(fullname)
+        }
+        if (!Array.isArray(fieldValue))
+          throw Error(`字段【${fullname}】的值不是数组，不能添加子项目`)
+
+        const { items } = schemaProp
+        if (items) {
+          const initVal = Field.initialVal(undefined, items.type)
+          ctx.editDoc.appendAt(fullname, initVal)
+        }
       },
     },
     `添加${shortname ? '-' + shortname : ''}`
   )
   return addVNode
 }
-
+/**
+ * 子项目字段添加兄弟字段
+ * @param ctx
+ * @param field
+ * @param index
+ * @returns
+ */
 const itemInsertVNode = (ctx: FormContext, field: Field, index: number) => {
   let fullname = `${field.fullname}[${index}]`
   return h(
@@ -84,7 +101,11 @@ const itemInsertVNode = (ctx: FormContext, field: Field, index: number) => {
       name: fullname,
       class: ['tvu-button'],
       onClick: () => {
-        ctx.editDoc.insertAt(fullname, field.value)
+        const { items } = field.schemaProp
+        if (items) {
+          const initVal = Field.initialVal(undefined, items.type)
+          ctx.editDoc.insertAt(fullname, initVal)
+        }
       },
     },
     '插入'
