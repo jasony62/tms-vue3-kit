@@ -44,7 +44,7 @@ export class Input extends FieldNode {
    * @param {*} attrOrProps
    */
   options(attrOrProps: any) {
-    let { field } = this
+    let { ctx, field } = this
     const fieldName = field.fullname
     const fieldValue = this.fieldValue()
     debug(
@@ -57,8 +57,6 @@ export class Input extends FieldNode {
       this.updateModel(newValue)
     }
 
-    Object.assign(this, { token: fieldName })
-
     const inpOps: { [k: string]: any } = {
       name: fieldName,
       type,
@@ -66,20 +64,22 @@ export class Input extends FieldNode {
       class: ['tvu-jdoc__field-input tvu-input'],
     }
     inpOps.onInput = onInput
-    if (typeof this.ctx.onNodeFocus === 'function')
+    if (typeof ctx.onNodeFocus === 'function')
       inpOps.onFocus = () => {
-        if (this.ctx.onNodeFocus) this.ctx.onNodeFocus(field)
+        if (ctx.onNodeFocus) ctx.onNodeFocus(field)
       }
-    if (typeof this.ctx.onNodeBlur === 'function')
+    if (typeof ctx.onNodeBlur === 'function')
       inpOps.onBlur = () => {
-        if (this.ctx.onNodeBlur) this.ctx.onNodeBlur(field)
+        if (ctx.onNodeBlur) ctx.onNodeBlur(field)
       }
     if (field.schemaProp.attrs.readonly === true) {
       inpOps.readonly = true
     }
     /**设置核选框的值*/
-    if (this.field.type === 'checkbox' && typeof fieldValue === 'boolean') {
+    if (field.type === 'checkbox' && typeof fieldValue === 'boolean') {
       inpOps.checked = fieldValue
+    } else if (field.type === 'text') {
+      inpOps.placeholder = `请输入: ${fieldName}`
     }
 
     return inpOps

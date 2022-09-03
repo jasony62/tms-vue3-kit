@@ -47,7 +47,7 @@ const itemPasteVNode = (ctx: FormContext, field: Field) => {
         }
       },
     },
-    `黏贴${shortname ? '-' + shortname : ''}`
+    `黏贴-${shortname}`
   )
 
   return pasteVNode
@@ -82,7 +82,7 @@ const itemAddVNode = (ctx: FormContext, field: Field) => {
         }
       },
     },
-    `添加${shortname ? '-' + shortname : ''}`
+    `添加-${shortname}`
   )
   return addVNode
 }
@@ -108,7 +108,7 @@ const itemInsertVNode = (ctx: FormContext, field: Field, index: number) => {
         }
       },
     },
-    '插入'
+    `插入-${field.label ? field.label : field.shortname}`
   )
 }
 
@@ -142,7 +142,7 @@ export class ArrayNode extends FieldNode {
     const options = {
       type: field.type,
       name: field.fullname,
-      class: ['tvu-jdoc__nest'],
+      class: ['tvu-jdoc__nest', 'tvu-jdoc__nest--depth'],
     }
 
     return options

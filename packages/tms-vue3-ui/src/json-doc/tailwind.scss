@@ -15,6 +15,34 @@
       display: none;
     }
   }
+  /*嵌套字段为折叠状态*/
+  .tvu-jdoc__field[data-collapsed-field] > :first-child {
+    margin-left: 1.5rem;
+    position: relative;
+    &::before {
+      position: absolute;
+      left: -1.5rem;
+      top: 0;
+      bottom: 0;
+      width: 1rem;
+      border: 1px solid lightgray;
+      border-radius: 4px;
+      text-align: center;
+    }
+  }
+  .tvu-jdoc__field[data-collapsed-field='true'] {
+    > :first-child::before {
+      content: '+';
+    }
+    > .tvu-jdoc__nest {
+      display: none;
+    }
+  }
+  .tvu-jdoc__field[data-collapsed-field='false'] {
+    > :first-child::before {
+      content: '-';
+    }
+  }
 
   .tvu-jdoc__field-name {
     input {
@@ -24,13 +52,18 @@
   .tvu-jdoc__nest {
     @apply flex flex-col gap-4;
     &.tvu-jdoc__nest--depth {
-      @apply flex flex-col gap-2 ml-2 pl-2;
-      border-left: 1px solid #ddd;
+      @apply flex flex-col gap-2 ml-2 pl-2 border-l border-gray-200;
     }
     .tvu-jdoc__nest__actions,
     .tvu-jdoc__field-actions,
     .tvu-jdoc__nest__item__actions {
       @apply flex flex-row flex-wrap gap-2 p-2;
     }
+    .tvu-jdoc__nest__actions {
+      @apply border-t-2 border-gray-200 border-dashed;
+    }
+  }
+  .tvu-jdoc__field-desc {
+    @apply border border-dashed border-gray-200 rounded-md text-gray-400 p-2 text-sm;
   }
 }

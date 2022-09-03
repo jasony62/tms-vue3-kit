@@ -3,7 +3,6 @@ import { FormContext } from '../builder'
 import { Field } from '../fields'
 import { h, VNode } from 'vue'
 import { components } from '.'
-import RandExp from 'randexp'
 import Debug from 'debug'
 
 const debug = Debug('json-doc:nodes:object')
@@ -160,7 +159,9 @@ const propPasteVNode = (ctx: FormContext, field: Field) => {
         }
       },
     },
-    `黏贴${field.shortname ? '-' + field.shortname : '全部'}`
+    `黏贴-${
+      field.label ? field.label : field.shortname ? field.shortname : '全部'
+    }`
   )
 
   return pasteVNode
@@ -255,6 +256,7 @@ export class ObjectNode extends FieldNode {
       let pasteVNode = propPasteVNode(ctx, field)
       actionVNodes.push(pasteVNode)
     }
+
     /**如果对象的格式是对象，添加选取文件操作*/
     if (field.schemaProp.attrs.format === 'file') {
       debug(

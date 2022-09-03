@@ -32,6 +32,18 @@ export default defineComponent({
      */
     fieldWrapClass: { type: String },
     /**
+     * 隐藏文档定义的标题
+     */
+    hideRootTitle: { type: Boolean, default: false },
+    /**
+     * 隐藏文档定义的描述
+     */
+    hideRootDescription: { type: Boolean, default: false },
+    /**
+     * 隐藏字段的描述
+     */
+    hideFieldDescription: { type: Boolean, default: false },
+    /**
      * 显示字段路径名称
      */
     showFieldFullname: { type: Boolean, default: false },
@@ -95,6 +107,9 @@ export default defineComponent({
       onFileUpload,
       onFileSelect,
       onFileDownload,
+      hideRootTitle,
+      hideRootDescription,
+      hideFieldDescription,
       showFieldFullname
     } = props
 
@@ -108,11 +123,14 @@ export default defineComponent({
     const fields = new Map<string, Field>()
     /**根据文档数据和用户选择，全局保存所有的oneOf字段选择状态*/
     const oneOfSelected = new Set<string>()
+    /**全局保留嵌套字段的折叠/展开状态*/
+    const nestExpanded = new Set<string>()
 
     const ctx = {
       editDoc,
       fields,
       oneOfSelected,
+      nestExpanded,
       schema,
       enablePaste,
       onMessage,
@@ -121,6 +139,9 @@ export default defineComponent({
       onFileUpload,
       onFileSelect,
       onFileDownload,
+      hideRootTitle,
+      hideRootDescription,
+      hideFieldDescription,
       showFieldFullname,
       onNodeFocus: (field: Field) => {
         debug(`节点【${field.fullname}】获得输入焦点，抛出jdocFocus事件`)

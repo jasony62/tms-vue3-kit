@@ -631,37 +631,8 @@ class Builder {
   }
 
   render() {
-    const { ctx } = this
-    const { schema } = ctx
-
     const topNodes = []
-    if (schema.title) {
-      topNodes.push(
-        h(components.title.tag, { class: ['tvu-jdoc__title'] }, schema.title)
-      )
-    }
-
-    if (schema.description) {
-      topNodes.push(
-        h(
-          components.description.tag,
-          { class: ['tvu-jdoc__description'] },
-          schema.description
-        )
-      )
-    }
-
-    // if (ctx.error) {
-    //   const errorNodes = []
-    //   if (components.error.option.native) {
-    //     errorNodes.push(ctx.error)
-    //   }
-    //   const errorNode = new Node(ctx, h, components.error)
-    //   topNodes.push(errorNode.createElem(errorNodes))
-    // }
-
     topNodes.push(this.createForm())
-
     return topNodes
   }
 }
@@ -675,12 +646,16 @@ export type FormContext = {
   onMessage: Function
   fields: Map<string, Field> // 保存表单中的field对象，避免每一次渲染都重新生成
   oneOfSelected: Set<string> // 保存选中的oneOf字段
+  nestExpanded: Set<string> // 保存展开状态的嵌套节点
   enablePaste?: boolean
   autofillRequest?: Function
   onPaste?: Function
   onFileUpload?: Function
   onFileSelect?: Function
   onFileDownload?: Function
+  hideRootTitle?: Boolean
+  hideRootDescription?: Boolean
+  hideFieldDescription?: Boolean
   showFieldFullname?: Boolean
   onNodeFocus?: (field: Field) => void
   onNodeBlur?: (field: Field) => void

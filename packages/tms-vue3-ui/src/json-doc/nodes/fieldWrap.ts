@@ -53,7 +53,7 @@ const fieldInsertVNode = (ctx: FormContext, field: Field) => {
         ctx.editDoc.insertAt(fullname, initVal, newKey)
       },
     },
-    '插入属性'
+    `插入-${field.label ? field.label : field.shortname}`
   )
 }
 /**
@@ -89,27 +89,77 @@ export class FieldWrap extends Node {
   get field() {
     return this.fieldNode.field
   }
-
+  /**
+   * 字段包裹节点中包含的节点
+   * label
+   * fullname?
+   * fullname input?
+   * field
+   * description
+   * actions
+   * oneOf remove
+   *
+   * @returns
+   */
   protected children(): VNode[] {
     const children = []
     const { field, ctx } = this
+    const { fullname } = field
 
-    if (field.label) {
-      children.push(
-        h(
-          components.fieldLabel.tag,
-          {
-            class: ['tvu-jdoc__field-label'],
-          },
-          field.label
+    /**不是根节点，或者未要求隐藏根标题*/
+    if (fullname || ctx.hideRootTitle !== true) {
+      const toggleNestExpanded = () => {
+        if (field.schemaType === 'object') {
+          if (ctx.nestExpanded.has(fullname)) ctx.nestExpanded.delete(fullname)
+          else ctx.nestExpanded.add(fullname)
+          ctx.editDoc.forceRender()
+        }
+      }
+
+      if (field.label) {
+        children.push(
+          h(
+            components.fieldLabel.tag,
+            {
+              class: ['tvu-jdoc__field-label'],
+              onClick: () => {
+                toggleNestExpanded()
+              },
+            },
+            field.label
+          )
         )
-      )
+        if (this.ctx.showFieldFullname === true && fullname) {
+          children.push(
+            h('div', { class: ['tvu-jdoc__field-fullname'] }, fullname)
+          )
+        }
+      } else if (fullname) {
+        children.push(
+          h(
+            'div',
+            {
+              class: ['tvu-jdoc__field-fullname'],
+              onClick: () => {
+                toggleNestExpanded()
+              },
+            },
+            fullname
+          )
+        )
+      }
     }
-
-    if (this.ctx.showFieldFullname === true && field.fullname) {
-      children.push(
-        h('div', { class: ['tvu-jdoc__field-fullname'] }, field.fullname)
-      )
+    /**不是根节点，或者未要求隐藏根说明*/
+    if (fullname || ctx.hideRootTitle !== true) {
+      if (ctx.hideFieldDescription !== true && field.description) {
+        children.push(
+          h(
+            components.fieldDescription.tag,
+            { class: ['tvu-jdoc__field-desc'] },
+            field.description
+          )
+        )
+      }
     }
     /**如果属性名称是用户定义的，需要显示给用户，并且允许进行编辑*/
     if (field.schemaProp.isPattern) {
@@ -118,15 +168,6 @@ export class FieldWrap extends Node {
 
     children.push(this.fieldNode.createElem())
 
-    if (field.description) {
-      children.push(
-        h(
-          components.fieldDescription.tag,
-          { class: ['tvu-jdoc__field-desc'] },
-          field.description
-        )
-      )
-    }
     /**属性是可扩展属性*/
     if (field.schemaProp.isPattern) {
       let actions = h(
@@ -151,7 +192,10 @@ export class FieldWrap extends Node {
 
     return children
   }
-
+  /**
+   * 字段包裹节点
+   * @returns
+   */
   createElem(): VNode {
     const { ctx, field } = this
 
@@ -159,10 +203,11 @@ export class FieldWrap extends Node {
     let children = this.children()
 
     const vnodes = [...children]
-
+    const { fullname, schemaType } = field
     const options = {
       name: field.fullname,
       class: ['tvu-jdoc__field'],
+      // 'data-schema-type': field.schemaType,
     }
     if (field.required) {
       Object.assign(options, { 'data-required-field': 'true' })
@@ -173,6 +218,14 @@ export class FieldWrap extends Node {
     // if (field.visible === false) {
     //   options.class.push('tvu-jdoc__field--hide')
     // }
+    // 嵌套节点默认设置为折叠状态
+    if (fullname && schemaType === 'object') {
+      Object.assign(options, {
+        'data-collapsed-field': ctx.nestExpanded.has(fullname)
+          ? 'false'
+          : 'true',
+      })
+    }
 
     // 设置排他属性字段是否出现
     if (field.isOneOf) {

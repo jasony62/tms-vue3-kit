@@ -23,7 +23,8 @@
     <div class="w-1/3 p-4">
       <json-doc v-if="loading === false" ref="jsonDocEditor" :key="caseName" :schema="testObj.schema"
         :value="testObj.data" :enable-paste="true" :autofill-request="onAutofill" :on-file-download="onFileDownload"
-        :on-file-upload="onFileUpload" :show-field-fullname="true" @jdoc-focus="onJdocFocus" @jdoc-blur="onJdocBlur">
+        :on-file-upload="onFileUpload" :hide-root-title="true" :hide-root-description="true"
+        :hide-field-description="true" :show-field-fullname="false" @jdoc-focus="onJdocFocus" @jdoc-blur="onJdocBlur">
       </json-doc>
     </div>
     <div class="w-1/3">
