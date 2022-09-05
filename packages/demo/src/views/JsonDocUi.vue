@@ -18,13 +18,15 @@
       <option value="rcssugg">rcssugg</option>
       <option value="rcsreply">rcsreply</option>
     </select>
+    <label><input type="checkbox" v-model="showFieldFullname" />是否显示字段路径名称</label>
   </div>
   <div class="flex flex-row">
     <div class="w-1/3 p-4">
       <json-doc v-if="loading === false" ref="jsonDocEditor" :key="caseName" :schema="testObj.schema"
         :value="testObj.data" :enable-paste="true" :autofill-request="onAutofill" :on-file-download="onFileDownload"
         :on-file-upload="onFileUpload" :hide-root-title="true" :hide-root-description="true"
-        :hide-field-description="true" :show-field-fullname="false" @jdoc-focus="onJdocFocus" @jdoc-blur="onJdocBlur">
+        :hide-field-description="true" :show-field-fullname="showFieldFullname" @jdoc-focus="onJdocFocus"
+        @jdoc-blur="onJdocBlur">
       </json-doc>
     </div>
     <div class="w-1/3">
@@ -68,6 +70,8 @@ const testObj = reactive({ schema: {}, data: {} })
 const activeField = ref<Field>() // 正在编辑的字段
 
 const elJsonEditor = ref<HTMLElement | null>(null)
+
+const showFieldFullname = ref(false)
 
 function loadTestData() {
   loading.value = true

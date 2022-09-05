@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent, h, PropType, ref, computed, getCurrentInstance } from 'vue'
+import { defineComponent, h, PropType, ref, computed, getCurrentInstance, watch } from 'vue'
 import { RawSchema } from '@/json-schema/model'
 import { deepClone } from '@/utils'
 import BuildEditor from './builder'
@@ -152,6 +152,12 @@ export default defineComponent({
         internalInstance?.emit('jdocBlur', field)
       }
     }
+
+    /**切换是否显示字段的全路径名 */
+    watch(() => props.showFieldFullname, (newVal) => {
+      ctx.showFieldFullname = newVal
+      editDoc.forceRender()
+    })
 
     return () => {
       const fieldNames: string[] = []

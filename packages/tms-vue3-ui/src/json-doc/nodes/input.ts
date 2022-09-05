@@ -62,6 +62,7 @@ export class Input extends FieldNode {
       type,
       value: toRaw(fieldValue),
       class: ['tvu-jdoc__field-input tvu-input'],
+      title: fieldName,
     }
     inpOps.onInput = onInput
     if (typeof ctx.onNodeFocus === 'function')
