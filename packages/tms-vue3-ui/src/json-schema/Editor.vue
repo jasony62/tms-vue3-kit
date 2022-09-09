@@ -409,7 +409,9 @@ const pasteJSONSchema = async (prop: SchemaProp) => {
 }
 
 onMounted(() => {
-  builder.flatten(JSON.parse(JSON.stringify(props.schema)))
+  const schema = JSON.parse(JSON.stringify(props.schema))
+  if (!schema.type) schema.type = 'object'
+  builder.flatten(schema)
   nodes.value = builder.props
   data.currProp = builder.props?.[0]
   useAutofill.value = typeof data.currProp.attrs.autofill === 'object'

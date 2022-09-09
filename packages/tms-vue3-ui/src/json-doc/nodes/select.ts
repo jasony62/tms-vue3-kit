@@ -11,7 +11,7 @@ export class Select extends Input {
     const { field } = this
     const fieldValue = this.fieldValue()
 
-    let opts = {
+    let opts: any = {
       name: field.fullname,
       class: ['tvu-jdoc__field-input tvu-input'],
       value: fieldValue,
@@ -20,6 +20,10 @@ export class Select extends Input {
         this.updateModel(newValue)
       },
     }
+    if (field.schemaProp.attrs.readonly === true) {
+      opts.disabled = true
+    }
+
     return opts
   }
   /**

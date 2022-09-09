@@ -74,7 +74,7 @@ export class Input extends FieldNode {
         if (ctx.onNodeBlur) ctx.onNodeBlur(field)
       }
     if (field.schemaProp.attrs.readonly === true) {
-      inpOps.readonly = true
+      inpOps.disabled = true
     }
     /**设置核选框的值*/
     if (field.type === 'checkbox' && typeof fieldValue === 'boolean') {
@@ -126,6 +126,9 @@ export class Input extends FieldNode {
           Array.isArray(fieldValue)
         ) {
           if (fieldValue.includes(item.value)) props.checked = true
+        }
+        if (field.schemaProp.attrs.readonly === true) {
+          props.disabled = true
         }
         // radio/checkbox
         let n1 = h(components[field.itemType].tag, props)

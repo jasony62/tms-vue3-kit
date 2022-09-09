@@ -1,5 +1,3 @@
-export const SampleSchema = {
-  type: 'object',
-}
+export const SampleSchema = {}
 
 export const SampleData = []

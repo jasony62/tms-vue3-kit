@@ -133,6 +133,7 @@ export const SampleSchema = {
     agree: {
       title: '同意？（布尔）',
       type: 'boolean',
+      readonly: true,
       required: true,
     },
     bday: {

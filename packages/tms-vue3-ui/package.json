@@ -1,7 +1,7 @@
 {
   "name": "tms-vue3-ui",
-  "version": "0.0.59",
-  "description": "Vue3基础UI库。",
+  "version": "0.0.60",
+  "description": "Vue3基础UI库，提供JSONSchema编辑器，支持基于JSONSchema生成表单。",
   "keywords": [
     "vue3",
     "ts",

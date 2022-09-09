@@ -112,6 +112,8 @@ const components = {
             }
           } else if (typeof this.modelValue === 'boolean') {
             this.$emit('update:modelValue', !this.modelValue)
+          } else {
+            this.$emit('update:modelValue', true)
           }
         },
       }
