@@ -19,6 +19,7 @@
       <option value="rcscarousel">rcscarousel</option>
       <option value="rcssugg">rcssugg</option>
       <option value="rcsreply">rcsreply</option>
+      <option value="dialog-script">dialog-script</option>
     </select>
     <label><input type="checkbox" v-model="showFieldFullname" />是否显示字段路径名称</label>
   </div>

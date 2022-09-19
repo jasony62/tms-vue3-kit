@@ -203,7 +203,7 @@ const itemPickVNode = (ctx: FormContext, field: Field) => {
 export class ObjectNode extends FieldNode {
   private _children
 
-  constructor(ctx: FormContext, field: Field, children?: VNode[]) {
+  constructor(ctx: FormContext, field: Field, children?: (VNode | null)[]) {
     super(ctx, field)
     this._children = children
     debug(
@@ -232,7 +232,12 @@ export class ObjectNode extends FieldNode {
    */
   protected children(): VNode[] {
     const { ctx, field } = this
-    const vnodes = this._children ? [...this._children] : []
+    let vnodes = []
+    if (this._children) {
+      this._children.forEach((c) => {
+        if (c) vnodes.push(c)
+      })
+    }
 
     const { schemaProp } = field
     const { patternChildren, isOneOfChildren } = schemaProp

@@ -89,13 +89,13 @@ function createArrayItemNode(
       if (prop.isOneOfChildren) itemProp.isOneOfChildren = prop.isOneOfChildren
       // 复合类型，需要根据文档数据生成字段，放入堆栈
       itemFields.forEach((field) => {
-        stack.newJoint(field, field.index)
+        stack.newJoint(field, joint)
         log(`属性【${fullname}】生成的字段【${field.fullname}】，放入堆栈`)
       })
     } else if ('array' === items.type) {
       // 复合类型，需要根据文档数据生成字段，放入堆栈
       itemFields.forEach((field) => {
-        stack.newJoint(field, field.index)
+        stack.newJoint(field, joint)
         log(`属性【${fullname}】生成的字段【${field.fullname}】，放入堆栈`)
       })
     } else {
@@ -220,7 +220,7 @@ function createFieldNode(
 function createJointNode(
   ctx: FormContext,
   field: Field,
-  children: VNode[]
+  children: (VNode | null)[]
 ): VNode {
   debug.extend('createJointNode')(
     `字段【${field.fullname}】，生成节点，包含【${children.length}】个子节点`
@@ -358,8 +358,8 @@ function checkPropExistIf(prop: SchemaProp, doc: DocAsArray): boolean {
 type StackJoint = {
   field: Field
   childNames: string[]
-  children: VNode[]
-  childrenIndex: number
+  children: (VNode | null)[]
+  childrenIndex: number // 子节点的索引位置
   indexInParent: number //连接字段在父字段中的位置。这时节点还没有生成，所以还不能加入的到父连接字段的子节点中。
 }
 
@@ -377,15 +377,23 @@ class Stack {
   /**
    * 新的连接字段
    */
-  newJoint(field: Field, indexInParent: number): StackJoint {
+  newJoint(field: Field, parent: StackJoint | null): StackJoint {
     const joint = {
       field,
       childNames: [],
       children: [],
       childrenIndex: -1,
-      indexInParent,
+      indexInParent: -1,
     }
+    if (parent) {
+      parent.childrenIndex++
+      joint.indexInParent = parent.childrenIndex
+      parent.childNames.push(field.name)
+      parent.children.push(null)
+    }
+
     this.joints.push(joint)
+
     return joint
   }
 
@@ -454,33 +462,42 @@ class Stack {
     if (!parent) return
     const log = debug.extend('addNode')
     if (typeof pair.index === 'number') {
-      /**指定了节点的添加位置*/
-      // _.set(parent.childNames, pair.index, pair.field.name)
-      // _.set(parent.children, pair.index, pair.vnode)
-      // 用splice方法不能保证顺序，当start>length时，在结尾追加
-      parent.childNames.splice(pair.index, 0, pair.field.name)
-      parent.children.splice(pair.index, 0, pair.vnode)
-      // this.fieldNames.splice(pair.index, 0, pair.field.fullname)
-      log(
-        `字段【${parent.field.fullname}】在位置【${pair.index}】，添加子节点【${pair.field.fullname}】`
-      )
-    } else if (atHeader) {
-      if (parent.childrenIndex === -1) {
-        parent.childrenIndex = parent.children.length
+      /**连接节点指定在父节点中的位置*/
+      if (pair.index >= parent.childNames.length) {
+        throw Error(
+          `字段【${pair.field.fullname}】在父节点中的位置【${pair.index}】超出父节点范围【childNameslengthe=${parent.childNames.length}】`
+        )
       }
-      parent.childNames.splice(parent.childrenIndex, 0, pair.field.name)
-      parent.children.splice(parent.childrenIndex, 0, pair.vnode)
-      // this.fieldNames.splice(0, 0, pair.field.fullname)
+      if (parent.childNames[pair.index] !== pair.field.name) {
+        throw Error(
+          `字段【${pair.field.fullname}】在父节点中的位置【${
+            pair.index
+          }】已经存在其它节点名称【${parent.childNames[pair.index]}】`
+        )
+      }
+      if (pair.index >= parent.children.length) {
+        throw Error(
+          `字段【${pair.field.fullname}】在父节点中的位置【${pair.index}】超出父节点范围【children.length=${parent.childNames.length}】`
+        )
+      }
+      if (parent.children[pair.index] !== null) {
+        throw Error(
+          `字段【${pair.field.fullname}】在父节点中的位置【${pair.index}】已经存在其它节点`
+        )
+      }
+      parent.children[pair.index] = pair.vnode
       log(
-        `字段【${parent.field.fullname}】在头部，添加子节点【${pair.field.fullname}】`
+        `字段【${parent.field.fullname}】在位置【${pair.index}】，更新子节点【${pair.field.fullname}】`
       )
     } else {
       parent.childNames.push(pair.field.name)
       parent.children.push(pair.vnode)
+      parent.childrenIndex++
       log(
         `字段【${parent.field.fullname}】在尾部，添加子节点【${pair.field.fullname}】`
       )
     }
+
     this.fieldNames.push(pair.field.fullname)
   }
 
@@ -532,10 +549,10 @@ export function build(ctx: FormContext, fieldNames?: string[]): VNode {
       const rootField = createField(ctx, prop)
       debug(`----属性【${prop.fullname}】生成根字段，放入堆栈----`)
       if (prop.attrs.type === 'object') {
-        stack.newJoint(rootField, -1)
+        stack.newJoint(rootField, null)
       } else if (prop.attrs.type === 'array') {
         debug('根节点类型是数组，生成items节点')
-        const joint = stack.newJoint(rootField, -1)
+        const joint = stack.newJoint(rootField, null)
         debug(
           `属性【${prop.fullname}】生成字段【${rootField.fullname}】放入堆栈，生成连接节点`
         )
@@ -570,7 +587,7 @@ export function build(ctx: FormContext, fieldNames?: string[]): VNode {
           let fields = createOptionalFields(ctx, prop, joint)
           debug(`属性【${prop.fullname}】生成${fields.length}个字段`)
           fields.forEach((field) => {
-            stack.newJoint(field, joint.children.length)
+            stack.newJoint(field, joint)
             debug(
               `属性【${prop.fullname}】生成字段【${field.fullname}】放入堆栈`
             )
@@ -579,7 +596,7 @@ export function build(ctx: FormContext, fieldNames?: string[]): VNode {
       } else {
         parentJoints.forEach((joint) => {
           const field = createField(ctx, prop, joint.field)
-          stack.newJoint(field, joint.children.length)
+          stack.newJoint(field, joint)
           debug(`属性【${prop.fullname}】生成字段【${field.fullname}】放入堆栈`)
         })
       }
@@ -590,7 +607,7 @@ export function build(ctx: FormContext, fieldNames?: string[]): VNode {
           let fields = createOptionalFields(ctx, prop, parentJoint)
           debug(`属性【${prop.fullname}】生成${fields.length}个可选字段`)
           fields.forEach((field) => {
-            const joint = stack.newJoint(field, parentJoint.children.length)
+            const joint = stack.newJoint(field, parentJoint)
             debug(
               `属性【${prop.fullname}】的字段【${field.fullname}】，生成连接节点并放入堆栈，在父节点中的位置【${joint.indexInParent}】`
             )
@@ -601,7 +618,7 @@ export function build(ctx: FormContext, fieldNames?: string[]): VNode {
       } else {
         parentJoints.forEach((parentJoint) => {
           const field = createField(ctx, prop, parentJoint.field)
-          const joint = stack.newJoint(field, parentJoint.children.length)
+          const joint = stack.newJoint(field, parentJoint)
           debug(
             `属性【${prop.fullname}】生成字段【${field.fullname}】放入堆栈；生成连接节点，在父节点中的位置【${joint.indexInParent}】`
           )
@@ -612,12 +629,14 @@ export function build(ctx: FormContext, fieldNames?: string[]): VNode {
       // 简单类型，叶节点，生成用户输入字段，生成字段节点，放入父连接字段
       if (prop.isPattern) {
         parentJoints.forEach((joint) => {
+          // 在父节点中按顺序添加
           let pairs = createOptionalFieldNode(ctx, prop, joint)
           debug(`属性【${prop.fullname}】生成${pairs.length}个可选字段`)
           pairs.forEach((p) => stack.addNode(p, joint))
         })
       } else {
         parentJoints.forEach((joint) => {
+          // 在父节点中按顺序添加
           let pair = createFieldNode(ctx, prop, joint)
           stack.addNode(pair, joint)
         })

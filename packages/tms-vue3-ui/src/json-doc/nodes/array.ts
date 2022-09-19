@@ -130,9 +130,9 @@ const itemRemoveVNode = (ctx: FormContext, field: Field, index: number) => {
  * 数组中的项目是对象
  */
 export class ArrayNode extends FieldNode {
-  private _children: VNode[]
+  private _children: (VNode | null)[]
 
-  constructor(ctx: FormContext, field: Field, children?: VNode[]) {
+  constructor(ctx: FormContext, field: Field, children?: (VNode | null)[]) {
     super(ctx, field)
     this._children = children ?? []
   }

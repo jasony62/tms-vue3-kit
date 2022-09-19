@@ -43,7 +43,7 @@ const components: { [k: string]: any } = {
 function prepareFieldNode(
   ctx: FormContext,
   field: Field,
-  children?: VNode[]
+  children?: (VNode | null)[]
 ): FieldNode {
   switch (field.type) {
     case 'textarea':
