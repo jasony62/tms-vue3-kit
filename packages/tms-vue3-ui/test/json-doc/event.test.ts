@@ -1,4 +1,4 @@
-import { SampleSchema } from '../data/schema-event'
+import { SampleSchema } from '../data/schema-autofill'
 import { build } from '@/json-doc/builder'
 import { DocAsArray } from '@/json-doc/model'
 
@@ -21,7 +21,7 @@ describe('通过API从外部获取值', () => {
       onMessage: (msg: string) => {
         console.log(msg)
       },
-      httpRequest: onAxios,
+      autofillRequest: onAxios,
     })
     // console.log(JSON.stringify(nodes, null, 2))
     setTimeout(() => {

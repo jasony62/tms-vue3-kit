@@ -305,6 +305,7 @@ function* _parseOne(
         newProp.items = { type: items.type }
         Object.keys(items).forEach((key) => {
           if (key === 'properties') return
+          if (key === 'patternProperties') return
           //@ts-ignore
           Object.assign(newProp.items, { [key]: items[key] })
         })
@@ -341,7 +342,14 @@ function* _parseOne(
     newProp.attrs.required = required
   }
   // 是否包含由正则表达式定义名称的子属性
-  if (rawProp.type === 'object' && typeof patternProperties === 'object') {
+  if (
+    (rawProp.type === 'object' &&
+      patternProperties &&
+      typeof patternProperties === 'object') ||
+    (rawProp.type === 'array' &&
+      items.patternProperties &&
+      typeof items.patternProperties === 'object')
+  ) {
     newProp.patternChildren = []
   }
   // 属性依赖规则
@@ -371,13 +379,24 @@ function* _parseOne(
       )
     }
   } else if (rawProp.type === 'array') {
-    // 处理数组属性下的子属性
-    if (typeof items === 'object' && typeof items.properties === 'object') {
-      yield* _parseChildren(
-        items.properties,
-        [newProp, ...parents],
-        requiredSet
-      )
+    if (items && typeof items === 'object') {
+      // 处理数组属性下的子属性
+      if (typeof items.properties === 'object') {
+        yield* _parseChildren(
+          items.properties,
+          [newProp, ...parents],
+          requiredSet
+        )
+      }
+      if (typeof items.patternProperties === 'object') {
+        log(`属性${newProp.fullname}包含模板属性`)
+        yield* _parseChildren(
+          items.patternProperties,
+          [newProp, ...parents],
+          requiredSet,
+          true
+        )
+      }
     }
   }
 }

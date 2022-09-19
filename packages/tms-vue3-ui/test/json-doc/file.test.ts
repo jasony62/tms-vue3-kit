@@ -21,14 +21,14 @@ describe('对象包含数组，数组的项目是文件', () => {
     // console.log(fieldNames)
     // console.log(vnodes[0].children)
 
-    let i = 0
     expect(fieldNames).toHaveLength(7)
-    expect(fieldNames[i++]).toBe('files')
-    expect(fieldNames[i++]).toBe('files[0]')
-    expect(fieldNames[i++]).toBe('files[1]')
-    expect(fieldNames[i++]).toBe('files[1].name')
+    let i = 0
     expect(fieldNames[i++]).toBe('files[0].name')
-    expect(fieldNames[i++]).toBe('files[1].url')
+    expect(fieldNames[i++]).toBe('files[1].name')
     expect(fieldNames[i++]).toBe('files[0].url')
+    expect(fieldNames[i++]).toBe('files[1].url')
+    expect(fieldNames[i++]).toBe('files[1]')
+    expect(fieldNames[i++]).toBe('files[0]')
+    expect(fieldNames[i++]).toBe('files')
   })
 })

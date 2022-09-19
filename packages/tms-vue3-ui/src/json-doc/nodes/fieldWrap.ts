@@ -69,7 +69,7 @@ const fieldRemoveVNode = (ctx: FormContext, field: Field) => {
       name: field.fullname,
       class: ['tvu-button'],
       onClick: () => {
-        if (field.isOneOf) ctx.oneOfSelected.delete(field.fullname)
+        if (field.isOneOf) ctx.oneOfSelected?.delete(field.fullname)
         ctx.editDoc.remove(field.fullname)
       },
     },
@@ -110,8 +110,8 @@ export class FieldWrap extends Node {
     if (fullname || ctx.hideRootTitle !== true) {
       const toggleNestExpanded = () => {
         if (field.schemaType === 'object') {
-          if (ctx.nestExpanded.has(fullname)) ctx.nestExpanded.delete(fullname)
-          else ctx.nestExpanded.add(fullname)
+          if (ctx.nestExpanded?.has(fullname)) ctx.nestExpanded.delete(fullname)
+          else ctx.nestExpanded?.add(fullname)
           ctx.editDoc.forceRender()
         }
       }
@@ -221,7 +221,7 @@ export class FieldWrap extends Node {
     // 嵌套节点默认设置为折叠状态
     if (fullname && schemaType === 'object') {
       Object.assign(options, {
-        'data-collapsed-field': ctx.nestExpanded.has(fullname)
+        'data-collapsed-field': ctx.nestExpanded?.has(fullname)
           ? 'false'
           : 'true',
       })
@@ -230,10 +230,10 @@ export class FieldWrap extends Node {
     // 设置排他属性字段是否出现
     if (field.isOneOf) {
       let selected = false
-      if (!ctx.oneOfSelected.has(field.fullname)) {
+      if (!ctx.oneOfSelected?.has(field.fullname)) {
         let fieldValue = ctx.editDoc.get(field.fullname)
         selected = fieldValue ?? false ? true : false
-        if (selected) ctx.oneOfSelected.add(field.fullname)
+        if (selected) ctx.oneOfSelected?.add(field.fullname)
       } else {
         selected = true
       }

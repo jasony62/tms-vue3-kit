@@ -84,8 +84,8 @@ const selectOneOfVNode = (ctx: FormContext, field: Field) => {
             let childField = ctx.fields?.get(childFullname)
             if (childField) {
               propName === childField.name
-                ? ctx.oneOfSelected.add(childFullname)
-                : ctx.oneOfSelected.delete(childFullname)
+                ? ctx.oneOfSelected?.add(childFullname)
+                : ctx.oneOfSelected?.delete(childFullname)
             }
           })
           ctx.editDoc.forceRender()
@@ -158,6 +158,7 @@ const propPasteVNode = (ctx: FormContext, field: Field) => {
           }
         }
       },
+      title: field.fullname,
     },
     `黏贴-${
       field.label ? field.label : field.shortname ? field.shortname : '全部'
@@ -235,6 +236,10 @@ export class ObjectNode extends FieldNode {
 
     const { schemaProp } = field
     const { patternChildren, isOneOfChildren } = schemaProp
+    debug(
+      `对象字段【${field.fullname}】【${schemaProp.fullname}】需要处理子节点`
+    )
+
     /**添加模板属性操作*/
     if (patternChildren?.length) {
       vnodes.push(propAddVNode(ctx, field))
@@ -244,7 +249,7 @@ export class ObjectNode extends FieldNode {
       let hasSelected = isOneOfChildren.some((childProp) => {
         let fullname =
           (field.fullname ? field.fullname + '.' : '') + childProp.name
-        return ctx.oneOfSelected.has(fullname)
+        return ctx.oneOfSelected?.has(fullname)
       })
       if (!hasSelected) vnodes.push(selectOneOfVNode(ctx, field))
     }

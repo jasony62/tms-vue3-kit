@@ -291,9 +291,9 @@ export class DocAsArray {
           )
           return
         }
-        let schemaProp = schemaProps.find((schemaProp) =>
-          schemaProp.fullRegExp.test(docProp.name)
-        )
+        let schemaProp = schemaProps.find((schemaProp) => {
+          return schemaProp.fullRegExp.test(docProp.name)
+        })
         if (schemaProp) {
           log(
             `文档属性【${docProp.name}】匹配的属性定义【${schemaProp.fullname}】`
@@ -397,8 +397,8 @@ export class DocAsArray {
 
   /**
    * 给属性添加兄弟属性
-   * @param name
-   * @param value
+   * @param name 属性名称
+   * @param value 添加的值
    * @param key
    */
   insertAt(name: string, value: any, key?: string, needRender = true) {
