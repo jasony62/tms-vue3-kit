@@ -231,8 +231,7 @@ export class FieldWrap extends Node {
     if (field.isOneOf) {
       let selected = false
       if (!ctx.oneOfSelected?.has(field.fullname)) {
-        let fieldValue = ctx.editDoc.get(field.fullname)
-        selected = fieldValue ?? false ? true : false
+        selected = ctx.editDoc.has(field.fullname)
         if (selected) ctx.oneOfSelected?.add(field.fullname)
       } else {
         selected = true

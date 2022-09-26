@@ -27,5 +27,5 @@ export const SampleSchema = {
 }
 
 export const SampleData = {
-  experiences: [],
+  experiences: [{}],
 }

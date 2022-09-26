@@ -52,11 +52,20 @@ export const DEFAULT_ROOT_NAME = ''
  */
 export class DocIter {
   _rawDoc
-  _rootName
+  _rootName: string
+  _rootProp: DocProp | null
 
-  constructor(rawDoc: any, rootName = DEFAULT_ROOT_NAME) {
-    this._rawDoc = rawDoc
-    this._rootName = rootName
+  constructor(rawDocOrRootProp: any | DocProp, rootName = DEFAULT_ROOT_NAME) {
+    this._rawDoc = rawDocOrRootProp
+    if (rawDocOrRootProp instanceof DocProp) {
+      this._rootProp = rawDocOrRootProp
+      this._rawDoc = rawDocOrRootProp.value
+      this._rootName = rawDocOrRootProp.name
+    } else {
+      this._rawDoc = rawDocOrRootProp
+      this._rootName = rootName
+      this._rootProp = null
+    }
   }
 
   get rawDoc() {
@@ -67,9 +76,14 @@ export class DocIter {
    * 迭代文档中的数据
    */
   *[Symbol.iterator]() {
-    let prop = new DocProp(undefined, this._rootName, this._rawDoc)
-    yield prop
-    yield* _pasrseObj(prop)
+    if (this._rootProp) {
+      yield this._rootProp
+      yield* _pasrseObj(this._rootProp)
+    } else {
+      let prop = new DocProp(undefined, this._rootName, this._rawDoc)
+      yield prop
+      yield* _pasrseObj(prop)
+    }
   }
 }
 
@@ -274,48 +288,81 @@ export class DocAsArray {
       if (index === 0) return
       let val = this.get(prop.name)
       val = _.cloneDeep(val)
-      _.set(output, prop.name, val)
+      _.set(Output, prop.name, val)
     }
 
-    const output = Array.isArray(this._rawDoc) ? [] : {}
-    const jsonDocPropNames: string[] = [] // json字段的名称
+    const Output = Array.isArray(this._rawDoc) ? [] : {}
+    const JsonDocPropNames: string[] = [] // json字段的名称
     if (schemaProps.length) {
-      /**检查是否为schema中定义的属性字段*/
-      this._properties.forEach((docProp, index) => {
-        let jsonParentName = jsonDocPropNames.find(
-          (n) => docProp.name.indexOf(n) === 0
-        )
-        if (jsonParentName) {
-          log(
-            `文档属性【${docProp.name}】是json类型的文档属性【${jsonParentName}】的值，跳过`
-          )
-          return
-        }
-        let schemaProp = schemaProps.find((schemaProp) => {
+      /**根据schema生成文档，忽略文档中没有对应schema的内容*/
+      schemaProps.forEach((schemaProp, index) => {
+        // 模板属性会有多个匹配的文档属性
+        let docProps = this._properties.filter((docProp) => {
           return schemaProp.fullRegExp.test(docProp.name)
         })
-        if (schemaProp) {
-          log(
-            `文档属性【${docProp.name}】匹配的属性定义【${schemaProp.fullname}】`
-          )
-          if (schemaProp.attrs.type === 'json') {
-            log(`文档属性【${docProp.name}】是json类型，需要处理下层节点`)
-            jsonDocPropNames.push(docProp.name)
-          } else {
-            if (docProp._children.length) {
-              log(`文档属性【${docProp.name}】不是叶节点，跳过`)
+        docProps.forEach((docProp) => {
+          if (docProp) {
+            log(
+              `文档属性【${docProp.name}】匹配的属性定义【${schemaProp.fullname}】`
+            )
+            let jsonParentName = JsonDocPropNames.find(
+              (n) => docProp?.name.indexOf(n) === 0
+            )
+            if (jsonParentName) {
+              log(
+                `文档属性【${docProp.name}】是json类型的文档属性【${jsonParentName}】的值，跳过`
+              )
               return
             }
+            if (schemaProp.attrs.type === 'json') {
+              log(`文档属性【${docProp.name}】是json类型，需要处理下层节点`)
+              JsonDocPropNames.push(docProp.name)
+            } else {
+              if (docProp._children.length) {
+                log(`文档属性【${docProp.name}】不是叶节点，跳过`)
+                return
+              }
+            }
+            handleDocProp(docProp, index)
           }
-          handleDocProp(docProp, index)
-        } else {
-          log(`文档属性【${docProp.name}】未找到匹配的属性定义，从文档中清除`)
-          if (_.has(output, docProp.name)) _.unset(output, docProp.name)
-        }
+        })
       })
+      /**检查是否为schema中定义的属性字段*/
+      // this._properties.forEach((docProp, index) => {
+      //   let jsonParentName = jsonDocPropNames.find(
+      //     (n) => docProp.name.indexOf(n) === 0
+      //   )
+      //   if (jsonParentName) {
+      //     log(
+      //       `文档属性【${docProp.name}】是json类型的文档属性【${jsonParentName}】的值，跳过`
+      //     )
+      //     return
+      //   }
+      //   let schemaProp = schemaProps.find((schemaProp) => {
+      //     return schemaProp.fullRegExp.test(docProp.name)
+      //   })
+      //   if (schemaProp) {
+      //     log(
+      //       `文档属性【${docProp.name}】匹配的属性定义【${schemaProp.fullname}】`
+      //     )
+      //     if (schemaProp.attrs.type === 'json') {
+      //       log(`文档属性【${docProp.name}】是json类型，需要处理下层节点`)
+      //       jsonDocPropNames.push(docProp.name)
+      //     } else {
+      //       if (docProp._children.length) {
+      //         log(`文档属性【${docProp.name}】不是叶节点，跳过`)
+      //         return
+      //       }
+      //     }
+      //     handleDocProp(docProp, index)
+      //   } else {
+      //     log(`文档属性【${docProp.name}】未找到匹配的属性定义，从文档中清除`)
+      //     if (_.has(output, docProp.name)) _.unset(output, docProp.name)
+      //   }
+      // })
     } else this._properties.forEach(handleDocProp)
 
-    return output
+    return Output
   }
   /**
    * 根据属性的值添加子属性
@@ -323,7 +370,7 @@ export class DocAsArray {
    */
   private _addSubProps(prop: DocProp): number {
     let num = 0
-    let iter = new DocIter(prop.value, prop.name)
+    let iter = new DocIter(prop)
     Array.from(iter)
       .slice(1)
       .forEach((child) => {
@@ -486,6 +533,14 @@ export class DocAsArray {
     return prop?.value
   }
   /**
+   * 指定的字段是否存在
+   * @param name
+   */
+  has(name: string): boolean {
+    let { index } = this.findByName(name)
+    return index >= 0
+  }
+  /**
    *
    * @param name
    * @param value
@@ -536,6 +591,7 @@ export class DocAsArray {
   rename(oldFullname: string, newKey: string, needRender = true) {
     let { prop } = this.findByName(oldFullname)
     if (!prop) throw Error(`指定的属性【${oldFullname}】不存在`)
+
     let parent = prop._parent
     if (parent) {
       delete parent.value[prop.key]

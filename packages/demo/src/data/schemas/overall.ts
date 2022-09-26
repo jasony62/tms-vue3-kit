@@ -13,6 +13,7 @@ export const SampleSchema = {
     name: {
       title: '姓名',
       type: 'string',
+      default: 'xyz',
     },
     nickname: {
       title: '昵称',

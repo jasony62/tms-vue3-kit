@@ -4,6 +4,7 @@ import { Field } from '../fields'
 import { h, VNode } from 'vue'
 import { components } from '.'
 import Debug from 'debug'
+import { SchemaProp } from '@/json-schema/model'
 
 const debug = Debug('json-doc:nodes:object')
 
@@ -83,9 +84,28 @@ const selectOneOfVNode = (ctx: FormContext, field: Field) => {
             }`
             let childField = ctx.fields?.get(childFullname)
             if (childField) {
-              propName === childField.name
-                ? ctx.oneOfSelected?.add(childFullname)
-                : ctx.oneOfSelected?.delete(childFullname)
+              if (propName === childField.name) {
+                ctx.oneOfSelected?.add(childFullname)
+              } else {
+                ctx.oneOfSelected?.delete(childFullname)
+              }
+            } else {
+              /**
+               * 如果是模板属性，需要重新生成字段
+               */
+              const { name, attrs } = child
+              if (propName === name) {
+                const newKey = Field.initialKey(name)
+                const initVal = Field.initialVal(attrs.default, attrs.type)
+                debug(
+                  `字段【${childFullname}】执行【添加${
+                    attrs.title ?? name
+                  }属性】，随机属性名：${newKey}，初始值：${JSON.stringify(
+                    initVal
+                  )}`
+                )
+                ctx.editDoc.appendAt(field.fullname, initVal, newKey)
+              }
             }
           })
           ctx.editDoc.forceRender()
@@ -99,11 +119,16 @@ const selectOneOfVNode = (ctx: FormContext, field: Field) => {
  * 添加模板子属性操作
  * @param ctx
  * @param field
+ * @param patternChildren 支持添加的属性定义
  * @returns
  */
-const propAddVNode = (ctx: FormContext, field: Field) => {
+const propAddVNode = (
+  ctx: FormContext,
+  field: Field,
+  patternChildren: SchemaProp[]
+) => {
   /**给每个模板属性创建一个添加字段操作*/
-  let addVNodes = field.schemaProp.patternChildren?.map((childProp) =>
+  let addVNodes = patternChildren.map((childProp) =>
     h(
       components.button.tag,
       {
@@ -247,7 +272,17 @@ export class ObjectNode extends FieldNode {
 
     /**添加模板属性操作*/
     if (patternChildren?.length) {
-      vnodes.push(propAddVNode(ctx, field))
+      let availablePatternChildren
+      if (Array.isArray(isOneOfChildren) && isOneOfChildren.length) {
+        availablePatternChildren = patternChildren.filter(
+          (childProp) => !isOneOfChildren.includes(childProp)
+        )
+      } else {
+        availablePatternChildren = patternChildren
+      }
+      if (availablePatternChildren && availablePatternChildren.length) {
+        vnodes.push(propAddVNode(ctx, field, availablePatternChildren))
+      }
     }
     /**选择oneOf属性操作*/
     if (Array.isArray(isOneOfChildren) && isOneOfChildren.length) {
