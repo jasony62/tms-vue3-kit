@@ -86,8 +86,8 @@ export class JSONSchemaBuilder {
        */
       let { path, name } = prop
       if (!name) {
-        alert('键值不允许为空')
-        throw Error('键值不允许为空')
+        alert(`第【${i}】个属性定义，键值不允许为空`)
+        throw Error(`第【${i}】个属性定义，键值不允许为空`)
       }
       if (prop.isPattern && !/\^.+\$/.test(name)) {
         alert('正则表达式类型的键值必须以"^"开头,"$"结尾')

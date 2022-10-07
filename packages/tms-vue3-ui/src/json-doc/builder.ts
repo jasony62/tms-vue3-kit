@@ -21,7 +21,10 @@ function createWrapClass(labelAndDescNodes: VNode): VNode {
   return labelAndDescNodes
 }
 /**
- * @param {object} field
+ * 创建字段对应的节点
+ * @param ctx
+ * @param field
+ * @returns
  */
 function createFieldWrapNode(ctx: FormContext, field: Field): VNode {
   const fieldNode = prepareFieldNode(ctx, field)
@@ -170,9 +173,9 @@ type FieldVNodePair = {
 }
 
 /**
- * 生成字段和节点
+ * 生成可选属性定义的字段和节点
  */
-function createOptionalFieldNode(
+function createOptionalFieldAndNode(
   ctx: FormContext,
   prop: SchemaProp,
   joint: StackJoint
@@ -195,8 +198,8 @@ function createOptionalFieldNode(
   return []
 }
 
-/**创建和当前属性对应的field*/
-function createFieldNode(
+/**创建和当前属性定义对应的field和node*/
+function createFieldAndNode(
   ctx: FormContext,
   prop: SchemaProp,
   joint: StackJoint
@@ -544,8 +547,7 @@ export function build(ctx: FormContext, fieldNames?: string[]): VNode {
   let stack = new Stack(ctx, fieldNames)
 
   // 依次处理JSONSchema的属性
-  let prop: SchemaProp
-  for (prop of iter) {
+  for (let prop of iter) {
     /**处理根节点*/
     if (prop.name === iter.rootName) {
       const rootField = createField(ctx, prop)
@@ -598,33 +600,48 @@ export function build(ctx: FormContext, fieldNames?: string[]): VNode {
       } else {
         parentJoints.forEach((joint) => {
           const field = createField(ctx, prop, joint.field)
+          // 创建连接节点，等待加入子节点
           stack.newJoint(field, joint)
           debug(`属性【${prop.fullname}】生成字段【${field.fullname}】放入堆栈`)
         })
       }
     } else if (prop.attrs.type === 'array') {
+      const createArrayNodeAndItems = (
+        field: Field,
+        parentJoint: StackJoint
+      ) => {
+        const joint = stack.newJoint(field, parentJoint)
+        debug(
+          `属性【${prop.fullname}】生成字段【${field.fullname}】放入堆栈；生成连接节点，在父节点中的位置【${joint.indexInParent}】`
+        )
+        // 因为数组属性中item没有独立属性定义，因此和父属性同时处理
+        createArrayItemNode(stack, field, prop, ctx, joint)
+      }
       // 数组，连接节点
       if (prop.isPattern) {
         parentJoints.forEach((parentJoint) => {
           let fields = createOptionalFields(ctx, prop, parentJoint)
           debug(`属性【${prop.fullname}】生成${fields.length}个可选字段`)
           fields.forEach((field) => {
-            const joint = stack.newJoint(field, parentJoint)
-            debug(
-              `属性【${prop.fullname}】的字段【${field.fullname}】，生成连接节点并放入堆栈，在父节点中的位置【${joint.indexInParent}】`
-            )
-            // 因为数组属性中item没有独立属性定义，因此和父属性同时处理
-            createArrayItemNode(stack, field, prop, ctx, joint)
+            createArrayNodeAndItems(field, parentJoint)
+            // const joint = stack.newJoint(field, parentJoint)
+            // debug(
+            //   `属性【${prop.fullname}】的字段【${field.fullname}】，生成连接节点并放入堆栈，在父节点中的位置【${joint.indexInParent}】`
+            // )
+            // // 因为数组属性中item没有独立属性定义，因此和父属性同时处理
+            // createArrayItemNode(stack, field, prop, ctx, joint)
           })
         })
       } else {
         parentJoints.forEach((parentJoint) => {
           const field = createField(ctx, prop, parentJoint.field)
-          const joint = stack.newJoint(field, parentJoint)
-          debug(
-            `属性【${prop.fullname}】生成字段【${field.fullname}】放入堆栈；生成连接节点，在父节点中的位置【${joint.indexInParent}】`
-          )
-          createArrayItemNode(stack, field, prop, ctx, joint)
+          createArrayNodeAndItems(field, parentJoint)
+          // const joint = stack.newJoint(field, parentJoint)
+          // debug(
+          //   `属性【${prop.fullname}】生成字段【${field.fullname}】放入堆栈；生成连接节点，在父节点中的位置【${joint.indexInParent}】`
+          // )
+          // // 因为数组属性中item没有独立属性定义，因此和父属性同时处理
+          // createArrayItemNode(stack, field, prop, ctx, joint)
         })
       }
     } else {
@@ -632,14 +649,14 @@ export function build(ctx: FormContext, fieldNames?: string[]): VNode {
       if (prop.isPattern) {
         parentJoints.forEach((joint) => {
           // 在父节点中按顺序添加
-          let pairs = createOptionalFieldNode(ctx, prop, joint)
+          let pairs = createOptionalFieldAndNode(ctx, prop, joint)
           debug(`属性【${prop.fullname}】生成${pairs.length}个可选字段`)
           pairs.forEach((p) => stack.addNode(p, joint))
         })
       } else {
         parentJoints.forEach((joint) => {
+          let pair = createFieldAndNode(ctx, prop, joint)
           // 在父节点中按顺序添加
-          let pair = createFieldNode(ctx, prop, joint)
           stack.addNode(pair, joint)
         })
       }

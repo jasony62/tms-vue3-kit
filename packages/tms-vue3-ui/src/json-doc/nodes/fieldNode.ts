@@ -16,7 +16,7 @@ const defaultGroup = { tag: 'div', option }
 function getRawCreateArgs(field: Field) {
   // field对应的组件类型，指定or预制，有items的变成group组件
   const args =
-    field.items && field.type !== 'select'
+    field.choices && field.type !== 'select'
       ? components[`${field.type}group`] || defaultGroup
       : components[field.type] || defaultInput
 
@@ -66,8 +66,8 @@ export abstract class FieldNode extends Node {
     const doc = ctx.editDoc
     const key = field.fullname
     // 指定了选型分组
-    if (field.enumGroups?.length && field.items?.length) {
-      field.itemVisible = {}
+    if (field.enumGroups?.length && field.choices?.length) {
+      field.choiceVisible = {}
       /**依次执行匹配规则*/
       field.enumGroups.forEach((enumGroup) => {
         let { assocEnum } = enumGroup // 分组依赖的选项
@@ -75,19 +75,19 @@ export abstract class FieldNode extends Node {
         // 在文档中检查，依赖的属性值是否和指定的值一致
         if (doc.get(assocEnum.property) !== assocEnum.value) {
           // 分组条件不满足，将分组下的选项设置为不可见
-          field.items?.forEach((oOption) => {
-            if (oOption.group === enumGroup.id) {
-              let id = oOption.group + oOption.value
-              if (field.itemVisible) field.itemVisible[id] = false
+          field.choices?.forEach((oChoice) => {
+            if (oChoice.group === enumGroup.id) {
+              let id = oChoice.group + oChoice.value
+              if (field.choiceVisible) field.choiceVisible[id] = false
               /**选项不可见，清除数据对象中对应的值*/
               let docVal = doc.get(key)
               if (field.schemaType === 'string') {
                 // 字段是字符串
-                if (docVal === oOption.value) doc.set(key, '')
+                if (docVal === oChoice.value) doc.set(key, '')
               } else {
                 // 字段是数组
-                if (Array.isArray(docVal) && docVal.includes(oOption.value)) {
-                  let index = docVal.indexOf(oOption.value)
+                if (Array.isArray(docVal) && docVal.includes(oChoice.value)) {
+                  let index = docVal.indexOf(oChoice.value)
                   docVal.splice(index, 1)
                 }
               }
@@ -95,10 +95,10 @@ export abstract class FieldNode extends Node {
           })
         } else {
           // 分组条件成立，将分组下的选项设置为可见
-          field.items?.forEach((oOption) => {
+          field.choices?.forEach((oOption) => {
             if (oOption.group === enumGroup.id) {
               let id = oOption.group + oOption.value
-              if (field.itemVisible) field.itemVisible[id] = true
+              if (field.choiceVisible) field.choiceVisible[id] = true
             }
           })
         }
@@ -151,8 +151,8 @@ export abstract class FieldNode extends Node {
           })
         }
         // 只有数据发生变化才触发渲染
-        if (!_.isEqual(field.items, arr)) {
-          field.items = arr
+        if (!_.isEqual(field.choices, arr)) {
+          field.choices = arr
           if (arr.length === 1) {
             // 选项唯一时自动赋值
             this.autofillValue(field, arr[0].value)

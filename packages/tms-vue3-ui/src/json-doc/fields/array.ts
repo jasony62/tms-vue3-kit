@@ -1,17 +1,21 @@
 import { SchemaProp } from '@/json-schema/model'
 import { Field, ARRAY_KEYWORDS } from './field'
 
-type Item = {
+type Choice = {
   value: string
   label: string
   group?: string
 }
-
-export function parseItems(items?: Item[]): Item[] | undefined {
-  return items?.map((item) => {
-    let obj: Item = { value: item.value, label: item.label }
-    if (item.group) {
-      obj.group = item.group
+/**
+ * 字段可用的选项
+ * @param choices
+ * @returns
+ */
+export function parseChoices(choices?: Choice[]): Choice[] | undefined {
+  return choices?.map((choice) => {
+    let obj: Choice = { value: choice.value, label: choice.label }
+    if (choice.group) {
+      obj.group = choice.group
     }
     return obj
   })
@@ -19,7 +23,7 @@ export function parseItems(items?: Item[]): Item[] | undefined {
 
 export class FieldArray extends Field {
   multiple: boolean
-  items: any[] = []
+  choices: any[] = []
   itemGroups?
 
   constructor(prop: SchemaProp, index = -1, name = '') {
@@ -38,29 +42,29 @@ export class FieldArray extends Field {
             if (attrs?.enumGroups?.length) {
               this.itemGroups = attrs.enumGroups
             }
-            this.itemType = 'option'
-            this.items = parseItems(attrs[keyword]) ?? []
+            this.choiceType = 'option'
+            this.choices = parseChoices(attrs[keyword]) ?? []
             break
 
           case 'oneOf':
             this.type = 'radiogroup'
-            this.itemType = 'radio'
+            this.choiceType = 'radio'
             this.value = this.hasOwnProperty('value') ? this.value : ''
-            this.items = parseItems(attrs[keyword]) ?? []
+            this.choices = parseChoices(attrs[keyword]) ?? []
             break
 
           case 'anyOf':
             this.type = 'checkboxgroup'
-            this.itemType = 'checkbox'
+            this.choiceType = 'checkbox'
             this.value = Array.isArray(this.value) ? this.value : []
-            this.items = parseItems(attrs[keyword]) ?? []
+            this.choices = parseChoices(attrs[keyword]) ?? []
             break
         }
       }
     }
     if (!this.type) {
       this.type = attrs.type
-      this.items = []
+      this.choices = []
     }
   }
 }

@@ -101,6 +101,10 @@ export class SchemaProp {
     return this._path
   }
 
+  set path(val) {
+    this._path = val
+  }
+
   get name() {
     return this._name
   }
@@ -252,7 +256,7 @@ function* _parseChildren(
   parents: SchemaProp[],
   requiredSet?: string[],
   isPatternProperty = false
-) {
+): IterableIterator<SchemaProp> {
   let keys = Object.keys(properties)
   for (let i = 0, key; i < keys.length; i++) {
     key = keys[i]
@@ -273,7 +277,7 @@ function* _parseOne(
   parents: SchemaProp[],
   mandatory?: boolean,
   isPatternProperty = false
-): any {
+): IterableIterator<SchemaProp> {
   const log = debug.extend('_parseOne')
   log(`开始解析属性【${name}】`)
   let path = ''
@@ -424,7 +428,7 @@ export class SchemaIter {
   /**
    * 迭代访问JSONSchema的属性
    */
-  *[Symbol.iterator]() {
+  *[Symbol.iterator](): IterableIterator<SchemaProp> {
     // 从根属性开始遍历
     yield* _parseOne(this._rootName, this._rawSchema, [])
   }

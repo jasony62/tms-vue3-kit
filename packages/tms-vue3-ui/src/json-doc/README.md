@@ -1,16 +1,18 @@
-根据指定`JSONSchema`生成表单，将表单和数据绑定。
+根据指定`JSONSchema`和文档数据生成表单。
 
-`JSONSchema`支持 8 种（"null", "boolean", "object", "array", "number", "integer", "string", "json"）基本的属性类型，每个属性和特定输入控件对应。
+`JSONSchema`支持 7 种（"null", "boolean", "object", "array", "number", "integer", "string"）基本的属性类型，每个属性和特定输入控件对应。为了便于使用，添加了`json`类型，可以直接编辑整段 JSON 数据。
 
 `object`和`array`分为固定和自由两种情况。
 
-除了基本属性类型，还包括元数据（title,description,error）和操作(submit)。
+除了基本属性类型，还包括元数据（title,description,error）。
 
 `schema`中的 `attrs`会作为`field`的初始值。
 
 `items`是`{value,label}`的数组。
 
 schema（定义）->field（字段）->vnode（节点）->form（表单）
+
+字段（`Filed`）对应表单中输入项。每个字段对应唯一的属性定义（`SchemaProp`）。
 
 # schema
 
@@ -199,6 +201,14 @@ creator.render
 支持给对象添加动态属性
 
 # 构造过程
+
+通过属性定义迭代器（SchemaIter）依次获得属性定义（SchemaProp）。
+
+处理根属性定义（唯一），依次处理子属性定义。
+
+如果属性是固定的，直接根据属性定义创建字段。如果属性是可选的，根据文档中是否有对应的值，判断是否需要创建字段。
+
+创建字段对应的节点（Node）。每个字段对应一个节点。
 
 ```mermaid
 flowchart TD

@@ -38,7 +38,7 @@ const rollupOptions = {
 function getSubDir(dir) {
   let subDir
   if (dir !== baseEntryDir) {
-    let name = dir.replace(baseEntryDir +	path.sep, '')
+    let name = dir.replace(baseEntryDir + path.sep, '')
     subDir = `${path.sep}${name}`
   } else {
     subDir = ''
@@ -92,7 +92,7 @@ const buildComponent = async (dir, file) => {
       rollupOptions,
       lib: {
         entry,
-        name: subDir ? subDir.substring(1) : 'tmsVueUI',
+        name: subDir ? subDir.substring(1) : 'tmsVue3UI',
         fileName: () => `index.js`,
         formats: [format],
       },

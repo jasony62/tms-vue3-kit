@@ -110,11 +110,11 @@ export class Input extends FieldNode {
   private createItems(children: VNode[]) {
     const { field } = this
     const fieldValue = this.fieldValue()
-    field.items?.forEach((item) => {
+    field.choices?.forEach((item) => {
       //TODO 需要处理选项是否可见
-      if (field.itemType) {
+      if (field.choiceType) {
         let props: { [k: string]: any } = {
-          type: field.itemType,
+          type: field.choiceType,
           name: field.fullname,
           value: item.value,
           label: item.label,
@@ -131,7 +131,7 @@ export class Input extends FieldNode {
           props.disabled = true
         }
         // radio/checkbox
-        let n1 = h(components[field.itemType].tag, props)
+        let n1 = h(components[field.choiceType].tag, props)
         // label
         let n2 = h(components.fieldLabel.tag, null, item.label)
         // wrap

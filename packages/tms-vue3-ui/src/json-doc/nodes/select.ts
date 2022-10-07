@@ -34,26 +34,26 @@ export class Select extends Input {
     const { field } = this
     // 非必填时添加空选项
     if (!field.required) {
-      if (field.itemType) {
-        const node = new Node(this.ctx, components[field.itemType])
+      if (field.choiceType) {
+        const node = new Node(this.ctx, components[field.choiceType])
         node.attrOrProps = () => {
           return { value: '' }
         }
         children.push(node.createElem())
       }
     }
-    field.items?.forEach((item) => {
+    field.choices?.forEach((choice) => {
       /**关联的可见性*/
-      if (field.itemVisible) {
-        let optionVG = item.group + item.value
-        if (field.itemVisible[optionVG] === false) return
+      if (field.choiceVisible) {
+        let choiceVG = choice.group + choice.value
+        if (field.choiceVisible[choiceVG] === false) return
       }
-      if (field.itemType) {
-        const node = new Node(this.ctx, components[field.itemType])
+      if (field.choiceType) {
+        const node = new Node(this.ctx, components[field.choiceType])
         node.attrOrProps = () => {
-          return { value: item.value }
+          return { value: choice.value }
         }
-        children.push(node.createElem([item.label]))
+        children.push(node.createElem([choice.label]))
       }
     })
 

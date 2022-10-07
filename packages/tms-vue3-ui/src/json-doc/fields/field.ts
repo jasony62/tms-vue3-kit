@@ -26,9 +26,9 @@ export abstract class Field {
   private _prop: SchemaProp
   private _required: boolean
   private _visible: boolean
-  items?: FieldItem[] // 字段的可选项。应该改个名字，避免和schema中的items混淆。
-  itemType?: string
-  itemVisible?: { [k: string]: boolean } // 记录字段的选项是否可见
+  choices?: FieldItem[] // 字段的可选项。应该改个名字，避免和schema中的items混淆。
+  choiceType?: string // 选项的类型
+  choiceVisible?: { [k: string]: boolean } // 记录字段的选项是否可见
   /**自动填充相关*/
   waitingRender: boolean = false // 是否在等待渲染
   autofillURL: string = '' // 当前值对应的自动填充参数，为了避免不必要接口调用

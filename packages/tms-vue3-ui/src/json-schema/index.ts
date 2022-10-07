@@ -13,4 +13,8 @@ JsonSchema.install = (app: App) => {
   app.component('tms-json-schema', JsonSchema)
 }
 
+export { JSONSchemaBuilder } from './builder'
+
+export { SchemaIter, SchemaProp } from './model'
+
 export default JsonSchema

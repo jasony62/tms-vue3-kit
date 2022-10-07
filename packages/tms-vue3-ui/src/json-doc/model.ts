@@ -87,7 +87,7 @@ export class DocIter {
   }
 }
 
-class DocProp {
+export class DocProp {
   _initialKey: string | number
   _value: any
   _parent?: DocProp
@@ -169,6 +169,10 @@ class DocProp {
 
   set value(val: any) {
     this._value = val
+  }
+
+  get parent() {
+    return this._parent
   }
 
   removeChild(key: string | number) {

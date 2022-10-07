@@ -9,10 +9,11 @@ export class Checkboxgroup extends Input {
     const fullname = field.fullname
     const fieldName = field.name
     if (fieldName) {
+      //@TODO 这里的逻辑有问题
       if (
-        field.items &&
-        field.itemType &&
-        /integer|number/.test(field.itemType)
+        field.choices &&
+        field.choiceType &&
+        /integer|number/.test(field.choiceType)
       ) {
         newValue = Number(newValue)
       }
