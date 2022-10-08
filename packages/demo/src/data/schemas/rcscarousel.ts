@@ -60,13 +60,15 @@ export const SampleSchema = {
                       isOneOf: true,
                       items: {
                         type: 'object',
-                        patternProperties: {
-                          '^media$': {
+                        properties: {
+                          media: {
                             type: 'object',
                             initialName: 'media',
                             title: '卡片媒体文件',
                             format: 'file',
                             required: false,
+                            isOneOf: true,
+                            isOneOfExclusiveGroup: '媒体文件',
                             properties: {
                               mediaUrl: {
                                 type: 'string',
@@ -118,10 +120,12 @@ export const SampleSchema = {
                               },
                             },
                           },
-                          '^mediaSupplier$': {
+                          mediaSupplier: {
                             type: 'object',
                             initialName: 'mediaSupplier',
-                            title: '获取卡片媒体文件数据',
+                            title: '卡片媒体文件服务',
+                            isOneOf: true,
+                            isOneOfExclusiveGroup: '媒体文件',
                             properties: {
                               url: {
                                 type: 'string',
@@ -135,20 +139,26 @@ export const SampleSchema = {
                               },
                             },
                           },
-                          '^title$': {
+                          title: {
                             type: 'string',
                             initialName: 'title',
                             title: '卡片标题',
+                            isOneOf: true,
+                            isOneOfExclusiveGroup: '卡片标题',
                           },
-                          '^titleTemplate$': {
+                          titleTemplate: {
                             type: 'string',
                             initialName: 'titleTemplate',
                             title: '卡片标题模板',
+                            isOneOf: true,
+                            isOneOfExclusiveGroup: '卡片标题',
                           },
-                          '^titleSupplier$': {
+                          titleSupplier: {
                             type: 'object',
                             initialName: 'titleSupplier',
                             title: '卡片标题服务',
+                            isOneOf: true,
+                            isOneOfExclusiveGroup: '卡片标题',
                             properties: {
                               url: {
                                 type: 'string',
@@ -162,20 +172,26 @@ export const SampleSchema = {
                               },
                             },
                           },
-                          '^description$': {
+                          description: {
                             type: 'string',
                             initialName: 'description',
                             title: '卡片说明',
+                            isOneOf: true,
+                            isOneOfExclusiveGroup: '卡片说明',
                           },
-                          '^descriptionTemplate$': {
+                          descriptionTemplate: {
                             type: 'string',
                             initialName: 'descriptionTemplate',
                             title: '卡片说明模板',
+                            isOneOf: true,
+                            isOneOfExclusiveGroup: '卡片说明',
                           },
-                          '^descriptionSupplier$': {
+                          descriptionSupplier: {
                             type: 'object',
                             initialName: 'descriptionSupplier',
                             title: '卡片说明服务',
+                            isOneOf: true,
+                            isOneOfExclusiveGroup: '卡片说明',
                             properties: {
                               url: {
                                 type: 'string',
@@ -189,15 +205,19 @@ export const SampleSchema = {
                               },
                             },
                           },
-                          '^suggestions$': {
+                          suggestions: {
                             type: 'json',
                             initialName: 'suggestions',
                             title: '卡片建议列表',
+                            isOneOf: true,
+                            isOneOfExclusiveGroup: '卡片建议列表',
                           },
-                          '^suggestionsSupplier$': {
+                          suggestionsSupplier: {
                             type: 'object',
                             initialName: 'suggestionsSupplier',
-                            title: '建议列表服务',
+                            title: '卡片建议列表服务',
+                            isOneOf: true,
+                            isOneOfExclusiveGroup: '卡片建议列表',
                             properties: {
                               url: {
                                 type: 'string',

@@ -21,7 +21,13 @@ export const Type2Format = {
 } as { [k: string]: { value: string; label: string }[] }
 
 const propToRaw = (prop: SchemaProp, parent: any): any => {
-  let { items, existIf, isOneOf } = prop
+  let {
+    items,
+    existIf,
+    isOneOf,
+    isOneOfInclusiveGroup,
+    isOneOfExclusiveGroup,
+  } = prop
 
   let rawProp: any = {
     ...prop.attrs,
@@ -36,6 +42,12 @@ const propToRaw = (prop: SchemaProp, parent: any): any => {
   }
 
   if (isOneOf) rawProp.isOneOf = isOneOf
+
+  if (isOneOfInclusiveGroup)
+    rawProp.isOneOfInclusiveGroup = isOneOfInclusiveGroup
+
+  if (isOneOfExclusiveGroup)
+    rawProp.isOneOfExclusiveGroup = isOneOfExclusiveGroup
 
   return rawProp
 }
@@ -76,7 +88,7 @@ export class JSONSchemaBuilder {
 
     // 处理根节点/
     const rootObj = propToRaw(root, null)
-    if (Object.hasOwn(rootObj, 'default')) delete rootObj.default
+    if (rootObj.hasOwnProperty('default')) delete rootObj.default
 
     for (let i = 1; i < this.props.length; i++) {
       let prop = this.props[i]
@@ -129,7 +141,7 @@ export class JSONSchemaBuilder {
       /**在父对象中添加当前属性 */
       let newProp = propToRaw(prop, parent)
       if (newProp.type === 'object' || newProp.type === 'array') {
-        if (Object.hasOwn(newProp, 'default')) delete newProp.default
+        if (newProp.hasOwnProperty('default')) delete newProp.default
       }
       /**加入父属性 */
       if (typeof prop.isPattern === 'boolean' && prop.isPattern === true) {

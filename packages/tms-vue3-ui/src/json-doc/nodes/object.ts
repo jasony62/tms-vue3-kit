@@ -55,65 +55,93 @@ function _pickLocalFile(ctx: FormContext, field: Field, fileUpload: Function) {
  * @param ctx
  * @param field
  */
-const selectOneOfVNode = (ctx: FormContext, field: Field) => {
-  const options = field.schemaProp.isOneOfChildren?.map((child) => {
-    return h(
-      'option',
-      { value: child.name },
-      `${child.attrs.title || child.name}`
-    )
-  })
+const selectOneOfVNode = (ctx: FormContext, field: Field): VNode[] => {
+  // 每个互斥组生成一个select控件
+  const egSelects: VNode[] = []
 
-  options?.splice(
-    0,
-    0,
-    h('option', { selected: true }, '--选择oneOf属性定义--')
+  field.schemaProp.isOneOfChildren.forEach(
+    (eg: Map<string, SchemaProp[]>, egName: string) => {
+      // 检查是否已经有被选中使用的定义
+      let egChildren: SchemaProp[] = []
+      eg.forEach((props: SchemaProp[]) => {
+        egChildren.push(...props)
+      })
+      let hasSelected = egChildren.some((childProp) => {
+        let fullname =
+          (field.fullname ? field.fullname + '.' : '') + childProp.name
+        return ctx.oneOfSelected?.has(fullname)
+      })
+      if (hasSelected) return
+      // 一个互斥组中的选项
+      const options: VNode[] = []
+      const labels: string[] = []
+      eg.forEach((props: SchemaProp[], igName: string) => {
+        let label =
+          props.length === 1
+            ? props[0].attrs.title
+              ? props[0].attrs.title
+              : igName
+            : igName
+        let vnode = h('option', { value: igName }, label)
+        labels.push(label)
+        options.push(vnode)
+      })
+      options?.splice(
+        0,
+        0,
+        h(
+          'option',
+          { value: '' },
+          `--选择【${egName ? egName : labels.join('/')}】输入方式--`
+        )
+      )
+      const vnSelect = h(
+        'select',
+        {
+          value: '',
+          class: ['tvu-input', 'tvu-jdoc__one-of-select'],
+          onChange: (event: any) => {
+            const selectedGroupName = event.target ? event.target.value : event
+            if (selectedGroupName === '') return
+            /**清除已选字段的选中状态*/
+            eg.forEach((props: SchemaProp[], egName: string) => {
+              if (egName !== selectedGroupName) return
+              props.forEach((child) => {
+                let childFullname = `${
+                  field.fullname ? field.fullname + '.' : ''
+                }${child.name}`
+                let childField = ctx.fields?.get(childFullname)
+                if (childField) {
+                  let ingroup = Field.isOneOfInclusiveGroupName(childField)
+                  ctx.oneOfSelected?.set(childFullname, { ingroup })
+                } else {
+                  /**
+                   * 如果是模板属性，需要重新生成字段
+                   */
+                  const { name, attrs } = child
+                  const newKey = Field.initialKey(name)
+                  const initVal = Field.initialVal(attrs.default, attrs.type)
+                  debug(
+                    `字段【${childFullname}】执行【添加${
+                      attrs.title ?? name
+                    }属性】，随机属性名：${newKey}，初始值：${JSON.stringify(
+                      initVal
+                    )}`
+                  )
+                  ctx.editDoc.appendAt(field.fullname, initVal, newKey)
+                }
+              })
+            })
+            ctx.editDoc.forceRender()
+          },
+        },
+        options
+      )
+      egSelects.push(vnSelect)
+    }
   )
 
-  return h(
-    'select',
-    {
-      class: ['tvu-input', 'tvu-jdoc__one-of-select'],
-      onChange: (event: any) => {
-        const propName = event && event.target ? event.target.value : event
-        if (propName) {
-          /**清除已选字段的选中状态*/
-          field.schemaProp.isOneOfChildren?.forEach((child) => {
-            let childFullname = `${field.fullname ? field.fullname + '.' : ''}${
-              child.name
-            }`
-            let childField = ctx.fields?.get(childFullname)
-            if (childField) {
-              if (propName === childField.name) {
-                ctx.oneOfSelected?.add(childFullname)
-              } else {
-                ctx.oneOfSelected?.delete(childFullname)
-              }
-            } else {
-              /**
-               * 如果是模板属性，需要重新生成字段
-               */
-              const { name, attrs } = child
-              if (propName === name) {
-                const newKey = Field.initialKey(name)
-                const initVal = Field.initialVal(attrs.default, attrs.type)
-                debug(
-                  `字段【${childFullname}】执行【添加${
-                    attrs.title ?? name
-                  }属性】，随机属性名：${newKey}，初始值：${JSON.stringify(
-                    initVal
-                  )}`
-                )
-                ctx.editDoc.appendAt(field.fullname, initVal, newKey)
-              }
-            }
-          })
-          ctx.editDoc.forceRender()
-        }
-      },
-    },
-    options
-  )
+  return egSelects
 }
 /**
  * 添加模板子属性操作
@@ -270,12 +298,20 @@ export class ObjectNode extends FieldNode {
       `对象字段【${field.fullname}】【${schemaProp.fullname}】需要处理子节点`
     )
 
+    /**提取所有的oneOf属性便于后续处理*/
+    const flattenIsOneOfChildren: SchemaProp[] = []
+    isOneOfChildren.forEach((eg: Map<string, SchemaProp[]>) => {
+      eg.forEach((props: SchemaProp[]) => {
+        flattenIsOneOfChildren.push(...props)
+      })
+    })
+
     /**添加模板属性操作*/
     if (patternChildren?.length) {
       let availablePatternChildren
-      if (Array.isArray(isOneOfChildren) && isOneOfChildren.length) {
+      if (flattenIsOneOfChildren.length) {
         availablePatternChildren = patternChildren.filter(
-          (childProp) => !isOneOfChildren.includes(childProp)
+          (childProp) => !flattenIsOneOfChildren.includes(childProp)
         )
       } else {
         availablePatternChildren = patternChildren
@@ -285,13 +321,8 @@ export class ObjectNode extends FieldNode {
       }
     }
     /**选择oneOf属性操作*/
-    if (Array.isArray(isOneOfChildren) && isOneOfChildren.length) {
-      let hasSelected = isOneOfChildren.some((childProp) => {
-        let fullname =
-          (field.fullname ? field.fullname + '.' : '') + childProp.name
-        return ctx.oneOfSelected?.has(fullname)
-      })
-      if (!hasSelected) vnodes.push(selectOneOfVNode(ctx, field))
+    if (flattenIsOneOfChildren.length) {
+      vnodes.push(...selectOneOfVNode(ctx, field))
     }
 
     /**如果开放paste操作，添加按钮*/

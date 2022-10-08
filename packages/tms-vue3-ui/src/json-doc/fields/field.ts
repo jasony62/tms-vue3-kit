@@ -208,4 +208,15 @@ export abstract class Field {
 
     return assignedValue
   }
+  /**
+   *
+   * @param field
+   * @returns
+   */
+  static isOneOfInclusiveGroupName(field: Field) {
+    let gname = field.schemaProp.isOneOfInclusiveGroup
+      ? `${field.path}.${field.schemaProp.isOneOfInclusiveGroup}`
+      : ''
+    return gname
+  }
 }

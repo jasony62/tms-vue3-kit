@@ -88,13 +88,14 @@ export class SchemaProp {
   isPattern = false //  是否是由正则表达式定义名称的子属性
   patternChildren: SchemaProp[] | undefined
   isOneOf = false // 在父属性中是否为排他属性
-  isOneOfChildren: SchemaProp[]
+  isOneOfInclusiveGroup = '' // 所属亲和组名称
+  isOneOfExclusiveGroup = '' // 所属互斥组名称
+  isOneOfChildren = new Map<string, Map<string, SchemaProp[]>>() // 子属性中的排他属性，第1层是互斥组，第2层是亲和组
 
   constructor(path: string, name: string, type?: string) {
     this._path = path
     this._name = name
     this.attrs = { type: type ?? '' }
-    this.isOneOfChildren = [] // 需要被子属性引用，需要预先创建
   }
 
   get path() {
@@ -334,8 +335,32 @@ function* _parseOne(
       case 'isOneOf':
         if (parents.length && rawProp.isOneOf === true) {
           newProp.isOneOf = true
-          parents[0].isOneOfChildren.push(newProp)
+          const { isOneOfChildren } = parents[0]
+          const { isOneOfInclusiveGroup, isOneOfExclusiveGroup } = rawProp
+          let exclusiveGroup // 第1层是互斥组
+          if (isOneOfExclusiveGroup) {
+            if (!isOneOfChildren.has(isOneOfExclusiveGroup))
+              isOneOfChildren.set(isOneOfExclusiveGroup, new Map())
+            exclusiveGroup = isOneOfChildren.get(isOneOfExclusiveGroup)
+          } else {
+            if (!isOneOfChildren.has('')) isOneOfChildren.set('', new Map())
+            exclusiveGroup = isOneOfChildren.get('')
+          }
+          if (exclusiveGroup) {
+            // 第2层是亲和组
+            if (isOneOfInclusiveGroup) {
+              if (exclusiveGroup.has(isOneOfInclusiveGroup))
+                exclusiveGroup.get(isOneOfInclusiveGroup)?.push(newProp)
+              else exclusiveGroup.set(isOneOfInclusiveGroup, [newProp])
+            } else {
+              exclusiveGroup.set(newProp.name, [newProp])
+            }
+          }
         }
+        break
+      case 'isOneOfInclusiveGroup':
+      case 'isOneOfExclusiveGroup':
+        newProp[key] = rawProp[key]
         break
       default:
         Object.assign(newProp.attrs, { [key]: rawProp[key] })
@@ -408,7 +433,6 @@ function* _parseOne(
  * 根节点默认名称
  */
 export const DEFAULT_ROOT_NAME = ''
-
 /**
  * JSONSchema对象迭代器
  */

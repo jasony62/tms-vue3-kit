@@ -57,23 +57,40 @@ const fieldInsertVNode = (ctx: FormContext, field: Field) => {
   )
 }
 /**
- * 删除属性操作
+ * 删除属性或亲和属性组操作
  * @param ctx
  * @param field
  * @returns
  */
 const fieldRemoveVNode = (ctx: FormContext, field: Field) => {
+  let label =
+    field.isOneOf && field.schemaProp.isOneOfInclusiveGroup
+      ? field.schemaProp.isOneOfInclusiveGroup
+      : field.shortname
+
   return h(
     components.button.tag,
     {
       name: field.fullname,
       class: ['tvu-button'],
       onClick: () => {
-        if (field.isOneOf) ctx.oneOfSelected?.delete(field.fullname)
-        ctx.editDoc.remove(field.fullname)
+        if (field.isOneOf && field.schemaProp.isOneOfInclusiveGroup) {
+          /**删除同亲和组的字段*/
+          const fieldNames: any[] = fieldNamesInGroup(field, ctx)
+          fieldNames.forEach((name) => {
+            ctx.oneOfSelected?.delete(name)
+            ctx.editDoc.remove(name, false)
+          })
+          ctx.editDoc.forceRender()
+        } else {
+          if (field.isOneOf) {
+            ctx.oneOfSelected?.delete(field.fullname)
+          }
+          ctx.editDoc.remove(field.fullname)
+        }
       },
     },
-    `删除-${field.shortname}`
+    `删除-${label}`
   )
 }
 /**
@@ -180,14 +197,28 @@ export class FieldWrap extends Node {
       children.push(actions)
     }
     if (field.isOneOf) {
-      let actions = h(
-        'div',
-        {
-          class: ['tvu-jdoc__field-actions'],
-        },
-        [fieldRemoveVNode(ctx, field)]
-      )
-      children.push(actions)
+      if (field.schemaProp.isOneOfInclusiveGroup) {
+        const fieldNames: any[] = fieldNamesInGroup(field, ctx)
+        if (fieldNames.indexOf(field.fullname) === fieldNames.length - 1) {
+          let actions = h(
+            'div',
+            {
+              class: ['tvu-jdoc__field-actions'],
+            },
+            [fieldRemoveVNode(ctx, field)]
+          )
+          children.push(actions)
+        }
+      } else {
+        let actions = h(
+          'div',
+          {
+            class: ['tvu-jdoc__field-actions'],
+          },
+          [fieldRemoveVNode(ctx, field)]
+        )
+        children.push(actions)
+      }
     }
 
     return children
@@ -232,7 +263,10 @@ export class FieldWrap extends Node {
       let selected = false
       if (!ctx.oneOfSelected?.has(field.fullname)) {
         selected = ctx.editDoc.has(field.fullname)
-        if (selected) ctx.oneOfSelected?.add(field.fullname)
+        if (selected) {
+          let ingroup = Field.isOneOfInclusiveGroupName(field)
+          ctx.oneOfSelected?.set(field.fullname, { ingroup })
+        }
       } else {
         selected = true
       }
@@ -245,4 +279,12 @@ export class FieldWrap extends Node {
 
     return this._vnode
   }
+}
+function fieldNamesInGroup(field: Field, ctx: FormContext) {
+  const groupName = Field.isOneOfInclusiveGroupName(field)
+  const fieldNames: any[] = []
+  ctx.oneOfSelected?.forEach(({ ingroup }, fieldName) => {
+    if (ingroup === groupName) fieldNames.push(fieldName)
+  })
+  return fieldNames
 }

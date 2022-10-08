@@ -81,6 +81,12 @@
       <tvu-form-item class="tvu-jse__field" v-if="activeIndex > 0">
         <tvu-checkbox v-model="prop.isOneOf" label="isOneOf"></tvu-checkbox>
       </tvu-form-item>
+      <tvu-form-item class="tvu-jse__field" v-if="prop.isOneOf" label="亲和组名称">
+        <tvu-input v-model.trim="prop.isOneOfInclusiveGroup" placeholder="亲和组名称"></tvu-input>
+      </tvu-form-item>
+      <tvu-form-item class="tvu-jse__field" v-if="prop.isOneOf" label="互斥组名称">
+        <tvu-input v-model.trim="prop.isOneOfExclusiveGroup" placeholder="互斥组名称"></tvu-input>
+      </tvu-form-item>
       <!--特定格式类型对应的扩展属性-->
       <component v-if="items" :is="compFormatAttrs" v-model:formatAttrs="items.formatAttrs"></component>
       <!--选项设置相关-->

@@ -1,5 +1,6 @@
 import { h, VNode } from 'vue'
 import { FormContext } from '../builder'
+import { Field } from '../fields'
 
 /**
  * 表单中的节点。与Vue中的VNode对应。

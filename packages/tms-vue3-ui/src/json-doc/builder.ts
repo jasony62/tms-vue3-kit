@@ -680,7 +680,8 @@ class Builder {
   constructor(ctx: FormContext, fieldNames?: string[]) {
     this._uid = ++_uid
     if (!ctx.fields) ctx.fields = new Map<string, Field>()
-    if (!ctx.oneOfSelected) ctx.oneOfSelected = new Set<string>()
+    if (!ctx.oneOfSelected)
+      ctx.oneOfSelected = new Map<string, { ingroup?: string }>()
     if (!ctx.nestExpanded) ctx.nestExpanded = new Set<string>()
     this.ctx = ctx
     this.fieldNames = fieldNames
@@ -713,7 +714,7 @@ export type FormContext = {
   schema: RawSchema
   onMessage: Function
   fields?: Map<string, Field> // 保存表单中的field对象，避免每一次渲染都重新生成
-  oneOfSelected?: Set<string> // 保存选中的oneOf字段
+  oneOfSelected?: Map<string, { ingroup?: string }> // 保存选中的oneOf字段
   nestExpanded?: Set<string> // 保存展开状态的嵌套节点
   enablePaste?: boolean
   autofillRequest?: Function

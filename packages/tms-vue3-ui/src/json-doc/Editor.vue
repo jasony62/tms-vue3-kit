@@ -122,7 +122,7 @@ export default defineComponent({
     /**全局保存所有的字段，方便查找*/
     const fields = new Map<string, Field>()
     /**根据文档数据和用户选择，全局保存所有的oneOf字段选择状态*/
-    const oneOfSelected = new Set<string>()
+    const oneOfSelected = new Map<string, { ingroup: string }>()
     /**全局保留嵌套字段的折叠/展开状态*/
     const nestExpanded = new Set<string>()
 
