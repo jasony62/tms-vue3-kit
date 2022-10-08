@@ -1,117 +1,283 @@
 export const SampleSchema = {
   type: 'object',
+  groupable: false,
+  dependencies: {},
+  eventDependencies: {},
+  readonly: false,
   required: false,
-  title: '单卡片消息',
   properties: {
-    message: {
+    name: {
+      type: 'string',
+      title: '名称',
+    },
+    title: {
+      type: 'string',
+      title: '标题',
+    },
+    data: {
       type: 'object',
+      title: '单卡片消息定义',
       required: false,
-      title: 'RCS单卡片消息',
       properties: {
-        generalPurposeCard: {
+        contentType: {
+          type: 'string',
+          title: '内容类型',
+          description: '按照《RCC.07V11.0》中的定义。',
+          default: 'application/vnd.gsma.botmessage.v1.0+json',
+          readonly: true,
+          required: true,
+        },
+        contentText: {
           type: 'object',
-          required: false,
-          title: 'RCS单卡片消息',
+          title: '内容',
+          required: true,
           properties: {
-            layout: {
+            message: {
               type: 'object',
-              required: false,
-              title: '布局方式',
+              title: '内容',
+              required: true,
               properties: {
-                cardOrientation: {
-                  type: 'string',
-                  required: false,
-                  title: '卡片方向',
-                  default: 'HORIZONTAL',
-                },
-                imageAlignment: {
-                  type: 'string',
-                  required: false,
-                  title: '图片对齐方式',
-                  default: 'LEFT',
-                },
-                style: {
-                  type: 'string',
-                  required: false,
-                  title: '样式文件',
-                },
-              },
-            },
-            content: {
-              type: 'object',
-              required: false,
-              title: '卡片内容',
-              properties: {
-                media: {
+                generalPurposeCard: {
                   type: 'object',
-                  required: false,
-                  title: '卡片头图',
+                  title: '单卡片定义',
+                  required: true,
                   properties: {
-                    mediaUrl: {
-                      type: 'string',
+                    layout: {
+                      type: 'object',
+                      title: '卡片布局',
                       required: false,
-                      title: '卡片头图地址',
+                      properties: {
+                        cardOrientation: {
+                          type: 'string',
+                          title: '卡片方向',
+                          default: 'HORIZONTAL',
+                          required: false,
+                        },
+                        imageAlignment: {
+                          type: 'string',
+                          default: 'LEFT',
+                          title: '图片对齐方式',
+                          required: false,
+                        },
+                      },
                     },
-                    mediaContentType: {
-                      type: 'string',
+                    content: {
+                      type: 'object',
+                      title: '卡片内容',
                       required: false,
-                      title: '卡片头图内容类型',
+                      isOneOf: true,
+                      properties: {
+                        media: {
+                          type: 'object',
+                          initialName: 'media',
+                          title: '卡片媒体文件',
+                          format: 'file',
+                          required: false,
+                          isOneOf: true,
+                          isOneOfExclusiveGroup: '媒体文件',
+                          properties: {
+                            mediaUrl: {
+                              type: 'string',
+                              title: '媒体文件地址',
+                              required: false,
+                              isOneOf: true,
+                            },
+                            mediaUrlTemplate: {
+                              type: 'string',
+                              title: '媒体文件地址模板',
+                              isOneOf: true,
+                            },
+                            mediaContentType: {
+                              type: 'string',
+                              title: '媒体文件内容类型',
+                              required: false,
+                            },
+                            mediaFileSize: {
+                              type: 'number',
+                              title: '媒体文件大小（字节）',
+                              required: false,
+                            },
+                            thumbnailUrl: {
+                              type: 'string',
+                              title: '缩略图地址',
+                              required: false,
+                              isOneOf: true,
+                            },
+                            thumbnailUrlTemplate: {
+                              type: 'string',
+                              title: '缩略图地址模板',
+                              isOneOf: true,
+                            },
+                            thumbnailContentType: {
+                              type: 'string',
+                              title: '缩略图内容类型',
+                              required: false,
+                            },
+                            thumbnailFileSize: {
+                              type: 'number',
+                              title: '缩略图文件大小（字节）',
+                              required: false,
+                            },
+                            height: {
+                              type: 'string',
+                              title: '图片的高度',
+                              required: false,
+                            },
+                            contentDescription: {
+                              type: 'string',
+                              title: '媒体文件内容说明',
+                              required: false,
+                            },
+                          },
+                        },
+                        mediaSupplier: {
+                          type: 'object',
+                          initialName: 'mediaSupplier',
+                          title: '卡片媒体文件服务',
+                          isOneOf: true,
+                          isOneOfExclusiveGroup: '媒体文件',
+                          properties: {
+                            url: {
+                              type: 'string',
+                              title: '获取数据地址',
+                              isOneOf: true,
+                            },
+                            id: {
+                              type: 'string',
+                              title: '数据ID',
+                              isOneOf: true,
+                            },
+                          },
+                        },
+                        title: {
+                          type: 'string',
+                          initialName: 'title',
+                          title: '卡片标题',
+                          isOneOf: true,
+                          isOneOfExclusiveGroup: '卡片标题',
+                        },
+                        titleTemplate: {
+                          type: 'string',
+                          initialName: 'titleTemplate',
+                          title: '卡片标题模板',
+                          isOneOf: true,
+                          isOneOfExclusiveGroup: '卡片标题',
+                        },
+                        titleSupplier: {
+                          type: 'object',
+                          initialName: 'titleSupplier',
+                          title: '卡片标题服务',
+                          isOneOf: true,
+                          isOneOfExclusiveGroup: '卡片标题',
+                          properties: {
+                            url: {
+                              type: 'string',
+                              title: '获取数据地址',
+                              isOneOf: true,
+                            },
+                            id: {
+                              type: 'string',
+                              title: '数据ID',
+                              isOneOf: true,
+                            },
+                          },
+                        },
+                        description: {
+                          type: 'string',
+                          initialName: 'description',
+                          title: '卡片说明',
+                          isOneOf: true,
+                          isOneOfExclusiveGroup: '卡片说明',
+                        },
+                        descriptionTemplate: {
+                          type: 'string',
+                          initialName: 'descriptionTemplate',
+                          title: '卡片说明模板',
+                          isOneOf: true,
+                          isOneOfExclusiveGroup: '卡片说明',
+                        },
+                        descriptionSupplier: {
+                          type: 'object',
+                          initialName: 'descriptionSupplier',
+                          title: '卡片说明服务',
+                          isOneOf: true,
+                          isOneOfExclusiveGroup: '卡片说明',
+                          properties: {
+                            url: {
+                              type: 'string',
+                              title: '获取数据地址',
+                              isOneOf: true,
+                            },
+                            id: {
+                              type: 'string',
+                              title: '数据ID',
+                              isOneOf: true,
+                            },
+                          },
+                        },
+                        suggestions: {
+                          type: 'json',
+                          initialName: 'suggestions',
+                          title: '卡片建议列表',
+                          isOneOf: true,
+                          isOneOfExclusiveGroup: '卡片建议列表',
+                        },
+                        suggestionsSupplier: {
+                          type: 'object',
+                          initialName: 'suggestionsSupplier',
+                          title: '卡片建议列表服务',
+                          isOneOf: true,
+                          isOneOfExclusiveGroup: '卡片建议列表',
+                          properties: {
+                            url: {
+                              type: 'string',
+                              title: '获取数据地址',
+                              isOneOf: true,
+                            },
+                            id: {
+                              type: 'string',
+                              title: '数据ID',
+                              isOneOf: true,
+                            },
+                          },
+                        },
+                      },
                     },
-                    mediaFileSize: {
-                      type: 'string',
-                      required: false,
-                      title: '卡片头图文件大小（字节）',
-                    },
-                    thumbnailUrl: {
-                      type: 'string',
-                      required: false,
-                      title: '缩略图地址',
-                    },
-                    thumbnailContentType: {
-                      type: 'string',
-                      required: false,
-                      title: '缩略图内容类型',
-                    },
-                    thumbnailFileSize: {
-                      type: 'string',
-                      required: false,
-                      title: '缩略图文件大小（字节）',
-                    },
-                    height: {
-                      type: 'string',
-                      required: false,
-                      title: '头图在卡片中的高度',
-                      default: 'MEDIUM_HEIGHT',
-                    },
-                    contentDescription: {
-                      type: 'string',
-                      required: false,
-                      title: '头图内容描述',
+                    contentSupplier: {
+                      type: 'object',
+                      title: '获取卡片内容数据',
+                      isOneOf: true,
+                      properties: {
+                        url: {
+                          type: 'string',
+                          title: '获取数据地址',
+                          isOneOf: true,
+                        },
+                        id: {
+                          type: 'string',
+                          title: '数据ID',
+                          isOneOf: true,
+                        },
+                      },
                     },
                   },
-                },
-                titile: {
-                  type: 'string',
-                  required: false,
-                  title: '卡片标题',
-                },
-                description: {
-                  type: 'string',
-                  required: false,
-                  title: '卡片描述',
-                },
-                suggestions: {
-                  type: 'json',
-                  required: false,
-                  title: '卡片内置建议列表',
-                  description:
-                    '卡片内置建议列表是数组，包含1-4个建议回复或建议操作。',
                 },
               },
             },
           },
         },
       },
+    },
+    keywords: {
+      type: 'array',
+      title: '关键字',
+      items: {
+        type: 'string',
+      },
+    },
+    remark: {
+      type: 'string',
+      title: '备注',
     },
   },
 }

@@ -331,39 +331,6 @@ export class DocAsArray {
           }
         })
       })
-      /**检查是否为schema中定义的属性字段*/
-      // this._properties.forEach((docProp, index) => {
-      //   let jsonParentName = jsonDocPropNames.find(
-      //     (n) => docProp.name.indexOf(n) === 0
-      //   )
-      //   if (jsonParentName) {
-      //     log(
-      //       `文档属性【${docProp.name}】是json类型的文档属性【${jsonParentName}】的值，跳过`
-      //     )
-      //     return
-      //   }
-      //   let schemaProp = schemaProps.find((schemaProp) => {
-      //     return schemaProp.fullRegExp.test(docProp.name)
-      //   })
-      //   if (schemaProp) {
-      //     log(
-      //       `文档属性【${docProp.name}】匹配的属性定义【${schemaProp.fullname}】`
-      //     )
-      //     if (schemaProp.attrs.type === 'json') {
-      //       log(`文档属性【${docProp.name}】是json类型，需要处理下层节点`)
-      //       jsonDocPropNames.push(docProp.name)
-      //     } else {
-      //       if (docProp._children.length) {
-      //         log(`文档属性【${docProp.name}】不是叶节点，跳过`)
-      //         return
-      //       }
-      //     }
-      //     handleDocProp(docProp, index)
-      //   } else {
-      //     log(`文档属性【${docProp.name}】未找到匹配的属性定义，从文档中清除`)
-      //     if (_.has(output, docProp.name)) _.unset(output, docProp.name)
-      //   }
-      // })
     } else this._properties.forEach(handleDocProp)
 
     return Output
