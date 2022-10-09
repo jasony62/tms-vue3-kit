@@ -29,17 +29,17 @@ export const SampleSchema = {
         },
         contentText: {
           type: 'object',
-          title: '内容',
+          title: '内容文本',
           required: true,
           properties: {
             message: {
               type: 'object',
-              title: '内容',
+              title: '消息',
               required: true,
               properties: {
                 generalPurposeCard: {
                   type: 'object',
-                  title: '单卡片定义',
+                  title: '单卡片',
                   required: true,
                   properties: {
                     layout: {
@@ -245,7 +245,7 @@ export const SampleSchema = {
                     },
                     contentSupplier: {
                       type: 'object',
-                      title: '获取卡片内容数据',
+                      title: '卡片内容服务',
                       isOneOf: true,
                       properties: {
                         url: {

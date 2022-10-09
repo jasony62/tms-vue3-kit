@@ -128,7 +128,22 @@ export class FieldWrap extends Node {
       const toggleNestExpanded = () => {
         if (field.schemaType === 'object') {
           if (ctx.nestExpanded?.has(fullname)) ctx.nestExpanded.delete(fullname)
-          else ctx.nestExpanded?.add(fullname)
+          else {
+            ctx.nestExpanded?.add(fullname)
+            // 如果字段只有1个子字段，且子字段是对象类型，自动展开
+            const expandSubField = (f: Field) => {
+              if (f.children?.length === 1) {
+                let childField = f.children[0]
+                if (childField.schemaType === 'object') {
+                  if (!ctx.nestExpanded?.has(childField.fullname)) {
+                    ctx.nestExpanded?.add(childField.fullname)
+                    expandSubField(childField)
+                  }
+                }
+              }
+            }
+            expandSubField(field)
+          }
           ctx.editDoc.forceRender()
         }
       }

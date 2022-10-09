@@ -19,7 +19,8 @@ function createField(
   index = -1,
   name = ''
 ): Field {
-  let newField
+  let newField: Field | undefined
+
   switch (prop.attrs.type) {
     case 'boolean':
       newField = new FieldBoolean(prop, index, name)
@@ -51,16 +52,11 @@ function createField(
       newField = new FieldText(prop, index, name)
   }
 
-  /**有父字段*/
+  /**有父字段，可能需要调整名称*/
   if (parentField) {
     newField.path = parentField.fullname
-    if (prop.name === '[*]') {
-      // 数组中的项目
-      newField.path += '[*]'
-    }
-    if (parentField.type === 'object') {
-      parentField.children?.push(newField)
-    }
+    // 新字段是数组中的项目
+    if (prop.name === '[*]') newField.path += '[*]'
   }
 
   // 不使用重复创建的field，因为计算fullname较为复杂，所以先创建对象再查找，可以优化
@@ -69,6 +65,7 @@ function createField(
     if (exist) {
       newField = exist
     } else {
+      if (parentField?.type === 'object') parentField.children?.push(newField)
       ctx.fields.set(newField.fullname, newField)
     }
   }
