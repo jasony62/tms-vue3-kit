@@ -28,6 +28,10 @@ export class FieldText extends Field {
         case 'dateTime':
           this.type = 'dateTime'
           break
+        case 'longtext':
+        case 'mustache':
+          this.type = 'textarea'
+          break
       }
     } else {
       switch (attrs.type) {

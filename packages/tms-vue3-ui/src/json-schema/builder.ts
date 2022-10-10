@@ -11,6 +11,8 @@ export const Type2Format = {
     { value: 'email', label: '邮箱' },
     { value: 'mobile', label: '手机' },
     { value: 'dateTime', label: '日期时间' },
+    { value: 'longtext', label: '长文本' },
+    { value: 'mustache', label: '文档模板' },
   ],
   object: [
     { value: 'file', label: '文件' },

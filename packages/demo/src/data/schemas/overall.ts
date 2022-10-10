@@ -29,6 +29,11 @@ export const SampleSchema = {
         type: 'string',
       },
     },
+    description: {
+      title: '介绍',
+      type: 'string',
+      format: 'longtext',
+    },
     experiences: {
       title: '经历（对象类型数组）',
       type: 'array',
@@ -233,6 +238,11 @@ export const SampleSchema = {
     config: {
       title: '配置（JSON）',
       type: 'json',
+    },
+    textTemplate: {
+      title: '文档模板（mustache）',
+      type: 'string',
+      format: 'mustache',
     },
   },
   dependencies: {
