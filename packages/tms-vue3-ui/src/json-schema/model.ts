@@ -79,6 +79,7 @@ export type SchemaPropAttrs = {
  * 单个属性定义
  */
 export class SchemaProp {
+  _parent: SchemaProp | undefined
   _path: string
   _name: string
   attrs: SchemaPropAttrs
@@ -98,7 +99,22 @@ export class SchemaProp {
     this.attrs = { type: type ?? '' }
   }
 
+  get parent() {
+    return this._parent
+  }
+
+  set parent(val) {
+    this._parent = val
+  }
+
   get path() {
+    // 因为允许父属性改名，所以需要动态计算
+    if (this._parent) {
+      let path = this._parent.fullname
+      if (this._parent.attrs.type === 'array') path += '[*]'
+      return path
+    }
+
     return this._path
   }
 
@@ -289,6 +305,9 @@ function* _parseOne(
   }
 
   let newProp = new SchemaProp(path, name)
+
+  // 设置父属性
+  if (parents.length) newProp.parent = parents[0]
 
   if (mandatory) newProp.attrs.required = mandatory
   newProp.isPattern = isPatternProperty

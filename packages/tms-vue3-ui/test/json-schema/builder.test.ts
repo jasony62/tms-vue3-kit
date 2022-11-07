@@ -201,4 +201,68 @@ describe('处理JSONSchema', () => {
       'age',
     ])
   })
+  it('测试修改属性名称', () => {
+    const schema = {
+      type: 'object',
+      $id: 'https://example.com/schema.json',
+      $schema: 'https://json-schema.org/draft/2020-12/schema',
+      description: '对象名由正则表达式定义',
+      properties: {
+        org: {
+          type: 'object',
+          title: '组织（可扩展对象）',
+          properties: {
+            name: {
+              type: 'string',
+              title: '组织名称',
+            },
+          },
+          patternProperties: {
+            '^str\\w+$': {
+              type: 'string',
+              title: '扩展属性简单类型',
+              initialName: 'strNewProp',
+            },
+            '^obj\\w+$': {
+              type: 'object',
+              title: '扩展属性对象类型',
+              initialName: 'objNewProp',
+              properties: {
+                label: {
+                  type: 'string',
+                  title: '标题',
+                },
+                value: {
+                  type: 'string',
+                  title: '数值',
+                },
+                extra: {
+                  type: 'object',
+                  title: '扩展数据',
+                  properties: {
+                    label: {
+                      type: 'string',
+                      title: '标题2',
+                    },
+                    value: {
+                      type: 'string',
+                      title: '数值2',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    }
+    const builder = new JSONSchemaBuilder()
+    builder.flatten(schema)
+    const prop = builder.get('org.^obj\\w+$.extra')
+    if (prop) {
+      prop.name = 'extra1'
+    }
+    console.log('pppp', builder.props)
+    console.log('pppp', JSON.stringify(builder.unflatten(), null, 2))
+  })
 })

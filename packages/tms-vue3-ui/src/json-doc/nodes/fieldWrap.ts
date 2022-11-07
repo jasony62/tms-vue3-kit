@@ -94,6 +94,44 @@ const fieldRemoveVNode = (ctx: FormContext, field: Field) => {
   )
 }
 /**
+ * 后移属性操作
+ * @param ctx
+ * @param field
+ * @returns
+ */
+const fieldMoveDownVNode = (ctx: FormContext, field: Field) => {
+  return h(
+    components.button.tag,
+    {
+      name: field.fullname,
+      class: ['tvu-button'],
+      onClick: () => {
+        ctx.editDoc.moveDown(field.fullname)
+      },
+    },
+    `后移`
+  )
+}
+/**
+ * 前移属性操作
+ * @param ctx
+ * @param field
+ * @returns
+ */
+const fieldMoveUpVNode = (ctx: FormContext, field: Field) => {
+  return h(
+    components.button.tag,
+    {
+      name: field.fullname,
+      class: ['tvu-button'],
+      onClick: () => {
+        ctx.editDoc.moveUp(field.fullname)
+      },
+    },
+    `前移`
+  )
+}
+/**
  * 输入字段的包裹字段，加入字段标题、说明和操作等节点。
  */
 export class FieldWrap extends Node {
@@ -202,12 +240,19 @@ export class FieldWrap extends Node {
 
     /**属性是可扩展属性*/
     if (field.schemaProp.isPattern) {
+      const actionVNodes = [
+        fieldInsertVNode(ctx, field),
+        fieldRemoveVNode(ctx, field),
+        fieldMoveUpVNode(ctx, field),
+        fieldMoveDownVNode(ctx, field),
+      ]
+
       let actions = h(
         'div',
         {
           class: ['tvu-jdoc__field-actions'],
         },
-        [fieldInsertVNode(ctx, field), fieldRemoveVNode(ctx, field)]
+        actionVNodes
       )
       children.push(actions)
     }

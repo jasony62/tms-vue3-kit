@@ -523,7 +523,7 @@ export class DocAsArray {
     if (prop === undefined) {
       debug(`属性【${name}】不存在，无法执行向前移动操作`)
       // 触发重新渲染
-      if (needRender) this.renderCounter.value++
+      // if (needRender) this.renderCounter.value++
       return false
     }
     let { parent } = prop
@@ -567,7 +567,7 @@ export class DocAsArray {
     if (prop === undefined) {
       debug(`属性【${name}】不存在，无法执行向后移动操作`)
       // 触发重新渲染
-      if (needRender) this.renderCounter.value++
+      // if (needRender) this.renderCounter.value++
       return false
     }
     let { parent } = prop
