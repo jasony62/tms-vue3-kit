@@ -2,14 +2,19 @@
   <div class="tvu-jse tvu-jse--layout-default">
     <!--属性列表部分-->
     <div class="tvu-jse__properties">
-      <div class="tvu-jse__property"
-        :class="{ 'tvu-jse__property--active': p === prop, 'tvu-jse__property--highlight': highlight(i) }"
-        v-for="(p, i) in nodes">
-        <div class="tvu-jse__property__fullname" @click="onClickNode(p)">{{ p.fullname }}</div>
+      <div class="tvu-jse__property" :class="{
+        'tvu-jse__property--active': p === prop,
+        'tvu-jse__property--highlight': highlight(i),
+      }" v-for="(p, i) in nodes">
+        <div class="tvu-jse__property__fullname" @click="onClickNode(p)">
+          {{ p.fullname }}
+        </div>
         <div class="tvu-jse__property__actions" v-if="p === prop">
           <div>
             <button @click="onRemoveProp" v-if="canRemove()">删除</button>
-            <button @click="onAddPropBefore" v-if="canAddBefore()">前插入</button>
+            <button @click="onAddPropBefore" v-if="canAddBefore()">
+              前插入
+            </button>
             <button @click="onAddPropAfter" v-if="canAddAfter()">后插入</button>
           </div>
           <div>
@@ -18,7 +23,9 @@
           </div>
           <div v-if="hasAddNode" class="flex flex-row gap-2">
             <button @click="onAddProp('properties')">添加子属性</button>
-            <button @click="onAddProp('patternProperties')">添加模板子属性</button>
+            <button @click="onAddProp('patternProperties')">
+              添加模板子属性
+            </button>
           </div>
           <div v-if="canAddJSONSchema()">
             <button @click="pasteJSONSchema(p)">粘贴子定义</button>
@@ -144,12 +151,17 @@ export default {
 }
 </script>
 <script setup lang="ts">
-
 const props = defineProps({
   schema: { type: Object, default: { type: 'object' } },
   rootName: { type: String, default: '$' },
-  onMessage: { type: Function, default(msg: string) { alert(msg) } },
+  onMessage: {
+    type: Function,
+    default(msg: string) {
+      alert(msg)
+    },
+  },
   onUpload: Function,
+  onPaste: { type: Function }, // 返回子schema定义
 })
 
 const builder = new JSONSchemaBuilder(props.rootName)
@@ -158,7 +170,9 @@ const data = reactive({ currProp: { name: '', attrs: {} } as SchemaProp })
 // 当前属性的索引
 const activeIndex = computed(() => builder.getIndex(toRaw(data.currProp)))
 // 当前属性最后一个后代的索引
-const activeEndIndex = computed(() => activeIndex.value === 0 ? 0 : builder.getEndIndex(toRaw(data.currProp)))
+const activeEndIndex = computed(() =>
+  activeIndex.value === 0 ? 0 : builder.getEndIndex(toRaw(data.currProp))
+)
 const choiceMode = ref('')
 const useAutofill = ref(false)
 const useExistIf = ref(false)
@@ -195,14 +209,14 @@ const compFormatAttrs = computed(() => {
 
 const formats = computed(() => {
   const { type } = attrs.value
-  return (typeof type === 'string' && Type2Format[type])
+  return typeof type === 'string' && Type2Format[type]
     ? [{ value: '', label: '无' }].concat(Type2Format[type])
     : null
 })
 
 const itemsFormats = computed(() => {
   const type = data.currProp?.items?.type
-  return (type && Type2Format[type])
+  return type && Type2Format[type]
     ? [{ value: '', label: '无' }].concat(Type2Format[type])
     : null
 })
@@ -210,8 +224,13 @@ const itemsFormats = computed(() => {
 /**禁止修改属性类型*/
 const disableChangeType = computed(() => {
   const { type } = attrs.value
-  if (type === 'object' || (type === 'array' && data.currProp?.items?.type === 'object')) {
-    const idx = nodes.value.findIndex((node: SchemaProp) => node.parentFullname === data.currProp.fullname)
+  if (
+    type === 'object' ||
+    (type === 'array' && data.currProp?.items?.type === 'object')
+  ) {
+    const idx = nodes.value.findIndex(
+      (node: SchemaProp) => node.parentFullname === data.currProp.fullname
+    )
     if (idx !== -1) return true
   }
   return false
@@ -221,7 +240,9 @@ const disableChangeItemType = computed(() => {
   if (data.currProp.items) {
     const { type } = data.currProp.items
     if (type === 'object') {
-      const idx = nodes.value.findIndex((node: SchemaProp) => node.parentFullname === data.currProp.fullname)
+      const idx = nodes.value.findIndex(
+        (node: SchemaProp) => node.parentFullname === data.currProp.fullname
+      )
       if (idx !== -1) return true
     }
   }
@@ -231,13 +252,19 @@ const disableChangeItemType = computed(() => {
 /**允许添加属性*/
 let hasAddNode = computed(() => {
   if (attrs.value.type === 'object') return true
-  if (attrs.value.type === 'array' && data.currProp.items?.type === 'object') return true
+  if (attrs.value.type === 'array' && data.currProp.items?.type === 'object')
+    return true
   return false
 })
 
 const autofill = computed(() => {
   let rawAttrs = attrs.value
-  rawAttrs.autofill ??= { url: '', method: 'GET', target: PropAutofillTarget.value, runPolicy: PropAutofillRunPolicy.onCreate }
+  rawAttrs.autofill ??= {
+    url: '',
+    method: 'GET',
+    target: PropAutofillTarget.value,
+    runPolicy: PropAutofillRunPolicy.onCreate,
+  }
   return rawAttrs.autofill
 })
 
@@ -265,8 +292,8 @@ const onChangeItemsFormat = (event: any) => {
 
 const onChangeChoiceMode = (event: any) => {
   const { attrs } = data.currProp
-  let oldValue = ""
-  Object.keys(attrs).forEach(item => {
+  let oldValue = ''
+  Object.keys(attrs).forEach((item) => {
     if (['oneOf', 'anyOf', 'enum'].includes(item)) {
       oldValue = item
     }
@@ -283,7 +310,7 @@ const onChangeChoiceMode = (event: any) => {
 
       attrs[newValue] = [
         { label: '选项1', value: 'a' },
-        { label: '选项2', value: 'b' }
+        { label: '选项2', value: 'b' },
       ]
       data.currProp.attrs.enumGroups = []
     }
@@ -291,7 +318,7 @@ const onChangeChoiceMode = (event: any) => {
     if (newValue) {
       attrs[newValue] = [
         { label: '选项1', value: 'a' },
-        { label: '选项2', value: 'b' }
+        { label: '选项2', value: 'b' },
       ]
       data.currProp.attrs.enumGroups = []
     }
@@ -315,7 +342,8 @@ const onClickNode = (prop: SchemaProp) => {
 /**
  * 是否在高亮区域（属性及其后代）
  */
-const highlight = (index: number): boolean => index > activeIndex.value && index <= activeEndIndex.value
+const highlight = (index: number): boolean =>
+  index > activeIndex.value && index <= activeEndIndex.value
 /**
  * 节点前是否可以插入节点
  */
@@ -345,7 +373,7 @@ const canAddJSONSchema = (): boolean => {
 }
 /**
  * 在结尾添加子属性
- * @param type 
+ * @param type
  */
 const onAddProp = (type: string) => {
   let child = builder.addProp(toRaw(data.currProp), type)
@@ -402,9 +430,15 @@ const onRemoveProp = () => {
  * 从粘贴板获得数据，在指定属性下添加子定义
  */
 const pasteJSONSchema = async (prop: SchemaProp) => {
-  const clipText = await navigator.clipboard.readText()
+  const { onPaste } = props
   try {
-    let rawSchema = JSON.parse(clipText)
+    let rawSchema
+    if (onPaste && typeof onPaste === 'function') {
+      rawSchema = await onPaste(toRaw(data.currProp))
+    } else {
+      const clipText = await navigator.clipboard.readText()
+      rawSchema = JSON.parse(clipText)
+    }
     let newProps = builder.addJSONSchema(toRaw(data.currProp), rawSchema)
     if (Array.isArray(newProps) && newProps.length) {
       data.currProp = newProps[0]
