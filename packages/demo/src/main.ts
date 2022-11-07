@@ -10,6 +10,8 @@ import './index.css'
 // import 'tms-vue3-ui/dist/es/text/style/index.css'
 // import 'tms-vue3-ui/dist/es/card/style/index.css'
 
+localStorage.debug = '*'
+
 const app = createApp(App)
 app.use(router)
 

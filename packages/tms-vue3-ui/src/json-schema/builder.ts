@@ -12,7 +12,7 @@ export const Type2Format = {
     { value: 'mobile', label: '手机' },
     { value: 'dateTime', label: '日期时间' },
     { value: 'longtext', label: '长文本' },
-    { value: 'mustache', label: '文档模板' },
+    { value: 'handlebars', label: 'Handlebars模板' },
   ],
   object: [
     { value: 'file', label: '文件' },
@@ -194,16 +194,10 @@ export class JSONSchemaBuilder {
     if (propIndex === 0) return this.props.length - 1 || -1
 
     const { fullname } = prop
-    let re = new RegExp(
-      `^${fullname
-        .replace('$', '\\$')
-        .replace(/\[\*\]/g, '\\[\\*\\]')
-        .replaceAll('.', '\\.')}\\b`
-    )
     let child
     for (let i = propIndex + 1; i < this.props.length; i++) {
       child = this.props[i]
-      if (re.test(child.path)) lastIndex = i
+      if (child.path.indexOf(fullname) === 0) lastIndex = i
     }
 
     return lastIndex
@@ -393,7 +387,7 @@ export class JSONSchemaBuilder {
     return newProp
   }
   /**
-   * 在指定属性前添加兄弟属性
+   * 在指定属性后添加兄弟属性
    * @param sibling
    */
   addPropAfter(sibling: SchemaProp): SchemaProp | undefined {

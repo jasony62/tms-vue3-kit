@@ -123,7 +123,38 @@ const itemRemoveVNode = (ctx: FormContext, field: Field, index: number) => {
         ctx.editDoc.remove(fullname)
       },
     },
-    `删除-${field.shortname}[${index}]`
+    '删除'
+    // `删除-${field.shortname}[${index}]`
+  )
+}
+
+const itemMoveUpVNode = (ctx: FormContext, field: Field, index: number) => {
+  let fullname = `${field.fullname}[${index}]`
+  return h(
+    components.button.tag,
+    {
+      name: fullname,
+      class: ['tvu-button'],
+      onClick: () => {
+        ctx.editDoc.moveUp(fullname)
+      },
+    },
+    '前移'
+  )
+}
+
+const itemMoveDownVNode = (ctx: FormContext, field: Field, index: number) => {
+  let fullname = `${field.fullname}[${index}]`
+  return h(
+    components.button.tag,
+    {
+      name: fullname,
+      class: ['tvu-button'],
+      onClick: () => {
+        ctx.editDoc.moveDown(fullname)
+      },
+    },
+    '后移'
   )
 }
 /**
@@ -156,10 +187,19 @@ export class ArrayNode extends FieldNode {
     this._children.forEach((child, index) => {
       let itemVNodes = [] // 数组中1个item的虚节点
       itemVNodes.push(child)
+      let actions = [
+        itemInsertVNode(ctx, field, index),
+        itemRemoveVNode(ctx, field, index),
+      ]
+      if (this._children.length > 1) {
+        if (index > 0) actions.push(itemMoveUpVNode(ctx, field, index))
+        if (index < this._children.length - 1)
+          actions.push(itemMoveDownVNode(ctx, field, index))
+      }
       let itemActionsVNode = h(
         'div',
         { class: ['tvu-jdoc__nest__item__actions'] },
-        [itemInsertVNode(ctx, field, index), itemRemoveVNode(ctx, field, index)]
+        actions
       )
       let itemNestVNode = h('div', { index, class: ['tvu-jdoc__nest__item'] }, [
         itemVNodes,

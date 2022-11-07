@@ -31,7 +31,7 @@ const baseConfig = defineConfig({
 // rollup配置
 const rollupOptions = {
   // 确保外部化处理那些你不想打包进库的依赖
-  external: ['vue', 'vant'],
+  external: ['vue'],
 }
 
 // 根据文件所在路径，获得输出路径

@@ -78,11 +78,14 @@ export class DocIter {
   *[Symbol.iterator]() {
     if (this._rootProp) {
       yield this._rootProp
-      yield* _pasrseObj(this._rootProp)
+      if (Array.isArray(this._rootProp.value))
+        yield* _parseArray(this._rootProp)
+      else yield* _pasrseObj(this._rootProp)
     } else {
       let prop = new DocProp(undefined, this._rootName, this._rawDoc)
       yield prop
-      yield* _pasrseObj(prop)
+      if (Array.isArray(prop.value)) yield* _parseArray(prop)
+      else yield* _pasrseObj(prop)
     }
   }
 }
@@ -173,6 +176,18 @@ export class DocProp {
 
   get parent() {
     return this._parent
+  }
+  /**
+   * 返回最后的一个后代字段
+   * @returns
+   */
+  getEndProp(): DocProp | undefined {
+    if (this._children.length === 0) return undefined
+    let latestChild = this._children[this._children.length - 1]
+    let latestDesc = latestChild.getEndProp()
+    if (latestDesc) return latestDesc
+
+    return latestChild
   }
 
   removeChild(key: string | number) {
@@ -271,6 +286,18 @@ export class DocAsArray {
       }
     }
     return { index, prop }
+  }
+  /**
+   * 返回最后的一个后代字段的位置
+   * 没有子字段时返回-1
+   * @returns
+   */
+  getEndIndex(prop: DocProp): number {
+    let latest = prop.getEndProp()
+    if (latest) {
+      return this._properties.indexOf(latest)
+    }
+    return -1
   }
   /**
    * 根据记录的文档属性构造文档对象
@@ -381,21 +408,24 @@ export class DocAsArray {
     if (typeof key === 'string') {
       /**对象添加子属性*/
       // 子属性名匹配规则
-      let re = name
-        ? new RegExp(`^${nameToRegExp(name)}\\.(\\w+)(\\.|$)`)
-        : new RegExp(`^\\w+(\\.|$)`)
-      let lastChildIndex = parentIndex + 1
-      while (lastChildIndex < this._properties.length) {
-        let next = this._properties[lastChildIndex]
-        if (!re.test(next.name)) {
-          break
-        }
-        lastChildIndex++
-      }
+      // let re = name
+      //   ? new RegExp(`^${nameToRegExp(name)}\\.(\\w+)(\\.|$)`)
+      //   : new RegExp(`^\\w+(\\.|$)`)
+      // let lastChildIndex = parentIndex + 1
+      // while (lastChildIndex < this._properties.length) {
+      //   let next = this._properties[lastChildIndex]
+      //   if (!re.test(next.name)) {
+      //     break
+      //   }
+      //   lastChildIndex++
+      // }
+      let endIndex = this.getEndIndex(parent)
+      log(`属性【${name}】最后一个后代的存储位置【${endIndex}】`)
+      if (endIndex === -1) endIndex = parentIndex
       newProp = new DocProp(parent, key, value)
-      this._properties.splice(lastChildIndex, 0, newProp)
+      this._properties.splice(endIndex + 1, 0, newProp)
       log(
-        `属性【${name}】在存储位置【${lastChildIndex}】添加子属性【${newProp.name}】`
+        `属性【${name}】在存储位置【${endIndex}】添加子属性【${newProp.name}】`
       )
     } else if ((key ?? true) || typeof key === 'number') {
       /**数组添加项目*/
@@ -477,6 +507,96 @@ export class DocAsArray {
     // 删除属性
     if (_parent && key !== undefined) _parent.removeChild(key)
     this._properties.splice(index, 1)
+
+    // 触发重新渲染
+    if (needRender) this.renderCounter.value++
+
+    return true
+  }
+  /**
+   * 向前移动当前字段在父字段中的位置
+   * @param name
+   * @param needRender
+   */
+  moveUp(name: string, needRender = true) {
+    let { index, prop } = this.findByName(name)
+    if (prop === undefined) {
+      debug(`属性【${name}】不存在，无法执行向前移动操作`)
+      // 触发重新渲染
+      if (needRender) this.renderCounter.value++
+      return false
+    }
+    let { parent } = prop
+    if (!parent) {
+      debug(`属性【${name}】不存在父属性，无法执行向前移动操作`)
+      return false
+    }
+    let childIndex = parent._children.indexOf(prop)
+    if (childIndex === 0) {
+      debug(`属性【${name}】在位置0，无法执行向前移动操作`)
+      return false
+    }
+    /*在全局数组中移动*/
+    let prev = parent._children[childIndex - 1]
+    let prevIndex = this.properties.indexOf(prev)
+    let endIndex = this.getEndIndex(prop)
+    if (endIndex === -1) endIndex = index
+    debug(
+      `属性【${name}】从全局位置【${index}到${endIndex}】，向前移动到位置【${prevIndex}】`
+    )
+    let moved = this._properties.splice(index, endIndex - index + 1)
+    this._properties.splice(prevIndex, 0, ...moved)
+
+    /*在父数组中移动*/
+    parent._children.splice(childIndex, 1)
+    parent._children.splice(childIndex - 1, 0, prop)
+    debug(`属性【${name}】从父属性中位置【${childIndex}】，向前移动`)
+
+    // 触发重新渲染
+    if (needRender) this.renderCounter.value++
+
+    return true
+  }
+  /**
+   * 移动当前字段在父字段中的位置
+   * @param name
+   * @param needRender
+   */
+  moveDown(name: string, needRender = true) {
+    let { index, prop } = this.findByName(name)
+    if (prop === undefined) {
+      debug(`属性【${name}】不存在，无法执行向后移动操作`)
+      // 触发重新渲染
+      if (needRender) this.renderCounter.value++
+      return false
+    }
+    let { parent } = prop
+    if (!parent) {
+      debug(`属性【${name}】不存在父属性，无法执行向后移动操作`)
+      return false
+    }
+    let childIndex = parent._children.indexOf(prop)
+    if (childIndex === parent._children.length - 1) {
+      debug(`属性【${name}】在位置【${childIndex}】，无法执行向后移动操作`)
+      return false
+    }
+    /*在全局数组中移动*/
+    let next = parent._children[childIndex + 1]
+    let nextIndex = this.properties.indexOf(next)
+    let nextEndIndex = this.getEndIndex(next)
+    if (nextEndIndex === -1) nextEndIndex = nextIndex
+    debug(
+      `属性【${name}】的后续属性从全局位置【${nextIndex}到${nextEndIndex}}】，向前移动到位置【${index}】`
+    )
+    let moved = this._properties.splice(nextIndex, nextEndIndex - nextIndex + 1)
+    this._properties.splice(index, 0, ...moved)
+
+    /*在父数组中移动*/
+    parent._children.splice(childIndex + 1, 1)
+    parent._children.splice(childIndex, 0, next)
+    debug(
+      `属性【${name}】的后续数据从父属性中位置【${childIndex + 1}】，向前移动`
+    )
 
     // 触发重新渲染
     if (needRender) this.renderCounter.value++

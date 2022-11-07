@@ -79,7 +79,7 @@ const showFieldFullname = ref(false)
 
 function loadTestData() {
   loading.value = true
-  return import(`../data/schemas/${caseName.value}`).then(
+  return import(`../data/schemas/${caseName.value}.ts`).then(
     ({ SampleData, SampleSchema }) => {
       testObj.schema = SampleSchema
       testObj.data = SampleData
