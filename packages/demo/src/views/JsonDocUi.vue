@@ -21,6 +21,7 @@
       <option value="rcsreply">rcsreply</option>
       <option value="dialog-script">dialog-script</option>
       <option value="isoneof">isoneof</option>
+      <option value="paste">粘贴</option>
     </select>
     <label><input type="checkbox" v-model="showFieldFullname" />是否显示字段路径名称</label>
   </div>
@@ -30,7 +31,7 @@
         :value="testObj.data" :enable-paste="true" :autofill-request="onAutofill" :on-file-download="onFileDownload"
         :on-file-upload="onFileUpload" :hide-root-title="true" :hide-root-description="true"
         :hide-field-description="true" :show-field-fullname="showFieldFullname" @jdoc-focus="onJdocFocus"
-        @jdoc-blur="onJdocBlur">
+        @jdoc-blur="onJdocBlur" :on-paste="onPaste">
       </json-doc>
     </div>
     <div class="w-1/3">
@@ -60,6 +61,7 @@ import { nextTick, onMounted, reactive, ref, watch } from 'vue'
 import JSONEditor from 'jsoneditor'
 import 'jsoneditor/dist/jsoneditor.css'
 import RandExp from 'randexp'
+import _ from 'lodash'
 
 const jsonDocEditor = ref<{ editing: () => string, editDoc: DocAsArray } | null>(null)
 
@@ -69,7 +71,7 @@ const jsonResult = ref('') // 表单数据结果
 
 const loading = ref(true)
 
-const testObj = reactive({ schema: {}, data: {} })
+const testObj = reactive({ schema: {}, data: {}, pasted: null })
 
 const activeField = ref<Field>() // 正在编辑的字段
 
@@ -80,9 +82,10 @@ const showFieldFullname = ref(false)
 function loadTestData() {
   loading.value = true
   return import(`../data/schemas/${caseName.value}.ts`).then(
-    ({ SampleData, SampleSchema }) => {
+    ({ SampleData, SampleSchema, SamplePasted }) => {
       testObj.schema = SampleSchema
       testObj.data = SampleData
+      testObj.pasted = SamplePasted
       loading.value = false
     }
   )
@@ -223,13 +226,27 @@ const onFileDownload = (name: string, url: string) => {
 const getResult = () => {
   jsonResult.value = JSON.stringify(jsonDocEditor.value?.editing(), null, 2)
 }
+
+const onPaste = async (field: Field) => {
+  let { fullname } = field
+  return new Promise((resolve, reject) => {
+    let pasted
+    if (testObj.pasted) {
+      pasted = fullname ? _.get(testObj.pasted, fullname) : testObj.pasted
+    }
+    if (pasted) {
+      resolve(pasted)
+    } else {
+      reject({ message: '没有提供粘贴数据' })
+    }
+  })
+}
 </script>
 
 <style lang="scss">
 .jsoneditor {
 
   .jsoneditor-transform,
-  .jsoneditor-repair,
   .jsoneditor-poweredBy {
     display: none;
   }

@@ -189,33 +189,32 @@ const propAddVNode = (
  * @returns
  */
 const propPasteVNode = (ctx: FormContext, field: Field) => {
+  const { fullname, label, shortname } = field
   let pasteVNode = h(
     components.button.tag,
     {
       class: ['tvu-button'],
       onClick: async () => {
-        if (typeof ctx.onPaste === 'function') {
-          ctx.onPaste(field).then((clipData: any) => {
-            ctx.editDoc.set(field.fullname, clipData)
-          })
-        } else {
-          /**从粘贴板中获取数据，添加到文档中*/
-          const clipText = await navigator.clipboard.readText()
-          try {
-            let clipData = JSON.parse(clipText)
-            if (clipData ?? false) ctx.editDoc.set(field.fullname, clipData)
-          } catch (e: any) {
-            ctx.onMessage(
-              `粘贴内容填充字段【${field.fullname}】失败：` + e.message
-            )
+        try {
+          let clipData
+          if (typeof ctx.onPaste === 'function') {
+            clipData = await ctx.onPaste(field)
+          } else {
+            /**从粘贴板中获取数据，添加到文档中*/
+            const clipText = await navigator.clipboard.readText()
+            clipData = JSON.parse(clipText)
           }
+          ctx.editDoc.set(fullname, clipData)
+        } catch (e: any) {
+          if (e)
+            ctx.onMessage(
+              `粘贴【${fullname ? fullname : '全部'}】失败：` + e.message
+            )
         }
       },
-      title: field.fullname,
+      title: fullname,
     },
-    `粘贴-${
-      field.label ? field.label : field.shortname ? field.shortname : '全部'
-    }`
+    `粘贴-${label ? label : shortname ? shortname : '全部'}`
   )
 
   return pasteVNode

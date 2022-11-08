@@ -28,22 +28,21 @@ const itemPasteVNode = (ctx: FormContext, field: Field) => {
             clipData.forEach((item) => ctx.editDoc.appendAt(fullname, item))
           } else ctx.editDoc.appendAt(fullname, clipData)
         }
-        if (typeof ctx.onPaste === 'function') {
-          /**调用方提供数据*/
-          log(`字段【${fullname}】调用外部方法执行粘贴数据操作`)
-          ctx.onPaste(field).then((clipData: any) => {
-            if (clipData ?? false) setDocData(clipData)
-          })
-        } else {
-          /**从粘贴板中获取数据，添加到文档中*/
-          log(`字段【${fullname}】调用内部方法执行粘贴数据操作`)
-          const clipText = await navigator.clipboard.readText()
-          try {
-            let clipData = JSON.parse(clipText)
-            setDocData(clipData)
-          } catch (e: any) {
-            ctx.onMessage(`粘贴内容填充字段【${fullname}】失败：` + e.message)
+        try {
+          let clipData
+          if (typeof ctx.onPaste === 'function') {
+            /**调用方提供数据*/
+            log(`字段【${fullname}】调用外部方法执行粘贴数据操作`)
+            clipData = await ctx.onPaste(field)
+          } else {
+            /**从粘贴板中获取数据，添加到文档中*/
+            log(`字段【${fullname}】调用内部方法执行粘贴数据操作`)
+            const clipText = await navigator.clipboard.readText()
+            clipData = JSON.parse(clipText)
           }
+          setDocData(clipData)
+        } catch (e: any) {
+          if (e) ctx.onMessage(`粘贴【${fullname}】失败：` + e.message)
         }
       },
     },

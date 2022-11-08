@@ -259,3 +259,10 @@ export const SampleSchema = {
 }
 
 export const SampleData = {}
+
+export const SamplePasted = {
+  experiences: [
+    { time: '2001', content: 'coding' },
+    { time: '2002', content: 'pm' },
+  ],
+}

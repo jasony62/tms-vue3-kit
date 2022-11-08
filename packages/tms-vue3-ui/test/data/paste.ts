@@ -14,12 +14,10 @@ export const SampleSchema = {
   },
 }
 
-export const SampleData = {
-  name: 'xyz',
-}
+export const SampleData = {}
 
 export const SamplePasted = {
   name: 'abc',
-  address: { city: 'beijing' },
+  address: {},
   age: 100,
 }

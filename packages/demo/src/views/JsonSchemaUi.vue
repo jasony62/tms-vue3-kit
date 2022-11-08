@@ -22,7 +22,7 @@
         </div>
         <div>
           <tms-json-schema v-if="loading === false" ref="schemaEditor" :schema="testObj.schema"
-            :on-upload="onUploadFile" :on-message="onMessage">
+            :on-upload="onUploadFile" :on-message="onMessage" :on-paste="onPaste">
             <template #extattrs="{ attrs }">
               <div>
                 <label><input type="checkbox" v-model="attrs.readonly" />不允许编辑</label>
@@ -47,8 +47,10 @@
 </template>
 
 <script setup lang="ts">
+import { SchemaProp } from 'tms-vue3-ui/dist/es/json-schema';
 import 'tms-vue3-ui/dist/es/json-schema/style/tailwind.scss'
 import { onMounted, reactive, ref, watch } from 'vue'
+import _ from 'lodash'
 
 const caseName = ref('')
 
@@ -56,15 +58,16 @@ const schemaEditor = ref<{ editing: () => string } | null>(null)
 
 const loading = ref(true)
 
-const testObj = reactive({ schema: {} })
+const testObj = reactive({ schema: {}, pasted: null })
 
 const schemaResult = ref('')
 
 function loadTestData() {
   loading.value = true
   return import(`../data/schemas/${caseName.value}.ts`).then(
-    ({ SampleSchema }) => {
+    ({ SampleSchema, SamplePastedSchema }) => {
       testObj.schema = SampleSchema
+      testObj.pasted = SamplePastedSchema
       loading.value = false
     }
   )
@@ -88,6 +91,19 @@ const onUploadFile = (file: { name: any }) => {
 
 const onMessage = (msg: string) => {
   alert(`提示：${msg}`)
+}
+
+const onPaste = (prop: SchemaProp) => {
+  const { fullname } = prop
+
+  return new Promise((resolve, reject) => {
+    let pasted
+    if (testObj.pasted)
+      pasted = testObj.pasted[fullname]
+
+    if (pasted) resolve(pasted)
+    else reject({ message: '没有提供粘贴数据' })
+  })
 }
 
 const getResult = () => {

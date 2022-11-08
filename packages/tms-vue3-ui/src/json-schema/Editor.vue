@@ -446,7 +446,7 @@ const pasteJSONSchema = async (prop: SchemaProp) => {
       }
     }
   } catch (e: any) {
-    props.onMessage('粘贴内容作为属性子定义发生错误：' + e.message)
+    if (e) props.onMessage(`粘贴【${prop.fullname}】错误：${e.message}`)
   }
 }
 

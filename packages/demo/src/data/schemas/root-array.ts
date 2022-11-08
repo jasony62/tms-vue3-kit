@@ -17,3 +17,8 @@ export const SampleSchema = {
 }
 
 export const SampleData = []
+
+export const SamplePasted = [
+  { name: 'test1', title: '测试1', age: 10 },
+  { name: 'test2', title: '测试2', age: 20 },
+]

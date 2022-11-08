@@ -337,6 +337,8 @@ export class DocAsArray {
           return schemaProp.fullRegExp.test(docProp.name)
         })
         docProps.forEach((docProp) => {
+          // 根节点不需要处理
+          if (!docProp.name) return
           if (docProp) {
             log(
               `文档属性【${docProp.name}】匹配的属性定义【${schemaProp.fullname}】`
@@ -356,13 +358,8 @@ export class DocAsArray {
               JsonDocPropNames.push(docProp.name)
             } else {
               if (docProp._children.length) {
-                if (typeof docProp._children[0].key === 'number') {
-                  log(`文档属性【${docProp.name}】不是叶节点，赋值空数组`)
-                  _.set(Output, docProp.name, [])
-                } else {
-                  log(`文档属性【${docProp.name}】不是叶节点，赋值空对象`)
-                  _.set(Output, docProp.name, {})
-                }
+                log(`文档属性【${docProp.name}】不是叶节点，赋值null`)
+                _.set(Output, docProp.name, null)
                 return
               }
             }
