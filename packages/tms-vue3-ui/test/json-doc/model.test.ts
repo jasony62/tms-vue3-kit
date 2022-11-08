@@ -186,32 +186,63 @@ describe('文档迭代器', () => {
 
   //   console.log(builder.build())
   // })
-  it('移动可选属性在父属性中的位置', () => {
+  // it('移动可选属性在父属性中的位置', () => {
+  //   const doc = {
+  //     org: {
+  //       name: '研发部',
+  //       strProduct: 'tms-vue3-kit',
+  //       objAbc: {
+  //         label: 'aaa',
+  //         value: '111',
+  //         extra: {
+  //           label: 'aaa_bbb',
+  //           value: '111_222',
+  //         },
+  //       },
+  //       objXyz: {
+  //         label: 'xxx',
+  //         value: '999',
+  //         extra: {
+  //           label: 'xxx_yyy',
+  //           value: '999_888',
+  //         },
+  //       },
+  //     },
+  //   }
+  //   const builder = new DocAsArray(doc)
+  //   builder.moveUp('org.strProduct')
+  //   builder.moveDown('org.objAbc')
+  //   console.log(builder.build())
+  // })
+  it('清除空字段', () => {
     const doc = {
       org: {
         name: '研发部',
-        strProduct: 'tms-vue3-kit',
+        strProduct: '',
         objAbc: {
           label: 'aaa',
           value: '111',
           extra: {
-            label: 'aaa_bbb',
+            label: '',
             value: '111_222',
           },
         },
         objXyz: {
           label: 'xxx',
-          value: '999',
+          value: '',
           extra: {
             label: 'xxx_yyy',
             value: '999_888',
           },
         },
+        emptyArray: [],
+        emptyArrayNest: [{ name: '' }],
+        emptyObject: {},
+        emptyNestObject: { child: {} },
       },
     }
     const builder = new DocAsArray(doc)
-    builder.moveUp('org.strProduct')
-    builder.moveDown('org.objAbc')
-    console.log(builder.build())
+    //builder.cleanEmpty()
+    console.log(JSON.stringify(builder.build(undefined, true), null, 2))
   })
 })

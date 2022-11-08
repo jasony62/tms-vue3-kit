@@ -307,8 +307,13 @@ export class DocAsArray {
    * @param rawSchema 指定的原始属性定义
    * @returns
    */
-  build(rawSchema?: RawSchema): any {
+  build(rawSchema?: RawSchema, cleanEmpty = false): any {
     let log = debug.extend('build')
+    // 清理空数据
+    if (cleanEmpty === true) {
+      this.cleanEmpty(false)
+    }
+
     let schemaProps: SchemaProp[] = []
     if (rawSchema) {
       const iter = new SchemaIter(rawSchema)
@@ -691,6 +696,30 @@ export class DocAsArray {
     prop.key = newKey
 
     if (needRender) this.renderCounter.value++
+  }
+  /**
+   * 清除文档中的空数据，值为空字符串，null，undefine，或空数组，或空对象
+   */
+  cleanEmpty(needRender = true) {
+    let counter = 0
+    for (let i = this._properties.length - 1; i > -0; i--) {
+      let prop = this._properties[i]
+      if (prop._children.length === 0) {
+        let { value } = prop
+        if (
+          value === null ||
+          value === undefined ||
+          value === '' ||
+          (Array.isArray(value) && value.length === 0) ||
+          (typeof value === 'object' && Object.keys(value).length === 0)
+        ) {
+          debug(`清除空属性【${prop.name}】`)
+          this.remove(prop.name, false)
+        }
+      }
+    }
+    if (needRender) this.renderCounter.value++
+    return counter
   }
   /**
    * 输出所有属性的key，便于调试

@@ -10,7 +10,7 @@ const debug = Debug('json-doc:nodes:array')
 /**
  * 执行粘贴操作
  * 如果黏贴的数据是对象，作为数组的项目进行追加
- * 如果黏贴的数据是数组，那么数组终端项目作为依次被添加
+ * 如果黏贴的数据是数组，那么数组中的项目作为依次被添加
  * @param ctx
  * @param field
  * @returns
@@ -47,7 +47,7 @@ const itemPasteVNode = (ctx: FormContext, field: Field) => {
         }
       },
     },
-    `黏贴-${shortname}`
+    `粘贴-${shortname}`
   )
 
   return pasteVNode
@@ -158,6 +158,29 @@ const itemMoveDownVNode = (ctx: FormContext, field: Field, index: number) => {
   )
 }
 /**
+ * 执行清除属性操作
+ * @param ctx
+ * @param field
+ * @returns
+ */
+const propRemoveVNode = (ctx: FormContext, field: Field) => {
+  let pasteVNode = h(
+    components.button.tag,
+    {
+      class: ['tvu-button'],
+      onClick: async () => {
+        ctx.editDoc.remove(field.fullname)
+      },
+      title: field.fullname,
+    },
+    `清除-${
+      field.label ? field.label : field.shortname ? field.shortname : '全部'
+    }`
+  )
+
+  return pasteVNode
+}
+/**
  * 数组中的项目是对象
  */
 export class ArrayNode extends FieldNode {
@@ -216,6 +239,7 @@ export class ArrayNode extends FieldNode {
       fieldActionVNodes.push(pasteVNode)
     }
     fieldActionVNodes.push(itemAddVNode(ctx, field))
+    fieldActionVNodes.push(propRemoveVNode(ctx, field))
 
     return [
       ...itemNestVNodes,

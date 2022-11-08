@@ -213,7 +213,30 @@ const propPasteVNode = (ctx: FormContext, field: Field) => {
       },
       title: field.fullname,
     },
-    `黏贴-${
+    `粘贴-${
+      field.label ? field.label : field.shortname ? field.shortname : '全部'
+    }`
+  )
+
+  return pasteVNode
+}
+/**
+ * 执行清除属性操作
+ * @param ctx
+ * @param field
+ * @returns
+ */
+const propRemoveVNode = (ctx: FormContext, field: Field) => {
+  let pasteVNode = h(
+    components.button.tag,
+    {
+      class: ['tvu-button'],
+      onClick: async () => {
+        ctx.editDoc.remove(field.fullname)
+      },
+      title: field.fullname,
+    },
+    `清除-${
       field.label ? field.label : field.shortname ? field.shortname : '全部'
     }`
   )
@@ -328,9 +351,13 @@ export class ObjectNode extends FieldNode {
     /**如果开放paste操作，添加按钮*/
     const actionVNodes = []
     if (ctx.enablePaste === true) {
-      debug(`对象字段【${field.fullname}】需要支持黏贴操作`)
-      let pasteVNode = propPasteVNode(ctx, field)
-      actionVNodes.push(pasteVNode)
+      // 只有值为空时才允许粘贴操作
+      const val = ctx.editDoc.get(field.fullname)
+      if (!val || Object.keys(val).length === 0) {
+        debug(`对象字段【${field.fullname}】需要支持黏贴操作`)
+        let pasteVNode = propPasteVNode(ctx, field)
+        actionVNodes.push(pasteVNode)
+      }
     }
 
     /**如果对象的格式是对象，添加选取文件操作*/
@@ -341,6 +368,10 @@ export class ObjectNode extends FieldNode {
       let pickFileVNode = itemPickVNode(ctx, field)
       actionVNodes.push(pickFileVNode)
     }
+
+    /*清除属性*/
+    actionVNodes.push(propRemoveVNode(ctx, field))
+
     if (actionVNodes.length) {
       vnodes.push(
         h('div', { class: ['tvu-jdoc__nest__actions'] }, actionVNodes)

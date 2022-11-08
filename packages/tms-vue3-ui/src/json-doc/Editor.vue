@@ -48,8 +48,8 @@ export default defineComponent({
      */
     showFieldFullname: { type: Boolean, default: false },
     /**
-     * 是否支持黏贴操作
-     * 对象字段可以通过黏贴操作快速对子字段进行赋值
+     * 是否支持粘贴操作
+     * 对象字段可以通过粘贴操作快速对子字段进行赋值
      */
     enablePaste: { type: Boolean, default: false },
     /**
@@ -66,7 +66,7 @@ export default defineComponent({
      */
     autofillRequest: { type: Function },
     /**
-     * 黏贴操作回调函数
+     * 粘贴操作回调函数
      */
     onPaste: {
       type: Function
@@ -94,8 +94,8 @@ export default defineComponent({
     /**
      * 返回表单中正在编辑的数据
      */
-    const editing = (matchSchema = true): any => {
-      return editDoc.build(matchSchema === true ? schema : null)
+    const editing = (matchSchema = true, cleanEmpty = true): any => {
+      return editDoc.build(matchSchema === true ? schema : null, cleanEmpty)
     }
 
     const {

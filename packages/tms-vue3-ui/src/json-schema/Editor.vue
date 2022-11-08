@@ -439,12 +439,14 @@ const pasteJSONSchema = async (prop: SchemaProp) => {
       const clipText = await navigator.clipboard.readText()
       rawSchema = JSON.parse(clipText)
     }
-    let newProps = builder.addJSONSchema(toRaw(data.currProp), rawSchema)
-    if (Array.isArray(newProps) && newProps.length) {
-      data.currProp = newProps[0]
+    if (rawSchema) {
+      let newProps = builder.addJSONSchema(toRaw(data.currProp), rawSchema)
+      if (Array.isArray(newProps) && newProps.length) {
+        data.currProp = newProps[0]
+      }
     }
   } catch (e: any) {
-    props.onMessage('粘贴内容作为属性子定义错误：' + e.message)
+    props.onMessage('粘贴内容作为属性子定义发生错误：' + e.message)
   }
 }
 
