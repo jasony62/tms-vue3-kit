@@ -352,12 +352,12 @@ export class ObjectNode extends FieldNode {
     const actionVNodes = []
     if (ctx.enablePaste === true) {
       // 只有值为空时才允许粘贴操作
-      const val = ctx.editDoc.get(field.fullname)
-      if (!val || Object.keys(val).length === 0) {
-        debug(`对象字段【${field.fullname}】需要支持黏贴操作`)
-        let pasteVNode = propPasteVNode(ctx, field)
-        actionVNodes.push(pasteVNode)
-      }
+      //const val = ctx.editDoc.get(field.fullname)
+      //if (!val || Object.keys(val).length === 0) {
+      debug(`对象字段【${field.fullname}】需要支持黏贴操作`)
+      let pasteVNode = propPasteVNode(ctx, field)
+      actionVNodes.push(pasteVNode)
+      //}
     }
 
     /**如果对象的格式是对象，添加选取文件操作*/

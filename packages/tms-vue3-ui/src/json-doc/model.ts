@@ -650,7 +650,6 @@ export class DocAsArray {
       log(`属性【${name}】在文档中不存在，在它的父属性【${path}】中进行追加`)
       this.appendAt(path, value, key)
     } else {
-      prop.value = value
       /**修改父对象 */
       let { _parent } = prop
       if (_parent) {
@@ -671,6 +670,7 @@ export class DocAsArray {
       }
       // 需要添加子字段。插入的位置需要控制吗？
       if (typeof value === 'object' && Object.keys(value).length) {
+        prop.value = value
         let num = this._addSubProps(prop)
         log(`属性【${prop.name}】的值是对象，生成并添加【${num}】个子属性`)
       }
