@@ -369,8 +369,8 @@ export class ObjectNode extends FieldNode {
       actionVNodes.push(pickFileVNode)
     }
 
-    /*清除属性*/
-    actionVNodes.push(propRemoveVNode(ctx, field))
+    /*清除属性。根属性不允许清除。*/
+    if (field.shortname) actionVNodes.push(propRemoveVNode(ctx, field))
 
     if (actionVNodes.length) {
       vnodes.push(
