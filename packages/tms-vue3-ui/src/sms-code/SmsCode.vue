@@ -47,6 +47,7 @@ const props = defineProps({
   asDialog: { type: Boolean, default: false },
   onClose: { type: Function },
   waitInputSmsCodeTime: { type: Number, default: 60 },
+  closeAfterSuccess: { type: Boolean, default: false },
 })
 
 // 组件的根节点
@@ -154,6 +155,7 @@ const verify = () => {
           return onFail(response)
         }
         onSuccess(response)
+        if (closeAfterSuccess) close()
       })
     }
   }

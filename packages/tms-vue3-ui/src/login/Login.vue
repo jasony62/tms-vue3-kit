@@ -42,6 +42,7 @@ const props = defineProps({
   onFail: { type: Function, default: () => { } },
   asDialog: { type: Boolean, default: false },
   onClose: { type: Function },
+  closeAfterSuccess: { type: Boolean, default: false },
 })
 
 // 组件的根节点
@@ -61,6 +62,7 @@ let {
   errorTip,
   asDialog,
   onClose,
+  closeAfterSuccess
 } = props
 
 // 用户提交的数据
@@ -125,6 +127,7 @@ const login = () => {
           return onFail(response)
         }
         onSuccess(response)
+        if (closeAfterSuccess) close()
       })
     }
   }

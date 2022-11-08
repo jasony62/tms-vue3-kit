@@ -14,6 +14,7 @@ function showAsDialog(options: any) {
     ...options,
     onClose: () => {
       app.unmount()
+      document.body.removeChild(root)
     },
   })
   app.mount(root)

@@ -16,7 +16,7 @@ import 'tms-vue3-ui/dist/es/login/style/tailwind.scss'
 import { schema, fnCaptcha, fnLogin } from '@/data/login'
 
 const showLoginDialog = () => {
-  Login.open({ schema, fnCaptcha, fnLogin })
+  Login.open({ schema, fnCaptcha, fnLogin, closeAfterSuccess: true })
 }
 
 const fnSuccessLogin = (response: LoginResponse) => {
