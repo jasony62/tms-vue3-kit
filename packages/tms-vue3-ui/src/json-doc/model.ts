@@ -346,8 +346,9 @@ export class DocAsArray {
             )
             if (jsonParentName) {
               log(
-                `文档属性【${docProp.name}】是json类型的文档属性【${jsonParentName}】的值，跳过`
+                `文档属性【${docProp.name}】是json类型的文档属性【${jsonParentName}】的值，赋值null`
               )
+              _.set(Output, docProp.name, null)
               return
             }
             if (schemaProp.attrs.type === 'json') {
@@ -355,7 +356,13 @@ export class DocAsArray {
               JsonDocPropNames.push(docProp.name)
             } else {
               if (docProp._children.length) {
-                log(`文档属性【${docProp.name}】不是叶节点，跳过`)
+                if (typeof docProp._children[0].key === 'number') {
+                  log(`文档属性【${docProp.name}】不是叶节点，赋值空数组`)
+                  _.set(Output, docProp.name, [])
+                } else {
+                  log(`文档属性【${docProp.name}】不是叶节点，赋值空对象`)
+                  _.set(Output, docProp.name, {})
+                }
                 return
               }
             }
@@ -669,8 +676,8 @@ export class DocAsArray {
         i--
       }
       // 需要添加子字段。插入的位置需要控制吗？
+      prop.value = value
       if (typeof value === 'object' && Object.keys(value).length) {
-        prop.value = value
         let num = this._addSubProps(prop)
         log(`属性【${prop.name}】的值是对象，生成并添加【${num}】个子属性`)
       }
