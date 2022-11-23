@@ -4,7 +4,9 @@ import Debug from 'debug'
 const debug = Debug('json-schema:builder')
 
 export { SchemaProp }
-
+/**
+ * 属性格式
+ */
 export const Type2Format = {
   string: [
     { value: 'name', label: '姓名' },
@@ -12,6 +14,8 @@ export const Type2Format = {
     { value: 'mobile', label: '手机' },
     { value: 'dateTime', label: '日期时间' },
     { value: 'longtext', label: '长文本' },
+    { value: 'password', label: '密码' },
+    { value: 'idcard', label: '身份证' },
     { value: 'handlebars', label: 'Handlebars模板' },
   ],
   object: [

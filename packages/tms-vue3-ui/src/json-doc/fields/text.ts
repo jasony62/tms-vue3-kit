@@ -18,6 +18,9 @@ export class FieldText extends Field {
         case 'email':
           this.type = 'email'
           break
+        case 'password':
+          this.type = 'password'
+          break
         case 'uri':
           this.type = 'url'
           break
@@ -30,6 +33,7 @@ export class FieldText extends Field {
           break
         case 'longtext':
         case 'mustache':
+        case 'handlebars':
           this.type = 'textarea'
           break
       }

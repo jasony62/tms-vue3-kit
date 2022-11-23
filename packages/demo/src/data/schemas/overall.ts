@@ -21,6 +21,11 @@ export const SampleSchema = {
       isOneOf: true,
       required: true,
     },
+    password: {
+      title: '密码',
+      type: 'string',
+      format: 'password',
+    },
     additionalName: {
       title: '其他名称（基础类型数组）',
       type: 'array',
@@ -240,9 +245,9 @@ export const SampleSchema = {
       type: 'json',
     },
     textTemplate: {
-      title: '文档模板（mustache）',
+      title: '文档模板（handlebars）',
       type: 'string',
-      format: 'mustache',
+      format: 'handlebars',
     },
   },
   dependencies: {
