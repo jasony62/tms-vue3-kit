@@ -255,6 +255,23 @@ export abstract class FieldNode extends Node {
     // 生成节点
     this._vnode = h(this.rawArgs.tag, nodeOptions, children)
 
+    if (field.type === 'password') {
+      function toggleClass() {
+        const inputEle = document.querySelector(".tvu-jdoc__password > input")
+        const spanEle = document.querySelector(".tvu-jdoc__password > span")
+        if (inputEle?.getAttribute('type') === 'password') {
+          inputEle?.setAttribute('type', 'text')
+          if (spanEle) spanEle.className = 'tvu-jdoc__password--open';
+        } else {
+          inputEle?.setAttribute('type', 'password');
+          if (spanEle) spanEle.className = 'tvu-jdoc__password--close';
+        }
+      }
+      let spanVnode = h('span', {class: 'tvu-jdoc__password--close', onClick: toggleClass })
+
+      this._vnode = h('div', {class: 'tvu-jdoc__password'}, [this._vnode, spanVnode])
+    }
+
     return this._vnode
   }
 }
