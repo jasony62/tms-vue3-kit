@@ -256,9 +256,9 @@ export abstract class FieldNode extends Node {
     this._vnode = h(this.rawArgs.tag, nodeOptions, children)
 
     if (field.type === 'password') {
-      function toggleClass() {
-        const inputEle = document.querySelector(".tvu-jdoc__password > input")
-        const spanEle = document.querySelector(".tvu-jdoc__password > span")
+      function toggleClass(event: any) {
+        const spanEle = event.currentTarget
+        const inputEle = spanEle.previousElementSibling
         if (inputEle?.getAttribute('type') === 'password') {
           inputEle?.setAttribute('type', 'text')
           if (spanEle) spanEle.className = 'tvu-jdoc__password--open';
