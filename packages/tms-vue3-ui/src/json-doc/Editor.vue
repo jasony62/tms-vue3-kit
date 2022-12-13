@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent, h, PropType, ref, computed, getCurrentInstance, watch } from 'vue'
+import { defineComponent, h, PropType, ref, getCurrentInstance, watch } from 'vue'
 import { RawSchema } from '@/json-schema/model'
 import { deepClone } from '@/utils'
 import BuildEditor from './builder'
@@ -114,7 +114,7 @@ export default defineComponent({
     } = props
 
     const editDoc = new DocAsArray(deepClone(props.value))
-    debug(`初始文档属性列表\n` + JSON.stringify(editDoc.properties, null, 2))
+    // debug(`初始文档属性列表\n`, JSON.stringify(editDoc.properties, null, 2))
     editDoc.renderCounter = ref(0) // 用于强制触发渲染
 
     context.expose({ editing, editDoc })

@@ -240,6 +240,7 @@ export class DocAsArray {
   _rawDoc
   _rootName
   _properties: DocProp[] // 文档的属性
+  _snapshot = new Map<string, DocProp>()
   renderCounter: any // 用于出发渲染
 
   constructor(rawDoc: any = {}, rootName = DEFAULT_ROOT_NAME) {
@@ -261,6 +262,15 @@ export class DocAsArray {
     return this._properties
   }
 
+  snapshot(renew = false) {
+    if (renew === true) {
+      this._snapshot.clear()
+      for (let p of this._properties) {
+        this._snapshot.set(p.name, p)
+      }
+    }
+    return this._snapshot
+  }
   /**
    *
    */
@@ -619,6 +629,27 @@ export class DocAsArray {
    */
   get(name: string): any {
     let { prop } = this.findByName(name)
+    if (prop?._children.length) {
+      if (Array.isArray(prop.value)) {
+        return prop._children.map((child) => child.value)
+      } else if (typeof prop.value === 'object') {
+        return prop._children.reduce(
+          (val, child) => Object.assign(val, { [child.key]: child.value }),
+          {}
+        )
+      }
+    }
+
+    return prop?.value
+  }
+  /**
+   * 返回指定字段的值。如果指定的属性有子属性，使用子属性的值构造属性的值。
+   * @param name
+   * @returns
+   */
+  get2(name: string): any {
+    // let { prop } = this.findByName(name)
+    let prop = this.snapshot().get(name)
     if (prop?._children.length) {
       if (Array.isArray(prop.value)) {
         return prop._children.map((child) => child.value)

@@ -322,7 +322,9 @@ export class FieldWrap extends Node {
     if (field.isOneOf) {
       let selected = false
       if (!ctx.oneOfSelected?.has(field.fullname)) {
-        selected = ctx.editDoc.has(field.fullname)
+        // selected = ctx.editDoc.has(field.fullname)
+        let snapshot = ctx.editDoc.snapshot()
+        selected = snapshot.has(field.fullname)
         if (selected) {
           let ingroup = Field.isOneOfInclusiveGroupName(field)
           ctx.oneOfSelected?.set(field.fullname, { ingroup })

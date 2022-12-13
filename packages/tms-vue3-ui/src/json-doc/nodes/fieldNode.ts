@@ -53,7 +53,8 @@ export abstract class FieldNode extends Node {
     const { field } = this
     const fieldName = field.fullname
     let fieldValue
-    fieldValue = this.ctx.editDoc.get(fieldName)
+    // fieldValue = this.ctx.editDoc.get(fieldName)
+    fieldValue = this.ctx.editDoc.get2(fieldName)
     fieldValue ??= field.value
 
     return fieldValue
@@ -257,19 +258,25 @@ export abstract class FieldNode extends Node {
 
     if (field.type === 'password') {
       function toggleClass() {
-        const inputEle = document.querySelector(".tvu-jdoc__password > input")
-        const spanEle = document.querySelector(".tvu-jdoc__password > span")
+        const inputEle = document.querySelector('.tvu-jdoc__password > input')
+        const spanEle = document.querySelector('.tvu-jdoc__password > span')
         if (inputEle?.getAttribute('type') === 'password') {
           inputEle?.setAttribute('type', 'text')
-          if (spanEle) spanEle.className = 'tvu-jdoc__password--open';
+          if (spanEle) spanEle.className = 'tvu-jdoc__password--open'
         } else {
-          inputEle?.setAttribute('type', 'password');
-          if (spanEle) spanEle.className = 'tvu-jdoc__password--close';
+          inputEle?.setAttribute('type', 'password')
+          if (spanEle) spanEle.className = 'tvu-jdoc__password--close'
         }
       }
-      let spanVnode = h('span', {class: 'tvu-jdoc__password--close', onClick: toggleClass })
+      let spanVnode = h('span', {
+        class: 'tvu-jdoc__password--close',
+        onClick: toggleClass,
+      })
 
-      this._vnode = h('div', {class: 'tvu-jdoc__password'}, [this._vnode, spanVnode])
+      this._vnode = h('div', { class: 'tvu-jdoc__password' }, [
+        this._vnode,
+        spanVnode,
+      ])
     }
 
     return this._vnode
