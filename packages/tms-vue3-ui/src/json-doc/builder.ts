@@ -393,12 +393,11 @@ class Stack {
   pop() {
     return this.joints.pop()
   }
-
   /**
    * 获得属性所有的父字段
    * 从stack中查找
    */
-  propParent(childProp: SchemaProp): StackJoint[] {
+  propParent(childProp: SchemaProp, ctx: FormContext): StackJoint[] {
     const topJoints = []
     // 倒序查找？终止条件是什么？
     for (let joint of this.joints) {
@@ -406,9 +405,15 @@ class Stack {
       let isParent = false
       if (field.schemaProp.isPattern) {
         // 可选属性
-        isParent = field.schemaProp.fullname === childProp.path
+        if (field.schemaProp.fullname === childProp.path) {
+          // 父节点展开时才处理子节点
+          if (ctx.nestExpanded?.has(field.fullname)) isParent = true
+        }
       } else if (childProp.isArrayItem) {
-        isParent = field.schemaProp.fullname === childProp.path
+        if (field.schemaProp.fullname === childProp.path) {
+          // 父节点展开时才处理子节点
+          if (ctx.nestExpanded?.has(field.fullname)) isParent = true
+        }
       } else {
         if (childProp.path === field.fullname) {
           isParent = true
@@ -557,7 +562,7 @@ export function build(ctx: FormContext, fieldNames?: string[]): VNode {
     debug(`----属性【${prop.fullname}】开始处理----`)
 
     // 当前属性的父字段。如果父属性是可选属性，可能有多个父字段。
-    const parentJoints = stack.propParent(prop)
+    const parentJoints = stack.propParent(prop, ctx)
     if (parentJoints.length === 0) {
       debug(`属性【${prop.fullname}】的父字段不存在，跳过`)
       continue
@@ -707,6 +712,7 @@ export type FormContext = {
   showFieldFullname?: Boolean
   onNodeFocus?: (field: Field) => void
   onNodeBlur?: (field: Field) => void
+  activeFieldName?: string // 用户最近点击的字段
 }
 
 /**

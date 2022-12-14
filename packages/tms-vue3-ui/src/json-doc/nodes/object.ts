@@ -214,7 +214,8 @@ const propPasteVNode = (ctx: FormContext, field: Field) => {
       },
       title: fullname,
     },
-    `粘贴-${label ? label : shortname ? shortname : '全部'}`
+    // `粘贴-${label ? label : shortname ? shortname : '全部'}`
+    '粘贴对象'
   )
 
   return pasteVNode
@@ -235,9 +236,10 @@ const propRemoveVNode = (ctx: FormContext, field: Field) => {
       },
       title: field.fullname,
     },
-    `清除-${
-      field.label ? field.label : field.shortname ? field.shortname : '全部'
-    }`
+    // `清除-${
+    //   field.label ? field.label : field.shortname ? field.shortname : '全部'
+    // }`
+    '清空'
   )
 
   return pasteVNode
@@ -320,61 +322,64 @@ export class ObjectNode extends FieldNode {
       `对象字段【${field.fullname}】【${schemaProp.fullname}】需要处理子节点`
     )
 
-    /**提取所有的oneOf属性便于后续处理*/
-    const flattenIsOneOfChildren: SchemaProp[] = []
-    isOneOfChildren.forEach((eg: Map<string, SchemaProp[]>) => {
-      eg.forEach((props: SchemaProp[]) => {
-        flattenIsOneOfChildren.push(...props)
+    // 激活状态时需要支持的操作
+    if (ctx.activeFieldName === field.fullname) {
+      /**提取所有的oneOf属性便于后续处理*/
+      const flattenIsOneOfChildren: SchemaProp[] = []
+      isOneOfChildren.forEach((eg: Map<string, SchemaProp[]>) => {
+        eg.forEach((props: SchemaProp[]) => {
+          flattenIsOneOfChildren.push(...props)
+        })
       })
-    })
 
-    /**添加模板属性操作*/
-    if (patternChildren?.length) {
-      let availablePatternChildren
+      /**添加模板属性操作*/
+      if (patternChildren?.length) {
+        let availablePatternChildren
+        if (flattenIsOneOfChildren.length) {
+          availablePatternChildren = patternChildren.filter(
+            (childProp) => !flattenIsOneOfChildren.includes(childProp)
+          )
+        } else {
+          availablePatternChildren = patternChildren
+        }
+        if (availablePatternChildren && availablePatternChildren.length) {
+          vnodes.push(propAddVNode(ctx, field, availablePatternChildren))
+        }
+      }
+      /**选择oneOf属性操作*/
       if (flattenIsOneOfChildren.length) {
-        availablePatternChildren = patternChildren.filter(
-          (childProp) => !flattenIsOneOfChildren.includes(childProp)
+        vnodes.push(...selectOneOfVNode(ctx, field))
+      }
+
+      /**如果开放paste操作，添加按钮*/
+      const actionVNodes = []
+      if (ctx.enablePaste === true) {
+        // 只有值为空时才允许粘贴操作
+        //const val = ctx.editDoc.get(field.fullname)
+        //if (!val || Object.keys(val).length === 0) {
+        debug(`对象字段【${field.fullname}】需要支持黏贴操作`)
+        let pasteVNode = propPasteVNode(ctx, field)
+        actionVNodes.push(pasteVNode)
+        //}
+      }
+
+      /**如果对象的格式是对象，添加选取文件操作*/
+      if (field.schemaProp.attrs.format === 'file') {
+        debug(
+          `对象字段【${field.fullname}】【format=file】，需要支持选取文件操作`
         )
-      } else {
-        availablePatternChildren = patternChildren
+        let pickFileVNode = itemPickVNode(ctx, field)
+        actionVNodes.push(pickFileVNode)
       }
-      if (availablePatternChildren && availablePatternChildren.length) {
-        vnodes.push(propAddVNode(ctx, field, availablePatternChildren))
+
+      /*清除属性。根属性不允许清除。*/
+      if (field.shortname) actionVNodes.push(propRemoveVNode(ctx, field))
+
+      if (actionVNodes.length) {
+        vnodes.push(
+          h('div', { class: ['tvu-jdoc__nest__actions'] }, actionVNodes)
+        )
       }
-    }
-    /**选择oneOf属性操作*/
-    if (flattenIsOneOfChildren.length) {
-      vnodes.push(...selectOneOfVNode(ctx, field))
-    }
-
-    /**如果开放paste操作，添加按钮*/
-    const actionVNodes = []
-    if (ctx.enablePaste === true) {
-      // 只有值为空时才允许粘贴操作
-      //const val = ctx.editDoc.get(field.fullname)
-      //if (!val || Object.keys(val).length === 0) {
-      debug(`对象字段【${field.fullname}】需要支持黏贴操作`)
-      let pasteVNode = propPasteVNode(ctx, field)
-      actionVNodes.push(pasteVNode)
-      //}
-    }
-
-    /**如果对象的格式是对象，添加选取文件操作*/
-    if (field.schemaProp.attrs.format === 'file') {
-      debug(
-        `对象字段【${field.fullname}】【format=file】，需要支持选取文件操作`
-      )
-      let pickFileVNode = itemPickVNode(ctx, field)
-      actionVNodes.push(pickFileVNode)
-    }
-
-    /*清除属性。根属性不允许清除。*/
-    if (field.shortname) actionVNodes.push(propRemoveVNode(ctx, field))
-
-    if (actionVNodes.length) {
-      vnodes.push(
-        h('div', { class: ['tvu-jdoc__nest__actions'] }, actionVNodes)
-      )
     }
 
     return vnodes

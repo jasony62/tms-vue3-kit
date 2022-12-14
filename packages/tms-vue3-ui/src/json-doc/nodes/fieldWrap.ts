@@ -53,7 +53,8 @@ const fieldInsertVNode = (ctx: FormContext, field: Field) => {
         ctx.editDoc.insertAt(fullname, initVal, newKey)
       },
     },
-    `插入-${field.label ? field.label : field.shortname}`
+    // `插入-${field.label ? field.label : field.shortname}`
+    '插入字段'
   )
 }
 /**
@@ -63,10 +64,10 @@ const fieldInsertVNode = (ctx: FormContext, field: Field) => {
  * @returns
  */
 const fieldRemoveVNode = (ctx: FormContext, field: Field) => {
-  let label =
-    field.isOneOf && field.schemaProp.isOneOfInclusiveGroup
-      ? field.schemaProp.isOneOfInclusiveGroup
-      : field.shortname
+  // let label =
+  //   field.isOneOf && field.schemaProp.isOneOfInclusiveGroup
+  //     ? field.schemaProp.isOneOfInclusiveGroup
+  //     : field.shortname
 
   return h(
     components.button.tag,
@@ -90,7 +91,7 @@ const fieldRemoveVNode = (ctx: FormContext, field: Field) => {
         }
       },
     },
-    `删除-${label}`
+    `删除字段`
   )
 }
 /**
@@ -238,28 +239,40 @@ export class FieldWrap extends Node {
 
     children.push(this.fieldNode.createElem())
 
-    /**属性是可扩展属性*/
-    if (field.schemaProp.isPattern) {
-      const actionVNodes = [
-        fieldInsertVNode(ctx, field),
-        fieldRemoveVNode(ctx, field),
-        fieldMoveUpVNode(ctx, field),
-        fieldMoveDownVNode(ctx, field),
-      ]
+    // 只有是激活节点时才出现操作
+    if (ctx.activeFieldName === field.fullname) {
+      /**属性是可扩展属性*/
+      if (field.schemaProp.isPattern) {
+        const actionVNodes = [
+          fieldInsertVNode(ctx, field),
+          fieldRemoveVNode(ctx, field),
+          fieldMoveUpVNode(ctx, field),
+          fieldMoveDownVNode(ctx, field),
+        ]
 
-      let actions = h(
-        'div',
-        {
-          class: ['tvu-jdoc__field-actions'],
-        },
-        actionVNodes
-      )
-      children.push(actions)
-    }
-    if (field.isOneOf) {
-      if (field.schemaProp.isOneOfInclusiveGroup) {
-        const fieldNames: any[] = fieldNamesInGroup(field, ctx)
-        if (fieldNames.indexOf(field.fullname) === fieldNames.length - 1) {
+        let actions = h(
+          'div',
+          {
+            class: ['tvu-jdoc__field-actions'],
+          },
+          actionVNodes
+        )
+        children.push(actions)
+      }
+      if (field.isOneOf) {
+        if (field.schemaProp.isOneOfInclusiveGroup) {
+          const fieldNames: any[] = fieldNamesInGroup(field, ctx)
+          if (fieldNames.indexOf(field.fullname) === fieldNames.length - 1) {
+            let actions = h(
+              'div',
+              {
+                class: ['tvu-jdoc__field-actions'],
+              },
+              [fieldRemoveVNode(ctx, field)]
+            )
+            children.push(actions)
+          }
+        } else {
           let actions = h(
             'div',
             {
@@ -269,15 +282,6 @@ export class FieldWrap extends Node {
           )
           children.push(actions)
         }
-      } else {
-        let actions = h(
-          'div',
-          {
-            class: ['tvu-jdoc__field-actions'],
-          },
-          [fieldRemoveVNode(ctx, field)]
-        )
-        children.push(actions)
       }
     }
 
@@ -295,22 +299,34 @@ export class FieldWrap extends Node {
 
     const vnodes = [...children]
     const { fullname, schemaType } = field
-    const options = {
+    const options: any = {
       name: field.fullname,
       class: ['tvu-jdoc__field'],
-      // 'data-schema-type': field.schemaType,
     }
+    // 是否需要切换激活节点
+    if (['object', 'array'].includes(schemaType)) {
+      options.onClick = (evt: any) => {
+        evt.stopPropagation()
+        if (ctx.activeFieldName !== field.fullname) {
+          ctx.activeFieldName = field.fullname
+          ctx.editDoc.forceRender()
+        }
+      }
+    }
+    // active字段
+    if (ctx.activeFieldName === field.fullname) {
+      options.class.push('tvu-jdoc__field--active')
+    }
+    // 必填字段
     if (field.required) {
       Object.assign(options, { 'data-required-field': 'true' })
     }
+    // 可选属性
     if (field.schemaProp.isPattern) {
       Object.assign(options, { 'data-optinal-field': 'true' })
     }
-    // if (field.visible === false) {
-    //   options.class.push('tvu-jdoc__field--hide')
-    // }
     // 嵌套节点默认设置为折叠状态
-    if (fullname && schemaType === 'object') {
+    if (fullname && ['object'].includes(schemaType)) {
       Object.assign(options, {
         'data-collapsed-field': ctx.nestExpanded?.has(fullname)
           ? 'false'

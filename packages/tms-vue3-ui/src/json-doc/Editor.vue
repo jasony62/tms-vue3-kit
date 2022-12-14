@@ -95,7 +95,8 @@ export default defineComponent({
      * 返回表单中正在编辑的数据
      */
     const editing = (matchSchema = true, cleanEmpty = true): any => {
-      return editDoc.build(matchSchema === true ? schema : null, cleanEmpty)
+      // return editDoc.build(matchSchema === true ? schema : null, cleanEmpty)
+      return editDoc.build(undefined, cleanEmpty)
     }
 
     const {

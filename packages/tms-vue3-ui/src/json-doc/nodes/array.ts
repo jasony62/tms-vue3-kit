@@ -20,7 +20,7 @@ const itemPasteVNode = (ctx: FormContext, field: Field) => {
   let pasteVNode = h(
     components.button.tag,
     {
-      class: ['tvu-button'],
+      class: ['tvu-button', 'tvu-button--green'],
       onClick: async () => {
         const log = debug.extend('onPaste')
         function setDocData(clipData: any) {
@@ -46,7 +46,8 @@ const itemPasteVNode = (ctx: FormContext, field: Field) => {
         }
       },
     },
-    `粘贴-${shortname}`
+    // `粘贴-${shortname}`
+    '粘贴数组'
   )
 
   return pasteVNode
@@ -63,7 +64,7 @@ const itemAddVNode = (ctx: FormContext, field: Field) => {
     components.button.tag,
     {
       name: fullname,
-      class: ['tvu-button'],
+      class: ['tvu-button', 'tvu-button--green'],
       onClick: () => {
         /**保证当前字段的值是数组*/
         let fieldValue = ctx.editDoc.get(fullname)
@@ -81,7 +82,8 @@ const itemAddVNode = (ctx: FormContext, field: Field) => {
         }
       },
     },
-    `添加-${field.label ? field.label : shortname}`
+    // `添加-${field.label ? field.label : shortname}`
+    '添加项目'
   )
   return addVNode
 }
@@ -98,7 +100,7 @@ const itemInsertVNode = (ctx: FormContext, field: Field, index: number) => {
     components.button.tag,
     {
       name: fullname,
-      class: ['tvu-button'],
+      class: ['tvu-button', 'tvu-button--green'],
       onClick: () => {
         const { items } = field.schemaProp
         if (items) {
@@ -107,7 +109,8 @@ const itemInsertVNode = (ctx: FormContext, field: Field, index: number) => {
         }
       },
     },
-    `插入-${field.label ? field.label : field.shortname}`
+    // `插入-${field.label ? field.label : field.shortname}`
+    '插入项目'
   )
 }
 
@@ -117,7 +120,7 @@ const itemRemoveVNode = (ctx: FormContext, field: Field, index: number) => {
     components.button.tag,
     {
       name: fullname,
-      class: ['tvu-button'],
+      class: ['tvu-button', 'tvu-button--green'],
       onClick: () => {
         ctx.editDoc.remove(fullname)
       },
@@ -133,7 +136,7 @@ const itemMoveUpVNode = (ctx: FormContext, field: Field, index: number) => {
     components.button.tag,
     {
       name: fullname,
-      class: ['tvu-button'],
+      class: ['tvu-button', 'tvu-button--green'],
       onClick: () => {
         ctx.editDoc.moveUp(fullname)
       },
@@ -148,7 +151,7 @@ const itemMoveDownVNode = (ctx: FormContext, field: Field, index: number) => {
     components.button.tag,
     {
       name: fullname,
-      class: ['tvu-button'],
+      class: ['tvu-button', 'tvu-button--green'],
       onClick: () => {
         ctx.editDoc.moveDown(fullname)
       },
@@ -166,15 +169,16 @@ const propRemoveVNode = (ctx: FormContext, field: Field) => {
   let pasteVNode = h(
     components.button.tag,
     {
-      class: ['tvu-button'],
+      class: ['tvu-button', 'tvu-button--green'],
       onClick: async () => {
         ctx.editDoc.remove(field.fullname)
       },
       title: field.fullname,
     },
-    `清除-${
-      field.label ? field.label : field.shortname ? field.shortname : '全部'
-    }`
+    // `清除-${
+    //   field.label ? field.label : field.shortname ? field.shortname : '全部'
+    // }`
+    '清空'
   )
 
   return pasteVNode
@@ -209,6 +213,12 @@ export class ArrayNode extends FieldNode {
     this._children.forEach((child, index) => {
       let itemVNodes = [] // 数组中1个item的虚节点
       itemVNodes.push(child)
+
+      const itemVNodeOptons = {
+        index,
+        class: ['tvu-jdoc__nest__item'],
+      }
+
       let actions = [
         itemInsertVNode(ctx, field, index),
         itemRemoveVNode(ctx, field, index),
@@ -223,7 +233,8 @@ export class ArrayNode extends FieldNode {
         { class: ['tvu-jdoc__nest__item__actions'] },
         actions
       )
-      let itemNestVNode = h('div', { index, class: ['tvu-jdoc__nest__item'] }, [
+
+      let itemNestVNode = h('div', itemVNodeOptons, [
         itemVNodes,
         itemActionsVNode,
       ])
@@ -231,6 +242,7 @@ export class ArrayNode extends FieldNode {
     })
 
     /**字段范围的操作*/
+    // if (ctx.activeFieldName === field.fullname) {
     const fieldActionVNodes = []
     if (ctx.enablePaste === true) {
       debug(`对象字段【${field.fullname}】需要支持黏贴操作`)
@@ -238,11 +250,15 @@ export class ArrayNode extends FieldNode {
       fieldActionVNodes.push(pasteVNode)
     }
     fieldActionVNodes.push(itemAddVNode(ctx, field))
-    fieldActionVNodes.push(propRemoveVNode(ctx, field))
+    if (this._children.length)
+      fieldActionVNodes.push(propRemoveVNode(ctx, field))
 
     return [
       ...itemNestVNodes,
       h('div', { class: ['tvu-jdoc__nest__actions'] }, fieldActionVNodes),
     ]
+    // } else {
+    //   return itemNestVNodes
+    // }
   }
 }

@@ -19,7 +19,7 @@
       input {
         @apply w-full;
       }
-  
+
       .tvu-jdoc__password--close::after {
         @apply absolute right-2 top-0 bottom-0;
         width: 2rem;
@@ -84,6 +84,13 @@
     }
     .tvu-jdoc__nest__actions {
       @apply border-t-2 border-gray-200 border-dashed;
+    }
+  }
+  .tvu-jdoc__field.tvu-jdoc__field--active {
+    & > .tvu-jdoc__nest {
+      &.tvu-jdoc__nest--depth {
+        @apply border-blue-300;
+      }
     }
   }
   .tvu-jdoc__field-desc {
