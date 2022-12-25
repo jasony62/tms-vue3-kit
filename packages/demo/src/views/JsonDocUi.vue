@@ -14,7 +14,6 @@
       <option value="files">文件（数组）</option>
       <option value="file">文件（单个）</option>
       <option value="defval">默认值</option>
-      <option value="rcsbot">rcsbot</option>
       <option value="rcscard">rcscard</option>
       <option value="rcscarousel">rcscarousel</option>
       <option value="rcssugg">rcssugg</option>

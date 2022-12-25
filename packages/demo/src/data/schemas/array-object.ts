@@ -25,5 +25,8 @@ export const SampleSchema = {
 }
 
 export const SampleData = {
-  experiences: [],
+  experiences: [
+    { time: '2001', content: 'coding' },
+    { time: '2002', content: 'pm' },
+  ],
 }

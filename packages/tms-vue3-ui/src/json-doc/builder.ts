@@ -6,7 +6,7 @@ import { DocAsArray } from './model'
 import _ from 'lodash'
 import Debug from 'debug'
 
-const debug = Debug('json-doc:builder')
+const debug = Debug('json-doc:build:form:form:former')
 
 function createWrapClass(labelAndDescNodes: VNode): VNode {
   // if (this.fieldWrapClass) {
@@ -416,9 +416,13 @@ class Stack {
         }
       } else {
         if (childProp.path === field.fullname) {
-          isParent = true
+          // 父节点展开时才处理子节点
+          if (field.fullname === '' || ctx.nestExpanded?.has(field.fullname))
+            isParent = true
         } else if (childProp.path === field.schemaProp.fullname) {
-          isParent = true
+          // 父节点展开时才处理子节点
+          if (field.fullname === '' || ctx.nestExpanded?.has(field.fullname))
+            isParent = true
         }
       }
 
@@ -528,7 +532,7 @@ class Stack {
  * @returns
  */
 export function build(ctx: FormContext, fieldNames?: string[]): VNode {
-  console.time('json-doc:build')
+  console.time('json-doc:build:form')
   const { schema, editDoc } = ctx
 
   /**生成文档的快照，提升查询消息*/
@@ -647,7 +651,7 @@ export function build(ctx: FormContext, fieldNames?: string[]): VNode {
 
   let rootVNode = stack.shrink()
 
-  console.timeEnd('json-doc:build')
+  console.timeEnd('json-doc:build:form')
 
   return rootVNode
 }

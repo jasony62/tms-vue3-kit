@@ -6,6 +6,13 @@ textarea {
   }
 }
 
+.tvu-jdoc__field-input.tvu-input[type='radiogroup'],
+.tvu-jdoc__field-input.tvu-input[type='checkboxgroup'] {
+  label {
+    @apply ml-2;
+  }
+}
+
 textarea.tvu-input {
   min-height: 10rem;
 }
@@ -16,4 +23,8 @@ button.tvu-button {
 
 button.tvu-button.tvu-button--green {
   @apply bg-green-500 hover:bg-green-600 focus:ring-green-400;
+}
+
+button.tvu-button.tvu-button--yellow {
+  @apply bg-yellow-500 hover:bg-yellow-600 focus:ring-yellow-400;
 }

@@ -165,7 +165,7 @@ export class FieldWrap extends Node {
     /**不是根节点，或者未要求隐藏根标题*/
     if (fullname || ctx.hideRootTitle !== true) {
       const toggleNestExpanded = () => {
-        if (field.schemaType === 'object') {
+        if (['object', 'array'].includes(field.schemaType)) {
           if (ctx.nestExpanded?.has(fullname)) ctx.nestExpanded.delete(fullname)
           else {
             ctx.nestExpanded?.add(fullname)
@@ -197,12 +197,23 @@ export class FieldWrap extends Node {
                 toggleNestExpanded()
               },
             },
-            field.label
+            h('div', [
+              field.label,
+              h(
+                'span',
+                { class: ['tvu-jdoc__field-label__field-name'] },
+                `(${field.name})`
+              ),
+            ])
           )
         )
         if (this.ctx.showFieldFullname === true && fullname) {
           children.push(
-            h('div', { class: ['tvu-jdoc__field-fullname'] }, fullname)
+            h(
+              'div',
+              { class: ['tvu-jdoc__field-fullname'] },
+              h('dev', fullname)
+            )
           )
         }
       } else if (fullname) {
@@ -215,7 +226,7 @@ export class FieldWrap extends Node {
                 toggleNestExpanded()
               },
             },
-            fullname
+            h('div', fullname)
           )
         )
       }
@@ -304,7 +315,7 @@ export class FieldWrap extends Node {
       class: ['tvu-jdoc__field'],
     }
     // 是否需要切换激活节点
-    if (['object', 'array'].includes(schemaType)) {
+    if (['object'].includes(schemaType)) {
       options.onClick = (evt: any) => {
         evt.stopPropagation()
         if (ctx.activeFieldName !== field.fullname) {
@@ -326,12 +337,18 @@ export class FieldWrap extends Node {
       Object.assign(options, { 'data-optinal-field': 'true' })
     }
     // 嵌套节点默认设置为折叠状态
-    if (fullname && ['object'].includes(schemaType)) {
-      Object.assign(options, {
-        'data-collapsed-field': ctx.nestExpanded?.has(fullname)
-          ? 'false'
-          : 'true',
-      })
+    if (fullname) {
+      if (['object', 'array'].includes(schemaType)) {
+        Object.assign(options, {
+          'data-collapsed-field': ctx.nestExpanded?.has(fullname)
+            ? 'false'
+            : 'true',
+        })
+      } else {
+        Object.assign(options, {
+          'data-leaf-field': schemaType,
+        })
+      }
     }
 
     // 设置排他属性字段是否出现

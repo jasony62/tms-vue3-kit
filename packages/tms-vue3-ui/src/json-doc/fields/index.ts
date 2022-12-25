@@ -65,7 +65,8 @@ function createField(
     if (exist) {
       newField = exist
     } else {
-      if (parentField?.type === 'object') parentField.children?.push(newField)
+      if (parentField && ['object', 'array'].includes(parentField.type))
+        parentField.children?.push(newField)
       ctx.fields.set(newField.fullname, newField)
     }
   }

@@ -51,7 +51,7 @@ export abstract class Field {
       this.value = undefined
     }
 
-    if (type === 'object') {
+    if (['object', 'array'].includes(type)) {
       this._children = []
     }
     this._prop = prop

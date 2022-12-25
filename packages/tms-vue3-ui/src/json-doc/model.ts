@@ -318,6 +318,7 @@ export class DocAsArray {
    * @returns
    */
   build(rawSchema?: RawSchema, cleanEmpty = false): any {
+    console.time('json-doc:build:doc')
     let log = debug.extend('build')
     // 清理空数据
     if (cleanEmpty === true) {
@@ -332,7 +333,7 @@ export class DocAsArray {
 
     const handleDocProp = (prop: DocProp, index: number) => {
       if (index === 0) return
-      let val = this.get(prop.name)
+      let val = this.get(prop)
       val = _.cloneDeep(val)
       _.set(Output, prop.name, val)
     }
@@ -340,6 +341,7 @@ export class DocAsArray {
     const Output = Array.isArray(this._rawDoc) ? [] : {}
     const JsonDocPropNames: string[] = [] // json字段的名称
     if (schemaProps.length) {
+      log('根据指定的schema去除数据')
       /**根据schema生成文档，忽略文档中没有对应schema的内容*/
       schemaProps.forEach((schemaProp, index) => {
         // 模板属性会有多个匹配的文档属性
@@ -377,7 +379,12 @@ export class DocAsArray {
           }
         })
       })
-    } else this._properties.forEach(handleDocProp)
+    } else {
+      log('返回全部数据')
+      this._properties.forEach(handleDocProp)
+    }
+
+    console.timeEnd('json-doc:build:doc')
 
     return Output
   }
@@ -624,11 +631,17 @@ export class DocAsArray {
   }
   /**
    * 返回指定字段的值。如果指定的属性有子属性，使用子属性的值构造属性的值。
-   * @param name
+   * @param nameOrProp
    * @returns
    */
-  get(name: string): any {
-    let { prop } = this.findByName(name)
+  get(nameOrProp: string | DocProp): any {
+    let prop
+    if (nameOrProp instanceof DocProp) {
+      prop = nameOrProp
+    } else {
+      prop = this.findByName(nameOrProp).prop
+    }
+
     if (prop?._children.length) {
       if (Array.isArray(prop.value)) {
         return prop._children.map((child) => child.value)

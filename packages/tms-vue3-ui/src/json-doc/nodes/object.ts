@@ -215,7 +215,7 @@ const propPasteVNode = (ctx: FormContext, field: Field) => {
       title: fullname,
     },
     // `粘贴-${label ? label : shortname ? shortname : '全部'}`
-    '粘贴对象'
+    '粘贴'
   )
 
   return pasteVNode
@@ -309,6 +309,11 @@ export class ObjectNode extends FieldNode {
    */
   protected children(): VNode[] {
     const { ctx, field } = this
+
+    // 节点未展开时，不生成子节点
+    if (field.fullname !== '' && !ctx.nestExpanded?.has(field.fullname))
+      return []
+
     let vnodes = []
     if (this._children) {
       this._children.forEach((c) => {

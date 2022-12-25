@@ -47,7 +47,7 @@ const itemPasteVNode = (ctx: FormContext, field: Field) => {
       },
     },
     // `粘贴-${shortname}`
-    '粘贴数组'
+    '粘贴'
   )
 
   return pasteVNode
@@ -83,7 +83,7 @@ const itemAddVNode = (ctx: FormContext, field: Field) => {
       },
     },
     // `添加-${field.label ? field.label : shortname}`
-    '添加项目'
+    '添加'
   )
   return addVNode
 }
@@ -100,7 +100,7 @@ const itemInsertVNode = (ctx: FormContext, field: Field, index: number) => {
     components.button.tag,
     {
       name: fullname,
-      class: ['tvu-button', 'tvu-button--green'],
+      class: ['tvu-button', 'tvu-button--yellow'],
       onClick: () => {
         const { items } = field.schemaProp
         if (items) {
@@ -110,7 +110,7 @@ const itemInsertVNode = (ctx: FormContext, field: Field, index: number) => {
       },
     },
     // `插入-${field.label ? field.label : field.shortname}`
-    '插入项目'
+    '插入'
   )
 }
 
@@ -120,7 +120,7 @@ const itemRemoveVNode = (ctx: FormContext, field: Field, index: number) => {
     components.button.tag,
     {
       name: fullname,
-      class: ['tvu-button', 'tvu-button--green'],
+      class: ['tvu-button', 'tvu-button--yellow'],
       onClick: () => {
         ctx.editDoc.remove(fullname)
       },
@@ -136,7 +136,7 @@ const itemMoveUpVNode = (ctx: FormContext, field: Field, index: number) => {
     components.button.tag,
     {
       name: fullname,
-      class: ['tvu-button', 'tvu-button--green'],
+      class: ['tvu-button', 'tvu-button--yellow'],
       onClick: () => {
         ctx.editDoc.moveUp(fullname)
       },
@@ -151,7 +151,7 @@ const itemMoveDownVNode = (ctx: FormContext, field: Field, index: number) => {
     components.button.tag,
     {
       name: fullname,
-      class: ['tvu-button', 'tvu-button--green'],
+      class: ['tvu-button', 'tvu-button--yellow'],
       onClick: () => {
         ctx.editDoc.moveDown(fullname)
       },
@@ -204,12 +204,19 @@ export class ArrayNode extends FieldNode {
 
     return options
   }
-
+  /**
+   * 生成子节点
+   * @returns
+   */
   protected children(): VNode[] {
     const { ctx, field } = this
 
+    // 节点未展开时，不生成子节点
+    if (!ctx.nestExpanded?.has(field.fullname)) return []
+
     const itemNestVNodes: VNode[] = []
 
+    /*每个子项目生成1个包裹元素，包含对这个元素的可用操作*/
     this._children.forEach((child, index) => {
       let itemVNodes = [] // 数组中1个item的虚节点
       itemVNodes.push(child)
@@ -217,32 +224,44 @@ export class ArrayNode extends FieldNode {
       const itemVNodeOptons = {
         index,
         class: ['tvu-jdoc__nest__item'],
+        onClick: (evt: any) => {
+          evt.stopPropagation()
+          if (ctx.activeFieldName !== field.fullname + `[${index}]`) {
+            ctx.activeFieldName = field.fullname + `[${index}]`
+            ctx.editDoc.forceRender()
+          }
+        },
+      }
+      /*如果子项目是激活状态，生成子项目的可用操作*/
+      if (field.children && field.children.length > index) {
+        let childField = field.children[index]
+        if (
+          ctx.activeFieldName === field.fullname + `[${index}]` ||
+          ctx.activeFieldName === childField.fullname
+        ) {
+          let actions = [
+            itemInsertVNode(ctx, field, index),
+            itemRemoveVNode(ctx, field, index),
+          ]
+          if (this._children.length > 1) {
+            if (index > 0) actions.push(itemMoveUpVNode(ctx, field, index))
+            if (index < this._children.length - 1)
+              actions.push(itemMoveDownVNode(ctx, field, index))
+          }
+          let itemActionsVNode = h(
+            'div',
+            { class: ['tvu-jdoc__nest__item__actions'] },
+            actions
+          )
+          itemVNodes.push(itemActionsVNode)
+        }
       }
 
-      let actions = [
-        itemInsertVNode(ctx, field, index),
-        itemRemoveVNode(ctx, field, index),
-      ]
-      if (this._children.length > 1) {
-        if (index > 0) actions.push(itemMoveUpVNode(ctx, field, index))
-        if (index < this._children.length - 1)
-          actions.push(itemMoveDownVNode(ctx, field, index))
-      }
-      let itemActionsVNode = h(
-        'div',
-        { class: ['tvu-jdoc__nest__item__actions'] },
-        actions
-      )
-
-      let itemNestVNode = h('div', itemVNodeOptons, [
-        itemVNodes,
-        itemActionsVNode,
-      ])
+      let itemNestVNode = h('div', itemVNodeOptons, [itemVNodes])
       itemNestVNodes.push(itemNestVNode)
     })
 
     /**字段范围的操作*/
-    // if (ctx.activeFieldName === field.fullname) {
     const fieldActionVNodes = []
     if (ctx.enablePaste === true) {
       debug(`对象字段【${field.fullname}】需要支持黏贴操作`)
@@ -257,8 +276,5 @@ export class ArrayNode extends FieldNode {
       ...itemNestVNodes,
       h('div', { class: ['tvu-jdoc__nest__actions'] }, fieldActionVNodes),
     ]
-    // } else {
-    //   return itemNestVNodes
-    // }
   }
 }

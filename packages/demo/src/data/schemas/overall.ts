@@ -18,7 +18,6 @@ export const SampleSchema = {
     nickname: {
       title: '昵称',
       type: 'string',
-      isOneOf: true,
       required: true,
     },
     password: {
@@ -29,7 +28,6 @@ export const SampleSchema = {
     additionalName: {
       title: '其他名称（基础类型数组）',
       type: 'array',
-      isOneOf: true,
       items: {
         type: 'string',
       },
@@ -263,11 +261,15 @@ export const SampleSchema = {
   },
 }
 
-export const SampleData = {}
-
-export const SamplePasted = {
+export const SampleData = {
   experiences: [
     { time: '2001', content: 'coding' },
     { time: '2002', content: 'pm' },
   ],
+  tel: {
+    areaCode: '010',
+    phoneNumber: '58551234',
+  },
 }
+
+export const SamplePasted = {}

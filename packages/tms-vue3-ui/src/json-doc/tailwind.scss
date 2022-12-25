@@ -7,6 +7,9 @@
     @apply flex flex-col gap-y-2;
     .tvu-jdoc__field-fullname {
       @apply text-gray-300;
+      > div {
+        @apply overflow-hidden whitespace-nowrap;
+      }
     }
     input.tvu-jdoc__field-input:read-only {
       @apply bg-gray-100;
@@ -38,6 +41,46 @@
       background-size: 100% auto;
     }
   }
+  /*叶字段锁进*/
+  .tvu-jdoc__field[data-leaf-field] > :first-child {
+    margin-left: 1.5rem;
+    position: relative;
+    &::before {
+      position: absolute;
+      left: -1.5rem;
+      top: 0;
+      bottom: 0;
+      width: 1rem;
+      border: 1px solid lightgray;
+      border-radius: 4px;
+      text-align: center;
+    }
+  }
+  .tvu-jdoc__field[data-leaf-field='string'] {
+    > :first-child::before {
+      content: 's';
+    }
+  }
+  .tvu-jdoc__field[data-leaf-field='number'] {
+    > :first-child::before {
+      content: 'n';
+    }
+  }
+  .tvu-jdoc__field[data-leaf-field='integer'] {
+    > :first-child::before {
+      content: 'i';
+    }
+  }
+  .tvu-jdoc__field[data-leaf-field='boolean'] {
+    > :first-child::before {
+      content: 'b';
+    }
+  }
+  .tvu-jdoc__field[data-leaf-field='json'] {
+    > :first-child::before {
+      content: 'j';
+    }
+  }
   /*嵌套字段为折叠状态*/
   .tvu-jdoc__field[data-collapsed-field] > :first-child {
     margin-left: 1.5rem;
@@ -66,7 +109,14 @@
       content: '-';
     }
   }
-
+  .tvu-jdoc__field-label {
+    > div {
+      @apply overflow-hidden whitespace-nowrap;
+      .tvu-jdoc__field-label__field-name {
+        @apply ml-2 text-gray-400;
+      }
+    }
+  }
   .tvu-jdoc__field-name {
     input {
       @apply w-full bg-green-50;
