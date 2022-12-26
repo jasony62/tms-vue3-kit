@@ -95,6 +95,7 @@ const selectOneOfVNode = (ctx: FormContext, field: Field): VNode[] => {
           `--选择【${egName ? egName : labels.join('/')}】输入方式--`
         )
       )
+      // 1个亲和组选项列表
       const vnSelect = h(
         'select',
         {
@@ -112,8 +113,10 @@ const selectOneOfVNode = (ctx: FormContext, field: Field): VNode[] => {
                 }${child.name}`
                 let childField = ctx.fields?.get(childFullname)
                 if (childField) {
+                  // 或得亲和组名称
                   let ingroup = Field.isOneOfInclusiveGroupName(childField)
                   ctx.oneOfSelected?.set(childFullname, { ingroup })
+                  ctx.oneOfSelectedInGroups.add(ingroup)
                 } else {
                   /**
                    * 如果是模板属性，需要重新生成字段
@@ -177,7 +180,7 @@ const propAddVNode = (
           ctx.editDoc.appendAt(fullname, initVal, newKey)
         },
       },
-      `添加-${childProp.attrs.title ?? childProp.name}`
+      `添加`
     )
   )
   return h('div', { class: ['tvu-jdoc__nest__actions'] }, addVNodes)
@@ -323,8 +326,14 @@ export class ObjectNode extends FieldNode {
       `对象字段【${field.fullname}】【${schemaProp.fullname}】需要处理子节点`
     )
 
-    // 激活状态时需要支持的操作
-    if (field.fullname === '' || ctx.activeFieldName === field.fullname) {
+    /**
+     * 根字段，字段或子字段为激活状态时，或者字段为展开状态时，需要支持的操作
+     */
+    if (
+      field.fullname === '' ||
+      ctx.activeFieldName?.indexOf(field.fullname) === 0 ||
+      ctx.nestExpanded?.has(field.fullname)
+    ) {
       /**提取所有的oneOf属性便于后续处理*/
       const flattenIsOneOfChildren: SchemaProp[] = []
       isOneOfChildren.forEach((eg: Map<string, SchemaProp[]>) => {

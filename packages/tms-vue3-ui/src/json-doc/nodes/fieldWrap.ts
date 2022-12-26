@@ -65,7 +65,7 @@ const fieldInsertVNode = (ctx: FormContext, field: Field) => {
  */
 const fieldRemoveVNode = (ctx: FormContext, field: Field) => {
   const label =
-    '删除' +
+    (field.isOneOf ? '替换' : '删除') +
     (field.schemaProp.isOneOfInclusiveGroup
       ? `-${field.schemaProp.isOneOfInclusiveGroup}`
       : '')
@@ -74,21 +74,26 @@ const fieldRemoveVNode = (ctx: FormContext, field: Field) => {
     components.button.tag,
     {
       name: field.fullname,
-      class: ['tvu-button', 'tvu-button--yellow'],
+      class: ['tvu-button', 'tvu-button--red'],
       onClick: (evt: any) => {
         evt.stopPropagation()
-        if (field.isOneOf && field.schemaProp.isOneOfInclusiveGroup) {
-          /**删除同亲和组的字段*/
-          const fieldNames: any[] = fieldNamesInGroup(field, ctx)
-          fieldNames.forEach((name) => {
-            ctx.oneOfSelected?.delete(name)
-            ctx.editDoc.remove(name, false)
-          })
+        if (field.isOneOf) {
+          if (field.schemaProp.isOneOfInclusiveGroup) {
+            const gname = Field.isOneOfInclusiveGroupName(field)
+            /**删除同亲和组的字段*/
+            const fieldNames: any[] = fieldNamesInGroup(field, ctx)
+            fieldNames.forEach((name) => {
+              ctx.oneOfSelected.delete(name)
+              ctx.editDoc.remove(name, false)
+            })
+            // 删除组名称
+            ctx.oneOfSelectedInGroups.delete(gname)
+          } else {
+            ctx.oneOfSelected.delete(field.fullname)
+            ctx.editDoc.remove(field.fullname, false)
+          }
           ctx.editDoc.forceRender()
         } else {
-          if (field.isOneOf) {
-            ctx.oneOfSelected?.delete(field.fullname)
-          }
           ctx.editDoc.remove(field.fullname)
         }
       },
@@ -379,20 +384,32 @@ export class FieldWrap extends Node {
     // 设置排他属性字段是否出现
     if (field.isOneOf) {
       let selected = false
-      if (!ctx.oneOfSelected?.has(field.fullname)) {
+      let ingroup = Field.isOneOfInclusiveGroupName(field)
+      if (!ctx.oneOfSelected.has(field.fullname)) {
+        // 没有记录在选中集合中，检查是否已经在文档中
         // selected = ctx.editDoc.has(field.fullname)
         let snapshot = ctx.editDoc.snapshot()
         selected = snapshot.has(field.fullname)
         if (selected) {
-          let ingroup = Field.isOneOfInclusiveGroupName(field)
-          ctx.oneOfSelected?.set(field.fullname, { ingroup })
+          // 获得oneOf亲和组名称
+          ctx.oneOfSelected.set(field.fullname, { ingroup })
+          ctx.oneOfSelectedInGroups.add(ingroup)
         }
       } else {
         selected = true
       }
-      Object.assign(options, {
-        'data-one-of-field-selected': selected,
-      })
+      if (selected) {
+        const groupIndex = Array.from(
+          ctx.oneOfSelectedInGroups.values()
+        ).indexOf(ingroup)
+        Object.assign(options, {
+          'data-one-of-field-selected': `ingroup-${groupIndex % 3}`,
+        })
+      } else {
+        Object.assign(options, {
+          'data-one-of-field-selected': false,
+        })
+      }
     }
 
     this._vnode = h(this.rawArgs.tag, options, vnodes)
@@ -400,10 +417,16 @@ export class FieldWrap extends Node {
     return this._vnode
   }
 }
+/**
+ * 获得字段同oneOf组的属性
+ * @param field
+ * @param ctx
+ * @returns
+ */
 function fieldNamesInGroup(field: Field, ctx: FormContext) {
   const groupName = Field.isOneOfInclusiveGroupName(field)
   const fieldNames: any[] = []
-  ctx.oneOfSelected?.forEach(({ ingroup }, fieldName) => {
+  ctx.oneOfSelected.forEach(({ ingroup }, fieldName) => {
     if (ingroup === groupName) fieldNames.push(fieldName)
   })
   return fieldNames

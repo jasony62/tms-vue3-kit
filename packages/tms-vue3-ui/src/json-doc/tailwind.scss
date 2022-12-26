@@ -58,27 +58,27 @@
   }
   .tvu-jdoc__field[data-leaf-field='string'] {
     > :first-child::before {
-      content: 's';
+      content: 'S';
     }
   }
   .tvu-jdoc__field[data-leaf-field='number'] {
     > :first-child::before {
-      content: 'n';
+      content: 'N';
     }
   }
   .tvu-jdoc__field[data-leaf-field='integer'] {
     > :first-child::before {
-      content: 'i';
+      content: 'I';
     }
   }
   .tvu-jdoc__field[data-leaf-field='boolean'] {
     > :first-child::before {
-      content: 'b';
+      content: 'B';
     }
   }
   .tvu-jdoc__field[data-leaf-field='json'] {
     > :first-child::before {
-      content: 'j';
+      content: 'J';
     }
   }
   /*嵌套字段为折叠状态*/
@@ -109,6 +109,31 @@
       content: '-';
     }
   }
+  /*当前为激活状态的字段*/
+  .tvu-jdoc__field[data-leaf-field].tvu-jdoc__field--active > :first-child,
+  .tvu-jdoc__field[data-collapsed-field].tvu-jdoc__field--active
+    > :first-child {
+    &::before {
+      @apply bg-blue-500 text-white;
+    }
+  }
+  /*标记oneOf亲和组*/
+  .tvu-jdoc__field[data-one-of-field-selected='ingroup-0'] > :first-child {
+    &::before {
+      @apply border-red-500 text-red-500;
+    }
+  }
+  .tvu-jdoc__field[data-one-of-field-selected='ingroup-1'] > :first-child {
+    &::before {
+      @apply border-red-700 text-red-700;
+    }
+  }
+  .tvu-jdoc__field[data-one-of-field-selected='ingroup-2'] > :first-child {
+    &::before {
+      @apply border-red-900 text-red-900;
+    }
+  }
+
   .tvu-jdoc__field-label {
     > div {
       @apply overflow-hidden whitespace-nowrap;

@@ -209,7 +209,8 @@ export abstract class Field {
     return assignedValue
   }
   /**
-   *
+   * 返回字段所属oneOf组的组名
+   * 字段的路径名.组名
    * @param field
    * @returns
    */

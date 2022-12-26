@@ -82,7 +82,6 @@ const itemAddVNode = (ctx: FormContext, field: Field) => {
         }
       },
     },
-    // `添加-${field.label ? field.label : shortname}`
     '添加'
   )
   return addVNode
