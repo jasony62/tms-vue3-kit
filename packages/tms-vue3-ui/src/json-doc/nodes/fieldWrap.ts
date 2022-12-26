@@ -44,8 +44,9 @@ const fieldInsertVNode = (ctx: FormContext, field: Field) => {
     components.button.tag,
     {
       name: fullname,
-      class: ['tvu-button'],
-      onClick: () => {
+      class: ['tvu-button', 'tvu-button--yellow'],
+      onClick: (evt: any) => {
+        evt.stopPropagation()
         const { name, attrs } = field.schemaProp
         const newKey = Field.initialKey(name)
         const initVal = Field.initialVal(attrs.default, attrs.type)
@@ -53,8 +54,7 @@ const fieldInsertVNode = (ctx: FormContext, field: Field) => {
         ctx.editDoc.insertAt(fullname, initVal, newKey)
       },
     },
-    // `插入-${field.label ? field.label : field.shortname}`
-    '插入字段'
+    '插入'
   )
 }
 /**
@@ -64,17 +64,19 @@ const fieldInsertVNode = (ctx: FormContext, field: Field) => {
  * @returns
  */
 const fieldRemoveVNode = (ctx: FormContext, field: Field) => {
-  // let label =
-  //   field.isOneOf && field.schemaProp.isOneOfInclusiveGroup
-  //     ? field.schemaProp.isOneOfInclusiveGroup
-  //     : field.shortname
+  const label =
+    '删除' +
+    (field.schemaProp.isOneOfInclusiveGroup
+      ? `-${field.schemaProp.isOneOfInclusiveGroup}`
+      : '')
 
   return h(
     components.button.tag,
     {
       name: field.fullname,
-      class: ['tvu-button'],
-      onClick: () => {
+      class: ['tvu-button', 'tvu-button--yellow'],
+      onClick: (evt: any) => {
+        evt.stopPropagation()
         if (field.isOneOf && field.schemaProp.isOneOfInclusiveGroup) {
           /**删除同亲和组的字段*/
           const fieldNames: any[] = fieldNamesInGroup(field, ctx)
@@ -91,7 +93,7 @@ const fieldRemoveVNode = (ctx: FormContext, field: Field) => {
         }
       },
     },
-    `删除字段`
+    label
   )
 }
 /**
@@ -105,8 +107,9 @@ const fieldMoveDownVNode = (ctx: FormContext, field: Field) => {
     components.button.tag,
     {
       name: field.fullname,
-      class: ['tvu-button'],
-      onClick: () => {
+      class: ['tvu-button', 'tvu-button--yellow'],
+      onClick: (evt: any) => {
+        evt.stopPropagation()
         ctx.editDoc.moveDown(field.fullname)
       },
     },
@@ -124,8 +127,9 @@ const fieldMoveUpVNode = (ctx: FormContext, field: Field) => {
     components.button.tag,
     {
       name: field.fullname,
-      class: ['tvu-button'],
-      onClick: () => {
+      class: ['tvu-button', 'tvu-button--yellow'],
+      onClick: (evt: any) => {
+        evt.stopPropagation()
         ctx.editDoc.moveUp(field.fullname)
       },
     },
@@ -250,40 +254,33 @@ export class FieldWrap extends Node {
 
     children.push(this.fieldNode.createElem())
 
-    // 只有是激活节点时才出现操作
-    if (ctx.activeFieldName === field.fullname) {
-      /**属性是可扩展属性*/
-      if (field.schemaProp.isPattern) {
-        const actionVNodes = [
-          fieldInsertVNode(ctx, field),
-          fieldRemoveVNode(ctx, field),
-          fieldMoveUpVNode(ctx, field),
-          fieldMoveDownVNode(ctx, field),
-        ]
+    /**属性是可扩展属性*/
+    if (
+      field.schemaProp.isPattern &&
+      ctx.activePatternFieldName === field.fullname
+    ) {
+      const actionVNodes = [
+        fieldInsertVNode(ctx, field),
+        fieldRemoveVNode(ctx, field),
+        fieldMoveUpVNode(ctx, field),
+        fieldMoveDownVNode(ctx, field),
+      ]
 
-        let actions = h(
-          'div',
-          {
-            class: ['tvu-jdoc__field-actions'],
-          },
-          actionVNodes
-        )
-        children.push(actions)
-      }
-      if (field.isOneOf) {
-        if (field.schemaProp.isOneOfInclusiveGroup) {
-          const fieldNames: any[] = fieldNamesInGroup(field, ctx)
-          if (fieldNames.indexOf(field.fullname) === fieldNames.length - 1) {
-            let actions = h(
-              'div',
-              {
-                class: ['tvu-jdoc__field-actions'],
-              },
-              [fieldRemoveVNode(ctx, field)]
-            )
-            children.push(actions)
-          }
-        } else {
+      let actions = h(
+        'div',
+        {
+          class: ['tvu-jdoc__field-actions'],
+        },
+        actionVNodes
+      )
+      children.push(actions)
+    }
+    /**属性是oneOf*/
+    if (field.isOneOf) {
+      if (field.schemaProp.isOneOfInclusiveGroup) {
+        const fieldNames: any[] = fieldNamesInGroup(field, ctx)
+        // 同组节点的最后一个节点中添加删除组操作
+        if (fieldNames.indexOf(field.fullname) === fieldNames.length - 1) {
           let actions = h(
             'div',
             {
@@ -293,6 +290,15 @@ export class FieldWrap extends Node {
           )
           children.push(actions)
         }
+      } else {
+        let actions = h(
+          'div',
+          {
+            class: ['tvu-jdoc__field-actions'],
+          },
+          [fieldRemoveVNode(ctx, field)]
+        )
+        children.push(actions)
       }
     }
 
@@ -315,18 +321,37 @@ export class FieldWrap extends Node {
       class: ['tvu-jdoc__field'],
     }
     // 是否需要切换激活节点
-    if (['object'].includes(schemaType)) {
+    if (['object'].includes(schemaType) || field.schemaProp.isPattern) {
       options.onClick = (evt: any) => {
-        evt.stopPropagation()
-        if (ctx.activeFieldName !== field.fullname) {
-          ctx.activeFieldName = field.fullname
-          ctx.editDoc.forceRender()
+        let requireRender = false
+        if (field.schemaProp.isPattern) {
+          if (ctx.activePatternFieldName !== field.fullname) {
+            ctx.activePatternFieldName = field.fullname
+            requireRender = true
+          }
         }
+        if (['object'].includes(schemaType)) {
+          evt.stopPropagation()
+          if (ctx.activeFieldName !== field.fullname) {
+            ctx.activeFieldName = field.fullname
+            // 如果模板属性的父节点不是激活状态，模板属性也不是激活状态
+            if (ctx.activePatternFieldName) {
+              if (ctx.activePatternFieldName.indexOf(field.fullname) === -1) {
+                ctx.activePatternFieldName = undefined
+              }
+            }
+            requireRender = true
+          }
+        }
+        if (requireRender) ctx.editDoc.forceRender()
       }
     }
     // active字段
     if (ctx.activeFieldName === field.fullname) {
       options.class.push('tvu-jdoc__field--active')
+    }
+    if (ctx.activePatternFieldName === field.fullname) {
+      options.class.push('tvu-jdoc__pattern-field--active')
     }
     // 必填字段
     if (field.required) {

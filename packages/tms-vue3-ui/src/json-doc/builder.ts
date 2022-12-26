@@ -717,6 +717,7 @@ export type FormContext = {
   onNodeFocus?: (field: Field) => void
   onNodeBlur?: (field: Field) => void
   activeFieldName?: string // 用户最近点击的字段
+  activePatternFieldName?: string // 用户最近点击的字段
 }
 
 /**

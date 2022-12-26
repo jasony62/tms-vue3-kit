@@ -1,6 +1,10 @@
 export const SampleSchema = {
   type: 'object',
   properties: {
+    name: {
+      type: 'string',
+      title: '名称',
+    },
     g1a: {
       type: 'string',
       title: '组1a',

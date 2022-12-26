@@ -101,7 +101,9 @@ const itemInsertVNode = (ctx: FormContext, field: Field, index: number) => {
     {
       name: fullname,
       class: ['tvu-button', 'tvu-button--yellow'],
-      onClick: () => {
+      onClick: (evt: any) => {
+        evt.stopPropagation()
+        ctx.activeFieldName = field.fullname + `[${index + 1}]`
         const { items } = field.schemaProp
         if (items) {
           const initVal = Field.initialVal(undefined, items.type)
@@ -109,7 +111,6 @@ const itemInsertVNode = (ctx: FormContext, field: Field, index: number) => {
         }
       },
     },
-    // `插入-${field.label ? field.label : field.shortname}`
     '插入'
   )
 }
@@ -121,12 +122,12 @@ const itemRemoveVNode = (ctx: FormContext, field: Field, index: number) => {
     {
       name: fullname,
       class: ['tvu-button', 'tvu-button--yellow'],
-      onClick: () => {
+      onClick: (evt: any) => {
+        evt.stopPropagation()
         ctx.editDoc.remove(fullname)
       },
     },
     '删除'
-    // `删除-${field.shortname}[${index}]`
   )
 }
 
@@ -137,7 +138,9 @@ const itemMoveUpVNode = (ctx: FormContext, field: Field, index: number) => {
     {
       name: fullname,
       class: ['tvu-button', 'tvu-button--yellow'],
-      onClick: () => {
+      onClick: (evt: any) => {
+        evt.stopPropagation()
+        ctx.activeFieldName = field.fullname + `[${index - 1}]`
         ctx.editDoc.moveUp(fullname)
       },
     },
@@ -152,7 +155,9 @@ const itemMoveDownVNode = (ctx: FormContext, field: Field, index: number) => {
     {
       name: fullname,
       class: ['tvu-button', 'tvu-button--yellow'],
-      onClick: () => {
+      onClick: (evt: any) => {
+        evt.stopPropagation()
+        ctx.activeFieldName = field.fullname + `[${index + 1}]`
         ctx.editDoc.moveDown(fullname)
       },
     },
