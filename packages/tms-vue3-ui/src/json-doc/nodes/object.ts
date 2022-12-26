@@ -214,7 +214,6 @@ const propPasteVNode = (ctx: FormContext, field: Field) => {
       },
       title: fullname,
     },
-    // `粘贴-${label ? label : shortname ? shortname : '全部'}`
     '粘贴'
   )
 
@@ -236,9 +235,6 @@ const propRemoveVNode = (ctx: FormContext, field: Field) => {
       },
       title: field.fullname,
     },
-    // `清除-${
-    //   field.label ? field.label : field.shortname ? field.shortname : '全部'
-    // }`
     '清空'
   )
 
@@ -328,7 +324,7 @@ export class ObjectNode extends FieldNode {
     )
 
     // 激活状态时需要支持的操作
-    if (ctx.activeFieldName === field.fullname) {
+    if (field.fullname === '' || ctx.activeFieldName === field.fullname) {
       /**提取所有的oneOf属性便于后续处理*/
       const flattenIsOneOfChildren: SchemaProp[] = []
       isOneOfChildren.forEach((eg: Map<string, SchemaProp[]>) => {
