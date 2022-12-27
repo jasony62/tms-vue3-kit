@@ -124,6 +124,11 @@
         <tvu-checkbox v-model="useAutofill" label="自动填充？"></tvu-checkbox>
       </tvu-form-item>
       <component v-if="useAutofill" :is="TvuJseAutofill" v-model:autofill="autofill"></component>
+      <!--查询填写内容-->
+      <tvu-form-item class="tvu-jse__field">
+        <tvu-checkbox v-model="useLookup" label="查询填写内容？"></tvu-checkbox>
+      </tvu-form-item>
+      <component v-if="useLookup" :is="TvuJseLookup" v-model:prop="prop"></component>
       <!--上传模板文件-->
       <div class="tvu-jse__field" v-if="onUpload && attrs.type === 'array' && items?.format === 'file'">
         <tvu-jse-attachment :schema-prop="prop" :on-upload="onUpload"></tvu-jse-attachment>
@@ -140,7 +145,8 @@ import File from './formats/File.vue'
 import TvuJseEnumConfig from './EnumConfig.vue'
 import TvuJseAttachment from './Attachment.vue'
 import TvuJseAutofill from './Autofill.vue'
-import { computed, onMounted, reactive, ref, toRaw } from 'vue'
+import TvuJseLookup from './Lookup.vue'
+import { computed, onMounted, reactive, ref, toRaw, watch } from 'vue'
 import { PropAutofillRunPolicy, PropAutofillTarget } from './model'
 
 export default {
@@ -175,6 +181,7 @@ const activeEndIndex = computed(() =>
 )
 const choiceMode = ref('')
 const useAutofill = ref(false)
+const useLookup = ref(false)
 const useExistIf = ref(false)
 
 // 获得当前的JSONSchema数据
@@ -257,6 +264,18 @@ let hasAddNode = computed(() => {
   return false
 })
 
+watch(useExistIf, (nv) => {
+  if (nv !== true) delete attrs.value.existIf
+})
+
+watch(useLookup, (nv) => {
+  if (nv !== true) delete attrs.value.lookup
+})
+
+watch(useAutofill, (nv) => {
+  if (nv !== true) delete attrs.value.autofill
+})
+
 const autofill = computed(() => {
   let rawAttrs = attrs.value
   rawAttrs.autofill ??= {
@@ -337,6 +356,7 @@ const onClickNode = (prop: SchemaProp) => {
     choiceMode.value = ''
   }
   useAutofill.value = typeof prop.attrs.autofill === 'object'
+  useLookup.value = typeof prop.lookup === 'object'
   useExistIf.value = typeof prop.existIf === 'object'
 }
 /**
@@ -457,6 +477,7 @@ onMounted(() => {
   nodes.value = builder.props
   data.currProp = builder.props?.[0]
   useAutofill.value = typeof data.currProp.attrs.autofill === 'object'
+  useLookup.value = typeof data.currProp.lookup === 'object'
   useExistIf.value = typeof data.currProp.existIf === 'object'
 })
 </script>

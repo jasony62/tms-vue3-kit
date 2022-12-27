@@ -29,6 +29,7 @@ export const Type2Format = {
 const propToRaw = (prop: SchemaProp, parent: any): any => {
   let {
     items,
+    lookup,
     existIf,
     isOneOf,
     isOneOfInclusiveGroup,
@@ -39,13 +40,11 @@ const propToRaw = (prop: SchemaProp, parent: any): any => {
     ...prop.attrs,
   }
 
-  if (items) {
-    rawProp.items = items
-  }
+  if (items) rawProp.items = items
 
-  if (existIf) {
-    rawProp.existIf = existIf
-  }
+  if (lookup) rawProp.lookup = lookup
+
+  if (existIf) rawProp.existIf = existIf
 
   if (isOneOf) rawProp.isOneOf = isOneOf
 

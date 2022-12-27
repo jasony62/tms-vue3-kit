@@ -706,6 +706,7 @@ export type FormContext = {
   enablePaste?: boolean
   autofillRequest?: Function
   onPaste?: Function
+  onLookup?: Function
   onFileUpload?: Function
   onFileSelect?: Function
   onFileDownload?: Function

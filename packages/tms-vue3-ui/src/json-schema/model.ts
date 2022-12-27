@@ -71,6 +71,7 @@ export type SchemaPropAttrs = {
   maxItems?: number
   default?: any
   autofill?: PropAutofill
+  lookup?: any
   value?: any // 要要保留？没有对应的逻辑
   [k: string]: any
   initialName?: string
@@ -84,6 +85,7 @@ export class SchemaProp {
   _name: string
   attrs: SchemaPropAttrs
   existIf: ExistIfRuleSet | undefined
+  lookup?: any
   items?: { type: string; [k: string]: any }
   attachment?: any
   isPattern = false //  是否是由正则表达式定义名称的子属性
@@ -210,6 +212,7 @@ export type RawSchema = {
   oneOf?: any
   default?: any
   autofill?: PropAutofill
+  lookup?: any
   attachment?: any
   component?: any
   visible?: any
@@ -314,7 +317,8 @@ function* _parseOne(
   if (parents.length && isPatternProperty)
     parents[0].patternChildren?.push(newProp)
 
-  let { properties, patternProperties, items, required, existIf } = rawProp
+  let { properties, patternProperties, items, required, lookup, existIf } =
+    rawProp
 
   let keys = Object.keys(rawProp)
   for (let i = 0; i < keys.length; i++) {
@@ -322,6 +326,7 @@ function* _parseOne(
     switch (key) {
       case 'properties':
       case 'patternProperties':
+      case 'lookup':
       case 'existIf':
       case 'required':
         break
@@ -400,10 +405,10 @@ function* _parseOne(
   ) {
     newProp.patternChildren = []
   }
+  // 属性查询桂娥
+  if (lookup && typeof lookup === 'object') newProp.lookup = lookup
   // 属性依赖规则
-  if (typeof existIf === 'object') {
-    newProp.existIf = existIf
-  }
+  if (existIf && typeof existIf === 'object') newProp.existIf = existIf
 
   // 返回当前的属性
   yield newProp

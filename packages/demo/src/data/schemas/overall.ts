@@ -14,6 +14,7 @@ export const SampleSchema = {
       title: '姓名',
       type: 'string',
       default: 'xyz',
+      lookup: {},
     },
     nickname: {
       title: '昵称',
@@ -28,6 +29,7 @@ export const SampleSchema = {
     additionalName: {
       title: '其他名称（基础类型数组）',
       type: 'array',
+      lookup: {},
       items: {
         type: 'string',
       },
@@ -177,6 +179,7 @@ export const SampleSchema = {
     tel: {
       title: '电话（对象）',
       type: 'object',
+      lookup: {},
       properties: {
         areaCode: {
           title: '区号',
@@ -273,3 +276,11 @@ export const SampleData = {
 }
 
 export const SamplePasted = {}
+
+export const SampleLookup = {
+  name: 'abc',
+  tel: {
+    areaCode: '010',
+    phoneNumber: '99991111',
+  },
+}

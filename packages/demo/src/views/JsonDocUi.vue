@@ -27,10 +27,10 @@
   <div class="flex flex-row">
     <div class="w-1/3 p-4">
       <json-doc v-if="loading === false" ref="jsonDocEditor" :key="caseName" :schema="testObj.schema"
-        :value="testObj.data" :enable-paste="true" :autofill-request="onAutofill" :on-file-download="onFileDownload"
-        :on-file-upload="onFileUpload" :hide-root-title="true" :hide-root-description="true"
-        :hide-field-description="true" :show-field-fullname="showFieldFullname" @jdoc-focus="onJdocFocus"
-        @jdoc-blur="onJdocBlur" :on-paste="onPaste">
+        :value="testObj.data" :enable-paste="true" :on-lookup="onLookup" :autofill-request="onAutofill"
+        :on-file-download="onFileDownload" :on-file-upload="onFileUpload" :hide-root-title="true"
+        :hide-root-description="true" :hide-field-description="true" :show-field-fullname="showFieldFullname"
+        @jdoc-focus="onJdocFocus" @jdoc-blur="onJdocBlur" :on-paste="onPaste">
       </json-doc>
     </div>
     <div class="w-1/3">
@@ -70,7 +70,7 @@ const jsonResult = ref('') // 表单数据结果
 
 const loading = ref(true)
 
-const testObj = reactive({ schema: {}, data: {}, pasted: null })
+const testObj = reactive({ schema: {}, data: {}, pasted: null, lookup: null })
 
 const activeField = ref<Field>() // 正在编辑的字段
 
@@ -81,10 +81,11 @@ const showFieldFullname = ref(false)
 function loadTestData() {
   loading.value = true
   return import(`../data/schemas/${caseName.value}.ts`).then(
-    ({ SampleData, SampleSchema, SamplePasted }) => {
+    ({ SampleData, SampleSchema, SamplePasted, SampleLookup }) => {
       testObj.schema = SampleSchema
       testObj.data = SampleData
       testObj.pasted = SamplePasted
+      testObj.lookup = SampleLookup
       loading.value = false
     }
   )
@@ -134,6 +135,21 @@ const updateJson = () => {
     let newVal = jsonEditor.get()
     jsonDocEditor.value?.editDoc.set(activeField.value.fullname, newVal)
   }
+}
+
+const onLookup = (field: Field) => {
+  let { fullname } = field
+  return new Promise((resolve, reject) => {
+    let pasted
+    if (testObj.lookup) {
+      pasted = fullname ? _.get(testObj.lookup, fullname) : testObj.lookup
+    }
+    if (pasted) {
+      resolve(pasted)
+    } else {
+      reject({ message: '没有提供粘贴数据' })
+    }
+  })
 }
 
 const onAutofill = () => {

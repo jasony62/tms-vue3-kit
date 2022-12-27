@@ -33,6 +33,36 @@ const fieldNameVNode = (ctx: FormContext, field: Field) => {
   )
 }
 /**
+ * 执行查询操作
+ * @param ctx
+ * @param field
+ * @returns
+ */
+const fieldLookupVNode = (ctx: FormContext, field: Field) => {
+  let { fullname } = field
+  return h(
+    components.button.tag,
+    {
+      name: fullname,
+      class: ['tvu-button', 'tvu-button--yellow'],
+      onClick: async (evt: any) => {
+        if (typeof ctx.onLookup === 'function') {
+          try {
+            let lookupData = await ctx.onLookup(field)
+            ctx.editDoc.set(fullname, lookupData)
+          } catch (e: any) {
+            ctx.onMessage(
+              `查询${fullname ? '【' + fullname + '】' : ''}失败，原因：` +
+                e.message
+            )
+          }
+        }
+      },
+    },
+    '查询'
+  )
+}
+/**
  * 在前面插入兄弟字段
  * @param ctx
  * @param field
@@ -270,7 +300,6 @@ export class FieldWrap extends Node {
         fieldMoveUpVNode(ctx, field),
         fieldMoveDownVNode(ctx, field),
       ]
-
       let actions = h(
         'div',
         {
@@ -305,6 +334,17 @@ export class FieldWrap extends Node {
         )
         children.push(actions)
       }
+    }
+    /**操作需要lookup操作 */
+    if (typeof ctx.onLookup === 'function' && field.schemaProp.lookup) {
+      let actions = h(
+        'div',
+        {
+          class: ['tvu-jdoc__field-actions'],
+        },
+        [fieldLookupVNode(ctx, field)]
+      )
+      children.push(actions)
     }
 
     return children

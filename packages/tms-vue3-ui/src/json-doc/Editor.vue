@@ -62,6 +62,12 @@ export default defineComponent({
       },
     },
     /**
+     * 查询操作回调函数
+     */
+    onLookup: {
+      type: Function
+    },
+    /**
      * 通过动态数据
      */
     autofillRequest: { type: Function },
@@ -105,6 +111,7 @@ export default defineComponent({
       onMessage,
       autofillRequest,
       onPaste,
+      onLookup,
       onFileUpload,
       onFileSelect,
       onFileDownload,
@@ -139,6 +146,7 @@ export default defineComponent({
       enablePaste,
       onMessage,
       autofillRequest,
+      onLookup,
       onPaste,
       onFileUpload,
       onFileSelect,

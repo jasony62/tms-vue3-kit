@@ -46,8 +46,10 @@ const components = {
         value: JSON.stringify(this.modelValue, null, 2),
         class: ['tvu-input'],
         onInput: ($event: any) => {
-          let data = JSON.parse($event.target.value)
-          this.$emit('update:modelValue', data)
+          try {
+            let data = JSON.parse($event.target.value)
+            this.$emit('update:modelValue', data)
+          } catch (e) {}
         },
       })
     },

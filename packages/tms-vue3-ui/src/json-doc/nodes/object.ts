@@ -192,7 +192,7 @@ const propAddVNode = (
  * @returns
  */
 const propPasteVNode = (ctx: FormContext, field: Field) => {
-  const { fullname, label, shortname } = field
+  const { fullname } = field
   let pasteVNode = h(
     components.button.tag,
     {
@@ -361,8 +361,8 @@ export class ObjectNode extends FieldNode {
         vnodes.push(...selectOneOfVNode(ctx, field))
       }
 
+      const actionVNodes = [] // 对象需要支持的整体操作
       /**如果开放paste操作，添加按钮*/
-      const actionVNodes = []
       if (ctx.enablePaste === true) {
         // 只有值为空时才允许粘贴操作
         //const val = ctx.editDoc.get(field.fullname)
