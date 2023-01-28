@@ -159,13 +159,18 @@ const propAddVNode = (
   patternChildren: SchemaProp[]
 ) => {
   /**给每个模板属性创建一个添加字段操作*/
-  let addVNodes = patternChildren.map((childProp) =>
-    h(
+  let addVNodes = patternChildren.map((childProp) => {
+    const label =
+      patternChildren.length === 1
+        ? '添加'
+        : `添加-${childProp.attrs.title ?? childProp.name}`
+
+    return h(
       components.button.tag,
       {
         name: childProp.fullname,
         title: childProp.name,
-        class: ['tvu-button'],
+        class: ['tvu-button', 'tvu-button--green'],
         onClick: () => {
           /**生成字段名称和初始值*/
           const { fullname } = field
@@ -180,9 +185,9 @@ const propAddVNode = (
           ctx.editDoc.appendAt(fullname, initVal, newKey)
         },
       },
-      `添加`
+      label
     )
-  )
+  })
   return h('div', { class: ['tvu-jdoc__nest__actions'] }, addVNodes)
 }
 /**
@@ -331,6 +336,7 @@ export class ObjectNode extends FieldNode {
      */
     if (
       field.fullname === '' ||
+      // ctx.activeFieldName === field.fullname
       ctx.activeFieldName?.indexOf(field.fullname) === 0 ||
       ctx.nestExpanded?.has(field.fullname)
     ) {

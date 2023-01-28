@@ -94,12 +94,32 @@ const fieldInsertVNode = (ctx: FormContext, field: Field) => {
  * @returns
  */
 const fieldRemoveVNode = (ctx: FormContext, field: Field) => {
+  return h(
+    components.button.tag,
+    {
+      name: field.fullname,
+      class: ['tvu-button', 'tvu-button--yellow'],
+      onClick: (evt: any) => {
+        evt.stopPropagation()
+        ctx.editDoc.remove(field.fullname)
+      },
+    },
+    '删除'
+  )
+}
+/**
+ * 更改亲和属性组操作
+ * @param ctx
+ * @param field
+ * @returns
+ */
+const fieldReplaceVNode = (ctx: FormContext, field: Field) => {
+  // 按钮标题
   const label =
-    (field.isOneOf ? '替换' : '删除') +
+    '替换' +
     (field.schemaProp.isOneOfInclusiveGroup
       ? `-${field.schemaProp.isOneOfInclusiveGroup}`
       : '')
-
   return h(
     components.button.tag,
     {
@@ -107,25 +127,21 @@ const fieldRemoveVNode = (ctx: FormContext, field: Field) => {
       class: ['tvu-button', 'tvu-button--red'],
       onClick: (evt: any) => {
         evt.stopPropagation()
-        if (field.isOneOf) {
-          if (field.schemaProp.isOneOfInclusiveGroup) {
-            const gname = Field.isOneOfInclusiveGroupName(field)
-            /**删除同亲和组的字段*/
-            const fieldNames: any[] = fieldNamesInGroup(field, ctx)
-            fieldNames.forEach((name) => {
-              ctx.oneOfSelected.delete(name)
-              ctx.editDoc.remove(name, false)
-            })
-            // 删除组名称
-            ctx.oneOfSelectedInGroups.delete(gname)
-          } else {
-            ctx.oneOfSelected.delete(field.fullname)
-            ctx.editDoc.remove(field.fullname, false)
-          }
-          ctx.editDoc.forceRender()
+        if (field.schemaProp.isOneOfInclusiveGroup) {
+          const gname = Field.isOneOfInclusiveGroupName(field)
+          /**删除同亲和组的字段*/
+          const fieldNames: any[] = fieldNamesInGroup(field, ctx)
+          fieldNames.forEach((name) => {
+            ctx.oneOfSelected.delete(name)
+            ctx.editDoc.remove(name, false)
+          })
+          // 删除组名称
+          ctx.oneOfSelectedInGroups.delete(gname)
         } else {
-          ctx.editDoc.remove(field.fullname)
+          ctx.oneOfSelected.delete(field.fullname)
+          ctx.editDoc.remove(field.fullname, false)
         }
+        ctx.editDoc.forceRender()
       },
     },
     label
@@ -208,11 +224,14 @@ export class FieldWrap extends Node {
           if (ctx.nestExpanded?.has(fullname)) ctx.nestExpanded.delete(fullname)
           else {
             ctx.nestExpanded?.add(fullname)
-            // 如果字段只有1个子字段，且子字段是对象类型，自动展开
+            /**
+             * 如果字段只有1个子字段，且子字段是对象或数组类型，自动展开
+             * 如果字段没有展开过，这段代码是不生效的
+             */
             const expandSubField = (f: Field) => {
               if (f.children?.length === 1) {
                 let childField = f.children[0]
-                if (childField.schemaType === 'object') {
+                if (['object', 'array'].includes(childField.schemaType)) {
                   if (!ctx.nestExpanded?.has(childField.fullname)) {
                     ctx.nestExpanded?.add(childField.fullname)
                     expandSubField(childField)
@@ -320,7 +339,7 @@ export class FieldWrap extends Node {
             {
               class: ['tvu-jdoc__field-actions'],
             },
-            [fieldRemoveVNode(ctx, field)]
+            [fieldReplaceVNode(ctx, field)]
           )
           children.push(actions)
         }
@@ -330,7 +349,7 @@ export class FieldWrap extends Node {
           {
             class: ['tvu-jdoc__field-actions'],
           },
-          [fieldRemoveVNode(ctx, field)]
+          [fieldReplaceVNode(ctx, field)]
         )
         children.push(actions)
       }

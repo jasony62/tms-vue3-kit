@@ -47,6 +47,11 @@ export const SampleSchema = {
         ],
       },
     },
+    colleeType: {
+      title: '咖啡类型',
+      type: 'string',
+      existIf: { properties: { coffee: { valid: true } } },
+    },
     bjOpera: {
       title: '京剧（两个条件同时满足，男+北京）',
       type: 'string',

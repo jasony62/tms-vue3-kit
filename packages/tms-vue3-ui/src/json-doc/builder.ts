@@ -277,6 +277,14 @@ function checkPropExistIfProperties(rule: any, doc: DocAsArray): boolean {
   let props = Object.keys(rule)
   return props.every((prop) => {
     let docVal = doc.get(prop)
+    /**
+     * 依赖的属性为非空值
+     */
+    if (rule[prop].valid === true)
+      return docVal !== null && docVal !== undefined && docVal !== ''
+    /**
+     * 依赖的属性等于指定值
+     */
     return rule[prop].const === docVal
   })
 }

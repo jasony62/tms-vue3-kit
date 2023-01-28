@@ -43,9 +43,11 @@ export type PropAutofill = {
 
 /**
  * 属性是否在文档中存在的规则
- * 指定的所有属性需要等于给定的值
+ *
+ * 指定的属性等于给定的值（const）
+ * 指定的属性值不是nullish
  */
-export type ExistIfRule = { [k: string]: { const: string } }
+export type ExistIfRule = { [k: string]: { const?: string; valid?: boolean } }
 /**
  * 属性是否在文档中存在的规则集
  */
@@ -400,7 +402,7 @@ function* _parseOne(
       patternProperties &&
       typeof patternProperties === 'object') ||
     (rawProp.type === 'array' &&
-      items.patternProperties &&
+      items?.patternProperties &&
       typeof items.patternProperties === 'object')
   ) {
     newProp.patternChildren = []
