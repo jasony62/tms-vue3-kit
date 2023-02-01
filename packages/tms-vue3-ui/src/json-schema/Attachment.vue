@@ -8,7 +8,7 @@
 </template>
 <script setup lang="ts">
 import { PropType } from 'vue';
-import { SchemaProp } from './model';
+import { SchemaProp } from '../data-aid.js/json-schema/model';
 
 const props = defineProps({
   schemaProp: { type: Object as PropType<SchemaProp>, required: true },

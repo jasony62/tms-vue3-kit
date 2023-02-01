@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import { h, nextTick, VNode } from 'vue'
 import { FormContext } from '../builder'
 import { Field } from '../fields'
 import { components, Node } from './index'
@@ -26,20 +25,24 @@ function getRawCreateArgs(field: Field) {
 /**
  * 表单中的模型属性节点包含value
  */
-export abstract class FieldNode extends Node {
+export abstract class FieldNode<VNode> extends Node<VNode> {
   _field: Field
 
-  constructor(ctx: FormContext, field: Field) {
-    super(ctx, getRawCreateArgs(field))
+  constructor(
+    ctx: FormContext,
+    field: Field,
+    h: (type: string, props?: object | null, children?: any) => VNode
+  ) {
+    super(ctx, getRawCreateArgs(field), h)
     this._field = field
     this._assocEnum()
     /**
      * 通过API自动更新数据
      * 每次有数据更新都会调用，这样对性能有影响，是否可以缓存数据？
      */
-    nextTick(() => {
-      this._autofileValue()
-    })
+    // nextTick(() => {
+    //   this._autofileValue()
+    // })
   }
 
   get field() {
@@ -254,7 +257,7 @@ export abstract class FieldNode extends Node {
     let children = this.children()
 
     // 生成节点
-    this._vnode = h(this.rawArgs.tag, nodeOptions, children)
+    this._vnode = this.h(this.rawArgs.tag, nodeOptions, children)
 
     if (field.type === 'password') {
       function toggleClass() {
@@ -268,12 +271,12 @@ export abstract class FieldNode extends Node {
           if (spanEle) spanEle.className = 'tvu-jdoc__password--close'
         }
       }
-      let spanVnode = h('span', {
+      let spanVnode = this.h('span', {
         class: 'tvu-jdoc__password--close',
         onClick: toggleClass,
       })
 
-      this._vnode = h('div', { class: 'tvu-jdoc__password' }, [
+      this._vnode = this.h('div', { class: 'tvu-jdoc__password' }, [
         this._vnode,
         spanVnode,
       ])

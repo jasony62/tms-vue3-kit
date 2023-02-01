@@ -1,6 +1,6 @@
 import { SampleSchema } from '../data/dialog-script'
-import { build } from '@/json-doc/builder'
-import { DocAsArray } from '@/json-doc/model'
+import { build } from '@/data-aid.js/json-doc/builder'
+import { DocAsArray } from '@/data-aid.js/json-doc/model'
 
 const SampleData = {
   dialogId: 'biyi-gongshi',

@@ -1,5 +1,5 @@
 import { SampleSchema } from '../data/schema-object-map-array'
-import { SchemaIter } from '../../src/json-schema/model'
+import { SchemaIter } from '../../src/data-aid.js/json-schema/model'
 
 describe('对象的子属性是数组，数组的项目是对象', () => {
   it('遍历数据', () => {

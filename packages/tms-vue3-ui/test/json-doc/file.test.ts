@@ -1,6 +1,6 @@
 import { SampleSchema } from '../data/schema-file'
-import { build } from '@/json-doc/builder'
-import { DocAsArray } from '@/json-doc/model'
+import { build } from '@/data-aid.js/json-doc/builder'
+import { DocAsArray } from '@/data-aid.js/json-doc/model'
 
 describe('对象包含数组，数组的项目是文件', () => {
   it('生成表单节点', () => {

@@ -1,4 +1,4 @@
-import { DocIter, DocAsArray } from '@/json-doc/model'
+import { DocIter, DocAsArray } from '@/data-aid.js/json-doc/model'
 
 describe('文档迭代器', () => {
   // it('执行迭代', () => {

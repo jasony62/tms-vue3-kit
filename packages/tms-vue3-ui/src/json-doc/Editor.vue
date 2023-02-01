@@ -1,10 +1,10 @@
 <script lang="ts">
-import { defineComponent, h, PropType, ref, getCurrentInstance, watch } from 'vue'
-import { RawSchema } from '@/json-schema/model'
+import { defineComponent, h, PropType, ref, getCurrentInstance, watch, VNode } from 'vue'
+import { RawSchema } from '@/data-aid.js/json-schema/model'
 import { deepClone } from '@/utils'
-import BuildEditor from './builder'
-import { Field } from './fields'
-import { DocAsArray } from './model'
+import BuildEditor from '../data-aid.js/json-doc/builder'
+import { Field } from '../data-aid.js/json-doc/fields'
+import { DocAsArray } from '../data-aid.js/json-doc/model'
 import Debug from 'debug'
 
 const debug = Debug('json-doc:editor')
@@ -173,7 +173,7 @@ export default defineComponent({
 
     return () => {
       const fieldNames: string[] = []
-      const nodes = BuildEditor(ctx, fieldNames)
+      const nodes = BuildEditor<VNode>(h, ctx, fieldNames)
       return h(
         'div',
         {

@@ -1,4 +1,4 @@
-import { SchemaIter } from '@/json-schema/model'
+import { SchemaIter } from '@/data-aid.js/json-schema/model'
 
 describe('检查名称是否与属性定义名称匹配', () => {
   it('固定属性名称', () => {

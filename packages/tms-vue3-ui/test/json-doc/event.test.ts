@@ -1,6 +1,6 @@
 import { SampleSchema } from '../data/schema-autofill'
-import { build } from '@/json-doc/builder'
-import { DocAsArray } from '@/json-doc/model'
+import { build } from '@/data-aid.js/json-doc/builder'
+import { DocAsArray } from '@/data-aid.js/json-doc/model'
 
 describe('通过API从外部获取值', () => {
   it('返回字段的值', (done) => {

@@ -1,6 +1,6 @@
 import { Input } from './input'
 
-export class Textarea extends Input {
+export class Textarea<VNode> extends Input<VNode> {
   /**
    *
    * @param {*} attrOrProps

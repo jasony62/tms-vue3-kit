@@ -1,5 +1,5 @@
 import RandExp from 'randexp'
-import { SchemaProp, SchemaPropAttrs } from '@/json-schema/model'
+import { SchemaProp, SchemaPropAttrs } from '@/data-aid.js/json-schema/model'
 
 export const ARRAY_KEYWORDS: (keyof SchemaPropAttrs)[] = [
   'anyOf',

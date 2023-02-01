@@ -1,4 +1,3 @@
-import { h, VNode } from 'vue'
 import { FormContext } from '../builder'
 import { Field } from '../fields'
 import { FieldNode } from './fieldNode'
@@ -9,7 +8,7 @@ import Debug from 'debug'
 const debug = Debug('json-doc:fieldWrap')
 
 /**用户指定的字段名称*/
-const fieldNameVNode = (ctx: FormContext, field: Field) => {
+const fieldNameVNode = (h: any, ctx: FormContext, field: Field) => {
   let inp = h('input', {
     class: ['tvu-input'],
     value: field.name,
@@ -38,7 +37,7 @@ const fieldNameVNode = (ctx: FormContext, field: Field) => {
  * @param field
  * @returns
  */
-const fieldLookupVNode = (ctx: FormContext, field: Field) => {
+const fieldLookupVNode = (h: any, ctx: FormContext, field: Field) => {
   let { fullname } = field
   return h(
     components.button.tag,
@@ -68,7 +67,7 @@ const fieldLookupVNode = (ctx: FormContext, field: Field) => {
  * @param field
  * @returns
  */
-const fieldInsertVNode = (ctx: FormContext, field: Field) => {
+const fieldInsertVNode = (h: any, ctx: FormContext, field: Field) => {
   let { fullname } = field
   return h(
     components.button.tag,
@@ -93,7 +92,7 @@ const fieldInsertVNode = (ctx: FormContext, field: Field) => {
  * @param field
  * @returns
  */
-const fieldRemoveVNode = (ctx: FormContext, field: Field) => {
+const fieldRemoveVNode = (h: any, ctx: FormContext, field: Field) => {
   return h(
     components.button.tag,
     {
@@ -113,7 +112,7 @@ const fieldRemoveVNode = (ctx: FormContext, field: Field) => {
  * @param field
  * @returns
  */
-const fieldReplaceVNode = (ctx: FormContext, field: Field) => {
+const fieldReplaceVNode = (h: any, ctx: FormContext, field: Field) => {
   // 按钮标题
   const label =
     '替换' +
@@ -153,7 +152,7 @@ const fieldReplaceVNode = (ctx: FormContext, field: Field) => {
  * @param field
  * @returns
  */
-const fieldMoveDownVNode = (ctx: FormContext, field: Field) => {
+const fieldMoveDownVNode = (h: any, ctx: FormContext, field: Field) => {
   return h(
     components.button.tag,
     {
@@ -173,7 +172,7 @@ const fieldMoveDownVNode = (ctx: FormContext, field: Field) => {
  * @param field
  * @returns
  */
-const fieldMoveUpVNode = (ctx: FormContext, field: Field) => {
+const fieldMoveUpVNode = (h: any, ctx: FormContext, field: Field) => {
   return h(
     components.button.tag,
     {
@@ -190,10 +189,14 @@ const fieldMoveUpVNode = (ctx: FormContext, field: Field) => {
 /**
  * 输入字段的包裹字段，加入字段标题、说明和操作等节点。
  */
-export class FieldWrap extends Node {
+export class FieldWrap<VNode> extends Node<VNode> {
   fieldNode
-  constructor(ctx: FormContext, fieldNode: FieldNode) {
-    super(ctx, components.fieldWrap)
+  constructor(
+    ctx: FormContext,
+    fieldNode: FieldNode<VNode>,
+    h: (type: string, props?: any, children?: any) => VNode
+  ) {
+    super(ctx, components.fieldWrap, h)
     this.fieldNode = fieldNode
   }
 
@@ -247,7 +250,7 @@ export class FieldWrap extends Node {
 
       if (field.label) {
         children.push(
-          h(
+          this.h(
             components.fieldLabel.tag,
             {
               class: ['tvu-jdoc__field-label'],
@@ -255,9 +258,9 @@ export class FieldWrap extends Node {
                 toggleNestExpanded()
               },
             },
-            h('div', [
+            this.h('div', [
               field.label,
-              h(
+              this.h(
                 'span',
                 { class: ['tvu-jdoc__field-label__field-name'] },
                 `(${field.name})`
@@ -267,16 +270,16 @@ export class FieldWrap extends Node {
         )
         if (this.ctx.showFieldFullname === true && fullname) {
           children.push(
-            h(
+            this.h(
               'div',
               { class: ['tvu-jdoc__field-fullname'] },
-              h('dev', fullname)
+              this.h('dev', fullname)
             )
           )
         }
       } else if (fullname) {
         children.push(
-          h(
+          this.h(
             'div',
             {
               class: ['tvu-jdoc__field-fullname'],
@@ -284,7 +287,7 @@ export class FieldWrap extends Node {
                 toggleNestExpanded()
               },
             },
-            h('div', fullname)
+            this.h('div', fullname)
           )
         )
       }
@@ -293,7 +296,7 @@ export class FieldWrap extends Node {
     if (fullname || ctx.hideRootTitle !== true) {
       if (ctx.hideFieldDescription !== true && field.description) {
         children.push(
-          h(
+          this.h(
             components.fieldDescription.tag,
             { class: ['tvu-jdoc__field-desc'] },
             field.description
@@ -303,7 +306,7 @@ export class FieldWrap extends Node {
     }
     /**如果属性名称是用户定义的，需要显示给用户，并且允许进行编辑*/
     if (field.schemaProp.isPattern) {
-      children.push(fieldNameVNode(ctx, field))
+      children.push(fieldNameVNode(this.h, ctx, field))
     }
 
     children.push(this.fieldNode.createElem())
@@ -314,12 +317,12 @@ export class FieldWrap extends Node {
       ctx.activePatternFieldName === field.fullname
     ) {
       const actionVNodes = [
-        fieldInsertVNode(ctx, field),
-        fieldRemoveVNode(ctx, field),
-        fieldMoveUpVNode(ctx, field),
-        fieldMoveDownVNode(ctx, field),
+        fieldInsertVNode(this.h, ctx, field),
+        fieldRemoveVNode(this.h, ctx, field),
+        fieldMoveUpVNode(this.h, ctx, field),
+        fieldMoveDownVNode(this.h, ctx, field),
       ]
-      let actions = h(
+      let actions = this.h(
         'div',
         {
           class: ['tvu-jdoc__field-actions'],
@@ -334,34 +337,34 @@ export class FieldWrap extends Node {
         const fieldNames: any[] = fieldNamesInGroup(field, ctx)
         // 同组节点的最后一个节点中添加删除组操作
         if (fieldNames.indexOf(field.fullname) === fieldNames.length - 1) {
-          let actions = h(
+          let actions = this.h(
             'div',
             {
               class: ['tvu-jdoc__field-actions'],
             },
-            [fieldReplaceVNode(ctx, field)]
+            [fieldReplaceVNode(this.h, ctx, field)]
           )
           children.push(actions)
         }
       } else {
-        let actions = h(
+        let actions = this.h(
           'div',
           {
             class: ['tvu-jdoc__field-actions'],
           },
-          [fieldReplaceVNode(ctx, field)]
+          [fieldReplaceVNode(this.h, ctx, field)]
         )
         children.push(actions)
       }
     }
     /**操作需要lookup操作 */
     if (typeof ctx.onLookup === 'function' && field.schemaProp.lookup) {
-      let actions = h(
+      let actions = this.h(
         'div',
         {
           class: ['tvu-jdoc__field-actions'],
         },
-        [fieldLookupVNode(ctx, field)]
+        [fieldLookupVNode(this.h, ctx, field)]
       )
       children.push(actions)
     }
@@ -471,7 +474,7 @@ export class FieldWrap extends Node {
       }
     }
 
-    this._vnode = h(this.rawArgs.tag, options, vnodes)
+    this._vnode = this.h(this.rawArgs.tag, options, vnodes)
 
     return this._vnode
   }

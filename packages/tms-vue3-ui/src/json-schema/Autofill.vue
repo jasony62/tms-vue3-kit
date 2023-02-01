@@ -31,7 +31,7 @@
 
 <script setup lang="ts">
 import { PropType } from 'vue';
-import { PropAutofill } from './model';
+import { PropAutofill } from '../data-aid.js/json-schema/model';
 
 const props = defineProps({
   autofill: { type: Object as PropType<PropAutofill>, required: true }

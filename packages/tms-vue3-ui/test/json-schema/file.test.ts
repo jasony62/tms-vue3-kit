@@ -1,5 +1,5 @@
 import { SampleSchema } from '../data/schema-file'
-import { SchemaIter } from '../../src/json-schema/model'
+import { SchemaIter } from '../../src/data-aid.js/json-schema/model'
 
 describe('处理JSONSchema', () => {
   it('迭代JSONSchema属性', () => {

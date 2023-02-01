@@ -1,6 +1,6 @@
 import { SampleSchema } from '../data/schema-object-map'
-import { SchemaIter } from '../../src/json-schema/model'
-import { JSONSchemaBuilder } from '../../src/json-schema/builder'
+import { SchemaIter } from '../../src/data-aid.js/json-schema/model'
+import { JSONSchemaBuilder } from '../../src/data-aid.js/json-schema/builder'
 
 describe('处理动态添加对象子属性的定义', () => {
   it('迭代JSONSchema属性', () => {

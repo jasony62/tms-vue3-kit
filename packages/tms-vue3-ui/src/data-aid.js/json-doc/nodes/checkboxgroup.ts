@@ -1,6 +1,6 @@
 import { Input } from './input'
 
-export class Checkboxgroup extends Input {
+export class Checkboxgroup<VNode> extends Input<VNode> {
   /**
    * 更新field对应的model数据
    */

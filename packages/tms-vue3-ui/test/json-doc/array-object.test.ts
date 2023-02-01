@@ -1,6 +1,6 @@
 import { SampleSchema } from '../data/schema-array-object'
-import { build } from '@/json-doc/builder'
-import { DocAsArray } from '@/json-doc/model'
+import { build } from '@/data-aid.js/json-doc/builder'
+import { DocAsArray } from '@/data-aid.js/json-doc/model'
 
 describe('定义包含数组，数组中项目为对象，生成表单节点', () => {
   it('生成表单节点', () => {

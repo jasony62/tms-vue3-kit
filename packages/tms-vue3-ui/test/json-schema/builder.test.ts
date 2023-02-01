@@ -1,4 +1,4 @@
-import { JSONSchemaBuilder } from '../../src/json-schema/builder'
+import { JSONSchemaBuilder } from '../../src/data-aid.js/json-schema/builder'
 
 describe('处理JSONSchema', () => {
   it('测试向前移动属性', () => {

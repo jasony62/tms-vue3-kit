@@ -1,9 +1,8 @@
-import { VNode } from 'vue'
 import { Node } from './node'
 import { Input } from './input'
 import { components } from '.'
 
-export class Select extends Input {
+export class Select<VNode> extends Input<VNode> {
   /**
    *
    */
@@ -35,7 +34,11 @@ export class Select extends Input {
     // 非必填时添加空选项
     if (!field.required) {
       if (field.choiceType) {
-        const node = new Node(this.ctx, components[field.choiceType])
+        const node = new Node<VNode>(
+          this.ctx,
+          components[field.choiceType],
+          this.h
+        )
         node.attrOrProps = () => {
           return { value: '' }
         }
@@ -49,7 +52,11 @@ export class Select extends Input {
         if (field.choiceVisible[choiceVG] === false) return
       }
       if (field.choiceType) {
-        const node = new Node(this.ctx, components[field.choiceType])
+        const node = new Node<VNode>(
+          this.ctx,
+          components[field.choiceType],
+          this.h
+        )
         node.attrOrProps = () => {
           return { value: choice.value }
         }

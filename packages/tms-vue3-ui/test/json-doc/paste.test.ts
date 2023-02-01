@@ -1,5 +1,5 @@
 import { SampleSchema, SampleData, SamplePasted } from '../data/paste'
-import { DocAsArray } from '@/json-doc/model'
+import { DocAsArray } from '@/data-aid.js/json-doc/model'
 
 describe('测试粘贴数据，set方法', () => {
   it('粘贴根数据', () => {

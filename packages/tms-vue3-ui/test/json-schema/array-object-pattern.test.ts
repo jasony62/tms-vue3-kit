@@ -1,5 +1,5 @@
 import { SampleSchema } from '../data/schema-array-object-pattern'
-import { JSONSchemaBuilder } from '@/json-schema/builder'
+import { JSONSchemaBuilder } from '@/data-aid.js/json-schema/builder'
 
 describe('处理JSONSchema', () => {
   it('迭代JSONSchema属性', () => {

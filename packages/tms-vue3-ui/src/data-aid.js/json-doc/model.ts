@@ -1,6 +1,10 @@
-import _ from 'lodash'
+import _set from 'lodash.set'
 import Debug from 'debug'
-import { RawSchema, SchemaIter, SchemaProp } from '@/json-schema/model'
+import {
+  RawSchema,
+  SchemaIter,
+  SchemaProp,
+} from '@/data-aid.js/json-schema/model'
 
 const debug = Debug('json-doc:model')
 
@@ -334,8 +338,8 @@ export class DocAsArray {
     const handleDocProp = (prop: DocProp, index: number) => {
       if (index === 0) return
       let val = this.get(prop)
-      val = _.cloneDeep(val)
-      _.set(Output, prop.name, val)
+      val = JSON.parse(JSON.stringify(val))
+      _set(Output, prop.name, val)
     }
 
     const Output = Array.isArray(this._rawDoc) ? [] : {}
@@ -362,7 +366,7 @@ export class DocAsArray {
               log(
                 `文档属性【${docProp.name}】是json类型的文档属性【${jsonParentName}】的值，赋值null`
               )
-              _.set(Output, docProp.name, null)
+              _set(Output, docProp.name, null)
               return
             }
             if (schemaProp.attrs.type === 'json') {
@@ -371,7 +375,7 @@ export class DocAsArray {
             } else {
               if (docProp._children.length) {
                 log(`文档属性【${docProp.name}】不是叶节点，赋值null`)
-                _.set(Output, docProp.name, null)
+                _set(Output, docProp.name, null)
                 return
               }
             }
@@ -701,7 +705,7 @@ export class DocAsArray {
       /**修改父对象 */
       let { _parent } = prop
       if (_parent) {
-        _.set(_parent.value, name, value)
+        _set(_parent.value, name, value)
         log(
           `修改属性【${prop.name}】在父属性中的值\n` +
             JSON.stringify(value, null, 2)

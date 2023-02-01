@@ -1,5 +1,5 @@
 import { SampleSchema } from '../data/schema-prop-oneof'
-import { JSONSchemaBuilder } from '@/json-schema/builder'
+import { JSONSchemaBuilder } from '@/data-aid.js/json-schema/builder'
 
 describe('处理oneOf属性', () => {
   it('oneOf属性', () => {

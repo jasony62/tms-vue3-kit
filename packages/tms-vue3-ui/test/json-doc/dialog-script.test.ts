@@ -1,6 +1,6 @@
 import { SampleSchema, SampleData } from '../data/dialog-script'
-import { build } from '@/json-doc/builder'
-import { DocAsArray } from '@/json-doc/model'
+import { build } from '@/data-aid.js/json-doc/builder'
+import { DocAsArray } from '@/data-aid.js/json-doc/model'
 
 describe('简单定义生成表单节点', () => {
   it('构造表单节点', () => {

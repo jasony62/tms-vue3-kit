@@ -1,4 +1,4 @@
-import { SchemaProp } from '@/json-schema/model'
+import { SchemaProp } from '@/data-aid.js/json-schema/model'
 import { Field } from './field'
 
 export class FieldObject extends Field {

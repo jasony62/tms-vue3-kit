@@ -1,5 +1,5 @@
 import { SampleSchema } from '../data/schema-autofill'
-import { SchemaIter } from '@/json-schema/model'
+import { SchemaIter } from '@/data-aid.js/json-schema/model'
 
 describe('处理JSONSchema', () => {
   it('迭代JSONSchema属性', () => {

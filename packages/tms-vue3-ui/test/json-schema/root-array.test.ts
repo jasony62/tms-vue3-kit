@@ -1,4 +1,4 @@
-import { JSONSchemaBuilder } from '@/json-schema/builder'
+import { JSONSchemaBuilder } from '@/data-aid.js/json-schema/builder'
 
 const SampleSchema = {
   type: 'array',

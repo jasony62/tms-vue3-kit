@@ -140,14 +140,14 @@
   </div>
 </template>
 <script lang="ts">
-import { Type2Format, JSONSchemaBuilder, SchemaProp } from './builder'
 import File from './formats/File.vue'
 import TvuJseEnumConfig from './EnumConfig.vue'
 import TvuJseAttachment from './Attachment.vue'
 import TvuJseAutofill from './Autofill.vue'
 import TvuJseLookup from './Lookup.vue'
 import { computed, onMounted, reactive, ref, toRaw, watch } from 'vue'
-import { PropAutofillRunPolicy, PropAutofillTarget } from './model'
+import { Type2Format, JSONSchemaBuilder, SchemaProp } from '../data-aid.js/json-schema/builder'
+import { PropAutofillRunPolicy, PropAutofillTarget } from '../data-aid.js/json-schema/model'
 
 export default {
   name: 'tms-json-schema',

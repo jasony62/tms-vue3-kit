@@ -11,7 +11,6 @@ import { FieldWrap } from './fieldWrap'
 import { FormNode } from './form'
 import { Field } from '../fields'
 import { FormContext } from '../builder'
-import { VNode } from 'vue'
 
 const option = { native: true }
 /**
@@ -40,26 +39,27 @@ const components: { [k: string]: any } = {
   a: { tag: 'a', option },
 }
 
-function prepareFieldNode(
+function prepareFieldNode<VNode>(
+  h: (type: string, props?: any, children?: any) => VNode,
   ctx: FormContext,
   field: Field,
   children?: (VNode | null)[]
-): FieldNode {
+): FieldNode<VNode> {
   switch (field.type) {
     case 'textarea':
-      return new Textarea(ctx, field)
+      return new Textarea(ctx, field, h)
     case 'dateTime':
-      return new DateTime(ctx, field)
+      return new DateTime(ctx, field, h)
     case 'select':
-      return new Select(ctx, field)
+      return new Select(ctx, field, h)
     case 'checkboxgroup':
-      return new Checkboxgroup(ctx, field)
+      return new Checkboxgroup(ctx, field, h)
     case 'array':
-      return new ArrayNode(ctx, field, children)
+      return new ArrayNode(ctx, field, h, children)
     case 'object':
-      return new ObjectNode(ctx, field, children)
+      return new ObjectNode(ctx, field, h, children)
     default:
-      return new Input(ctx, field)
+      return new Input(ctx, field, h)
   }
 }
 

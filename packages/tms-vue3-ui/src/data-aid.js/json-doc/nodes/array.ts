@@ -1,4 +1,3 @@
-import { h, VNode } from 'vue'
 import { components } from './index'
 import { FieldNode } from './fieldNode'
 import { Field } from '../fields'
@@ -15,7 +14,7 @@ const debug = Debug('json-doc:nodes:array')
  * @param field
  * @returns
  */
-const itemPasteVNode = (ctx: FormContext, field: Field) => {
+const itemPasteVNode = (h: any, ctx: FormContext, field: Field) => {
   const { shortname, fullname } = field
   let pasteVNode = h(
     components.button.tag,
@@ -58,7 +57,7 @@ const itemPasteVNode = (ctx: FormContext, field: Field) => {
  * @param field
  * @returns
  */
-const itemAddVNode = (ctx: FormContext, field: Field) => {
+const itemAddVNode = (h: any, ctx: FormContext, field: Field) => {
   const { fullname, shortname, schemaProp } = field
   let addVNode = h(
     components.button.tag,
@@ -93,7 +92,12 @@ const itemAddVNode = (ctx: FormContext, field: Field) => {
  * @param index
  * @returns
  */
-const itemInsertVNode = (ctx: FormContext, field: Field, index: number) => {
+const itemInsertVNode = (
+  h: any,
+  ctx: FormContext,
+  field: Field,
+  index: number
+) => {
   let fullname = `${field.fullname}[${index}]`
   return h(
     components.button.tag,
@@ -114,7 +118,12 @@ const itemInsertVNode = (ctx: FormContext, field: Field, index: number) => {
   )
 }
 
-const itemRemoveVNode = (ctx: FormContext, field: Field, index: number) => {
+const itemRemoveVNode = (
+  h: any,
+  ctx: FormContext,
+  field: Field,
+  index: number
+) => {
   let fullname = `${field.fullname}[${index}]`
   return h(
     components.button.tag,
@@ -130,7 +139,12 @@ const itemRemoveVNode = (ctx: FormContext, field: Field, index: number) => {
   )
 }
 
-const itemMoveUpVNode = (ctx: FormContext, field: Field, index: number) => {
+const itemMoveUpVNode = (
+  h: any,
+  ctx: FormContext,
+  field: Field,
+  index: number
+) => {
   let fullname = `${field.fullname}[${index}]`
   return h(
     components.button.tag,
@@ -147,7 +161,12 @@ const itemMoveUpVNode = (ctx: FormContext, field: Field, index: number) => {
   )
 }
 
-const itemMoveDownVNode = (ctx: FormContext, field: Field, index: number) => {
+const itemMoveDownVNode = (
+  h: any,
+  ctx: FormContext,
+  field: Field,
+  index: number
+) => {
   let fullname = `${field.fullname}[${index}]`
   return h(
     components.button.tag,
@@ -169,7 +188,7 @@ const itemMoveDownVNode = (ctx: FormContext, field: Field, index: number) => {
  * @param field
  * @returns
  */
-const propRemoveVNode = (ctx: FormContext, field: Field) => {
+const propRemoveVNode = (h: any, ctx: FormContext, field: Field) => {
   let pasteVNode = h(
     components.button.tag,
     {
@@ -190,11 +209,16 @@ const propRemoveVNode = (ctx: FormContext, field: Field) => {
 /**
  * 数组中的项目是对象
  */
-export class ArrayNode extends FieldNode {
+export class ArrayNode<VNode> extends FieldNode<VNode> {
   private _children: (VNode | null)[]
 
-  constructor(ctx: FormContext, field: Field, children?: (VNode | null)[]) {
-    super(ctx, field)
+  constructor(
+    ctx: FormContext,
+    field: Field,
+    h: (type: string, props?: any, children?: any) => VNode,
+    children?: (VNode | null)[]
+  ) {
+    super(ctx, field, h)
     this._children = children ?? []
   }
 
@@ -244,15 +268,16 @@ export class ArrayNode extends FieldNode {
           ctx.activeFieldName === childField.fullname
         ) {
           let actions = [
-            itemInsertVNode(ctx, field, index),
-            itemRemoveVNode(ctx, field, index),
+            itemInsertVNode(this.h, ctx, field, index),
+            itemRemoveVNode(this.h, ctx, field, index),
           ]
           if (this._children.length > 1) {
-            if (index > 0) actions.push(itemMoveUpVNode(ctx, field, index))
+            if (index > 0)
+              actions.push(itemMoveUpVNode(this.h, ctx, field, index))
             if (index < this._children.length - 1)
-              actions.push(itemMoveDownVNode(ctx, field, index))
+              actions.push(itemMoveDownVNode(this.h, ctx, field, index))
           }
-          let itemActionsVNode = h(
+          let itemActionsVNode = this.h(
             'div',
             { class: ['tvu-jdoc__nest__item__actions'] },
             actions
@@ -261,7 +286,7 @@ export class ArrayNode extends FieldNode {
         }
       }
 
-      let itemNestVNode = h('div', itemVNodeOptons, [itemVNodes])
+      let itemNestVNode = this.h('div', itemVNodeOptons, [itemVNodes])
       itemNestVNodes.push(itemNestVNode)
     })
 
@@ -269,16 +294,16 @@ export class ArrayNode extends FieldNode {
     const fieldActionVNodes = []
     if (ctx.enablePaste === true) {
       debug(`对象字段【${field.fullname}】需要支持黏贴操作`)
-      let pasteVNode = itemPasteVNode(ctx, field)
+      let pasteVNode = itemPasteVNode(this.h, ctx, field)
       fieldActionVNodes.push(pasteVNode)
     }
-    fieldActionVNodes.push(itemAddVNode(ctx, field))
+    fieldActionVNodes.push(itemAddVNode(this.h, ctx, field))
     if (this._children.length)
-      fieldActionVNodes.push(propRemoveVNode(ctx, field))
+      fieldActionVNodes.push(propRemoveVNode(this.h, ctx, field))
 
     return [
       ...itemNestVNodes,
-      h('div', { class: ['tvu-jdoc__nest__actions'] }, fieldActionVNodes),
+      this.h('div', { class: ['tvu-jdoc__nest__actions'] }, fieldActionVNodes),
     ]
   }
 }

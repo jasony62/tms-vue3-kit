@@ -1,12 +1,14 @@
-import { h, VNode } from 'vue'
 import { FormContext } from '../builder'
 import { components, Node } from './index'
 /**
  *
  */
-export class FormNode extends Node {
-  constructor(ctx: FormContext) {
-    super(ctx, components.form)
+export class FormNode<VNode> extends Node<VNode> {
+  constructor(
+    ctx: FormContext,
+    h: (type: string, props?: any, children?: any) => VNode
+  ) {
+    super(ctx, components.form, h)
   }
 
   createElem(children: (VNode | string)[] = []): VNode {
@@ -15,7 +17,7 @@ export class FormNode extends Node {
       class: ['tvu-jdoc__form'],
     }
 
-    this._vnode = h(this.rawArgs.tag, nodeOptions, children)
+    this._vnode = this.h(this.rawArgs.tag, nodeOptions, children)
 
     return this._vnode
   }

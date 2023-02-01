@@ -1,14 +1,13 @@
-import { h, toRaw, VNode } from 'vue'
 import { FieldNode } from './fieldNode'
 import { components } from '.'
-import { Field } from '../fields'
+// import { Field } from '../fields'
 import Debug from 'debug'
 
 const debug = Debug('json-doc:nodes:input')
 /**
  * text/json/radiogroup
  */
-export class Input extends FieldNode {
+export class Input<VNode> extends FieldNode<VNode> {
   /**
    * 更新field对应的model数据
    */
@@ -60,7 +59,8 @@ export class Input extends FieldNode {
     const inpOps: { [k: string]: any } = {
       name: fieldName,
       type,
-      value: toRaw(fieldValue),
+      // value: toRaw(fieldValue),
+      value: fieldValue,
       class: ['tvu-jdoc__field-input tvu-input'],
       title: fieldName,
     }
@@ -85,15 +85,17 @@ export class Input extends FieldNode {
 
     return inpOps
   }
-  /**获得外部时*/
-  protected autofillValue(field: Field, val: any): void {
-    if (this._vnode?.el) {
-      let { el } = this._vnode
-      el.value = val
-      // 不需要触发渲染
-      this.ctx.editDoc.set(field.fullname, val, false)
-    }
-  }
+  /**
+   * 获得外部时
+   */
+  // protected autofillValue(field: Field, val: any): void {
+  //   if (this._vnode?.el) {
+  //     let { el } = this._vnode
+  //     el.value = val
+  //     // 不需要触发渲染
+  //     this.ctx.editDoc.set(field.fullname, val, false)
+  //   }
+  // }
   /**
    * 创建radiogroup|checkboxgroup下的子节点
    * @returns 返回子节点
@@ -131,11 +133,11 @@ export class Input extends FieldNode {
           props.disabled = true
         }
         // radio/checkbox
-        let n1 = h(components[field.choiceType].tag, props)
+        let n1 = this.h(components[field.choiceType].tag, props)
         // label
-        let n2 = h(components.fieldLabel.tag, null, item.label)
+        let n2 = this.h(components.fieldLabel.tag, null, item.label)
         // wrap
-        let n3 = h('div', [n1, n2])
+        let n3 = this.h('div', [n1, n2])
         children.push(n3)
       }
     })
