@@ -1,4 +1,5 @@
-import RandExp from 'randexp'
+import { genRandStringByExp } from '../utils'
+
 import { SchemaProp, SchemaPropAttrs } from '@/data-aid.js/json-schema/model'
 
 export const ARRAY_KEYWORDS: (keyof SchemaPropAttrs)[] = [
@@ -18,14 +19,23 @@ type FieldItem = {
  * 编辑文档中的字段，与表单中的一个输入项对应。
  */
 export abstract class Field {
+  /**
+   * 字段的默认值
+   */
   value?: any
-  type: string = '' // 字段的类型
-  _index: number // 如果字段是数组中的对象，index代表字段所属对象在数组中的饿索引
-  _name: string // 固定属性的名称或可选属性的实际名称
-  _path: string // 父节点有可能是动态的
+  /**
+   * 展示字段的节点类型
+   * 1、文本字段与html中input组件中的type属性对应
+   * 2、数组字段，select|radiogroup|checkboxgroup
+   */
+  type: string = ''
+  private _index: number // 如果字段是数组中的对象，index代表字段所属对象在数组中的饿索引
+  private _name: string // 固定属性的名称或可选属性的实际名称
+  private _path: string // 父节点有可能是动态的
   private _prop: SchemaProp
   private _required: boolean
   private _visible: boolean
+  private _children?: Field[] // 对象类型字段的子字段数组
   choices?: FieldItem[] // 字段的可选项。应该改个名字，避免和schema中的items混淆。
   choiceType?: string // 选项的类型
   choiceVisible?: { [k: string]: boolean } // 记录字段的选项是否可见
@@ -34,11 +44,12 @@ export abstract class Field {
   autofillURL: string = '' // 当前值对应的自动填充参数，为了避免不必要接口调用
   autofillBody: any // 当前值对应的自动填充参数，为了避免不必要接口调用
   autofilled: boolean = false // 是否已经进行过填充
-  _children?: Field[] // 对象类型字段的子字段数组
 
   constructor(prop: SchemaProp, index = -1, name = '') {
     let { attrs } = prop
-    /**设置默认值*/
+    /**
+     * 设置默认值
+     */
     let { type, default: defVal } = attrs
     if (type === 'array') {
       this.value = Array.isArray(defVal) ? [...defVal] : []
@@ -177,10 +188,7 @@ export abstract class Field {
    * @returns
    */
   static initialKey(patternName: string): string {
-    let randexp = new RandExp(new RegExp(patternName))
-    randexp.max = 8
-    let newKey = randexp.gen()
-    return newKey
+    return genRandStringByExp(patternName)
   }
   /**
    * 根据指定的默认值和数据的类型计算初始值

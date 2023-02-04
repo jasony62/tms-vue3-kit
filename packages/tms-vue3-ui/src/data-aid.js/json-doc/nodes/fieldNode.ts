@@ -28,12 +28,8 @@ function getRawCreateArgs(field: Field) {
 export abstract class FieldNode<VNode> extends Node<VNode> {
   _field: Field
 
-  constructor(
-    ctx: FormContext,
-    field: Field,
-    h: (type: string, props?: object | null, children?: any) => VNode
-  ) {
-    super(ctx, getRawCreateArgs(field), h)
+  constructor(ctx: FormContext<VNode>, field: Field) {
+    super(ctx, getRawCreateArgs(field))
     this._field = field
     this._assocEnum()
     /**
@@ -257,7 +253,7 @@ export abstract class FieldNode<VNode> extends Node<VNode> {
     let children = this.children()
 
     // 生成节点
-    this._vnode = this.h(this.rawArgs.tag, nodeOptions, children)
+    this._vnode = this.ctx.h(this.rawArgs.tag, nodeOptions, children)
 
     if (field.type === 'password') {
       function toggleClass() {
@@ -271,12 +267,12 @@ export abstract class FieldNode<VNode> extends Node<VNode> {
           if (spanEle) spanEle.className = 'tvu-jdoc__password--close'
         }
       }
-      let spanVnode = this.h('span', {
+      let spanVnode = this.ctx.h('span', {
         class: 'tvu-jdoc__password--close',
         onClick: toggleClass,
       })
 
-      this._vnode = this.h('div', { class: 'tvu-jdoc__password' }, [
+      this._vnode = this.ctx.h('div', { class: 'tvu-jdoc__password' }, [
         this._vnode,
         spanVnode,
       ])

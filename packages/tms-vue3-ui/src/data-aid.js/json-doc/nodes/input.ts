@@ -133,11 +133,11 @@ export class Input<VNode> extends FieldNode<VNode> {
           props.disabled = true
         }
         // radio/checkbox
-        let n1 = this.h(components[field.choiceType].tag, props)
+        let n1 = this.ctx.h(components[field.choiceType].tag, props)
         // label
-        let n2 = this.h(components.fieldLabel.tag, null, item.label)
+        let n2 = this.ctx.h(components.fieldLabel.tag, null, item.label)
         // wrap
-        let n3 = this.h('div', [n1, n2])
+        let n3 = this.ctx.h('div', [n1, n2])
         children.push(n3)
       }
     })

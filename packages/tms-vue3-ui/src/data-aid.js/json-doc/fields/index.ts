@@ -7,13 +7,13 @@ import { FieldObject } from './object'
 import { FormContext } from '../builder'
 
 /**
- * 创建表单字段对象
+ * 根据属性定义创建表单字段对象
  *
  * @param prop JSONSchema属性
  * @param index 如果字段是数组中的对象的字段，index为字段所属对象在数组中的索引
  */
-function createField(
-  ctx: FormContext,
+function createField<VNode>(
+  ctx: FormContext<VNode>,
   prop: SchemaProp,
   parentField?: Field,
   index = -1,
@@ -59,17 +59,24 @@ function createField(
     if (prop.name === '[*]') newField.path += '[*]'
   }
 
-  // 不使用重复创建的field，因为计算fullname较为复杂，所以先创建对象再查找，可以优化
+  /**
+   * 不重复创建field，因为计算fullname较为复杂，所以先创建对象再查找，可以优化
+   */
   if (ctx.fields) {
     let exist = ctx.fields.get(newField.fullname)
     if (exist) {
       newField = exist
     } else {
+      /**
+       * 加入父字段
+       */
       if (parentField && ['object', 'array'].includes(parentField.type))
         parentField.children?.push(newField)
       ctx.fields.set(newField.fullname, newField)
     }
   }
+
+  if (!newField) throw Error(`根据属性【${prop.fullname}】创建字段失败`)
 
   return newField
 }

@@ -137,6 +137,7 @@ export default defineComponent({
     const nestExpanded = new Set<string>()
 
     const ctx = {
+      h,
       editDoc,
       fields,
       oneOfSelected,
@@ -173,7 +174,7 @@ export default defineComponent({
 
     return () => {
       const fieldNames: string[] = []
-      const nodes = BuildEditor<VNode>(h, ctx, fieldNames)
+      const nodes = BuildEditor<VNode>(ctx, fieldNames)
       return h(
         'div',
         {

@@ -22,7 +22,7 @@ export function parseChoices(choices?: Choice[]): Choice[] | undefined {
 }
 
 export class FieldArray extends Field {
-  multiple: boolean
+  // multiple: boolean
   choices: any[] = []
   itemGroups?
 
@@ -30,18 +30,14 @@ export class FieldArray extends Field {
     super(prop, index, name)
 
     const { attrs } = prop
-    this.multiple = attrs.type === 'array'
+    // this.multiple = attrs.type === 'array'
 
     for (const keyword of ARRAY_KEYWORDS) {
       if (attrs.hasOwnProperty(keyword)) {
         switch (keyword) {
           case 'enum':
-            if (!this.type) {
-              this.type = 'select'
-            }
-            if (attrs?.enumGroups?.length) {
-              this.itemGroups = attrs.enumGroups
-            }
+            if (!this.type) this.type = 'select'
+            if (attrs?.enumGroups?.length) this.itemGroups = attrs.enumGroups
             this.choiceType = 'option'
             this.choices = parseChoices(attrs[keyword]) ?? []
             break

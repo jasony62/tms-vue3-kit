@@ -34,11 +34,7 @@ export class Select<VNode> extends Input<VNode> {
     // 非必填时添加空选项
     if (!field.required) {
       if (field.choiceType) {
-        const node = new Node<VNode>(
-          this.ctx,
-          components[field.choiceType],
-          this.h
-        )
+        const node = new Node<VNode>(this.ctx, components[field.choiceType])
         node.attrOrProps = () => {
           return { value: '' }
         }
@@ -52,11 +48,7 @@ export class Select<VNode> extends Input<VNode> {
         if (field.choiceVisible[choiceVG] === false) return
       }
       if (field.choiceType) {
-        const node = new Node<VNode>(
-          this.ctx,
-          components[field.choiceType],
-          this.h
-        )
+        const node = new Node<VNode>(this.ctx, components[field.choiceType])
         node.attrOrProps = () => {
           return { value: choice.value }
         }

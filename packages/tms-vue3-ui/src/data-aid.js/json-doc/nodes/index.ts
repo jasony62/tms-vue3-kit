@@ -40,26 +40,25 @@ const components: { [k: string]: any } = {
 }
 
 function prepareFieldNode<VNode>(
-  h: (type: string, props?: any, children?: any) => VNode,
-  ctx: FormContext,
+  ctx: FormContext<VNode>,
   field: Field,
   children?: (VNode | null)[]
 ): FieldNode<VNode> {
   switch (field.type) {
     case 'textarea':
-      return new Textarea(ctx, field, h)
+      return new Textarea(ctx, field)
     case 'dateTime':
-      return new DateTime(ctx, field, h)
+      return new DateTime(ctx, field)
     case 'select':
-      return new Select(ctx, field, h)
+      return new Select(ctx, field)
     case 'checkboxgroup':
-      return new Checkboxgroup(ctx, field, h)
+      return new Checkboxgroup(ctx, field)
     case 'array':
-      return new ArrayNode(ctx, field, h, children)
+      return new ArrayNode(ctx, field, children)
     case 'object':
-      return new ObjectNode(ctx, field, h, children)
+      return new ObjectNode(ctx, field, children)
     default:
-      return new Input(ctx, field, h)
+      return new Input(ctx, field)
   }
 }
 

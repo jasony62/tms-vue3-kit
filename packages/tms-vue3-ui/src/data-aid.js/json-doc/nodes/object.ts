@@ -2,8 +2,9 @@ import { FieldNode } from './fieldNode'
 import { FormContext } from '../builder'
 import { Field } from '../fields'
 import { components } from '.'
-import Debug from 'debug'
 import { SchemaProp } from '@/data-aid.js/json-schema/model'
+
+import Debug from 'debug'
 
 const debug = Debug('json-doc:nodes:object')
 
@@ -13,7 +14,11 @@ const debug = Debug('json-doc:nodes:object')
  * @param fileData
  * @param ctx
  */
-function _setNewFileData(field: Field, fileData: any, ctx: FormContext) {
+function _setNewFileData<VNode>(
+  field: Field,
+  fileData: any,
+  ctx: FormContext<VNode>
+) {
   field.children?.forEach((cf: Field) => {
     if (typeof fileData[cf.name] !== undefined) {
       ctx.editDoc.set(cf.fullname, fileData[cf.name], false)
@@ -24,7 +29,11 @@ function _setNewFileData(field: Field, fileData: any, ctx: FormContext) {
 /**
  * 选择本地文件并上传
  */
-function _pickLocalFile(ctx: FormContext, field: Field, fileUpload: Function) {
+function _pickLocalFile<VNode>(
+  ctx: FormContext<VNode>,
+  field: Field,
+  fileUpload: Function
+) {
   const elInput = document.createElement('input')
   elInput.setAttribute('type', 'file')
   // const { accept, size } = field.schemaProp
@@ -55,8 +64,7 @@ function _pickLocalFile(ctx: FormContext, field: Field, fileUpload: Function) {
  * @param field
  */
 const selectOneOfVNode = <VNode>(
-  h: any,
-  ctx: FormContext,
+  ctx: FormContext<VNode>,
   field: Field
 ): VNode[] => {
   // 每个互斥组生成一个select控件
@@ -85,21 +93,21 @@ const selectOneOfVNode = <VNode>(
               ? props[0].attrs.title
               : igName
             : igName
-        let vnode = h('option', { value: igName }, label)
+        let vnode = ctx.h('option', { value: igName }, label)
         labels.push(label)
         options.push(vnode)
       })
       options?.splice(
         0,
         0,
-        h(
+        ctx.h(
           'option',
           { value: '' },
           `--选择【${egName ? egName : labels.join('/')}】输入方式--`
         )
       )
       // 1个亲和组选项列表
-      const vnSelect = h(
+      const vnSelect = ctx.h(
         'select',
         {
           value: '',
@@ -156,9 +164,8 @@ const selectOneOfVNode = <VNode>(
  * @param patternChildren 支持添加的属性定义
  * @returns
  */
-const propAddVNode = (
-  h: any,
-  ctx: FormContext,
+const propAddVNode = <VNode>(
+  ctx: FormContext<VNode>,
   field: Field,
   patternChildren: SchemaProp[]
 ) => {
@@ -169,7 +176,7 @@ const propAddVNode = (
         ? '添加'
         : `添加-${childProp.attrs.title ?? childProp.name}`
 
-    return h(
+    return ctx.h(
       components.button.tag,
       {
         name: childProp.fullname,
@@ -192,7 +199,7 @@ const propAddVNode = (
       label
     )
   })
-  return h('div', { class: ['tvu-jdoc__nest__actions'] }, addVNodes)
+  return ctx.h('div', { class: ['tvu-jdoc__nest__actions'] }, addVNodes)
 }
 /**
  * 执行粘贴操作
@@ -200,9 +207,9 @@ const propAddVNode = (
  * @param field
  * @returns
  */
-const propPasteVNode = (h: any, ctx: FormContext, field: Field) => {
+const propPasteVNode = <VNode>(ctx: FormContext<VNode>, field: Field) => {
   const { fullname } = field
-  let pasteVNode = h(
+  let pasteVNode = ctx.h(
     components.button.tag,
     {
       class: ['tvu-button'],
@@ -237,8 +244,8 @@ const propPasteVNode = (h: any, ctx: FormContext, field: Field) => {
  * @param field
  * @returns
  */
-const propRemoveVNode = (h: any, ctx: FormContext, field: Field) => {
-  let pasteVNode = h(
+const propRemoveVNode = <VNode>(ctx: FormContext<VNode>, field: Field) => {
+  let pasteVNode = ctx.h(
     components.button.tag,
     {
       class: ['tvu-button'],
@@ -259,8 +266,8 @@ const propRemoveVNode = (h: any, ctx: FormContext, field: Field) => {
  * @param field
  * @returns
  */
-const itemPickVNode = (h: any, ctx: FormContext, field: Field) => {
-  let pickVNode = h(
+const itemPickVNode = <VNode>(ctx: FormContext<VNode>, field: Field) => {
+  let pickVNode = ctx.h(
     components.button.tag,
     {
       class: ['tvu-button'],
@@ -289,12 +296,11 @@ export class ObjectNode<VNode> extends FieldNode<VNode> {
   private _children
 
   constructor(
-    ctx: FormContext,
+    ctx: FormContext<VNode>,
     field: Field,
-    h: (type: string, props?: any, children?: any) => VNode,
     children?: (VNode | null)[]
   ) {
-    super(ctx, field, h)
+    super(ctx, field)
     this._children = children
     debug(
       `字段【${field.fullname}】构造节点对象，包含【${children?.length}】个子节点`
@@ -368,14 +374,12 @@ export class ObjectNode<VNode> extends FieldNode<VNode> {
           availablePatternChildren = patternChildren
         }
         if (availablePatternChildren && availablePatternChildren.length) {
-          vnodes.push(
-            propAddVNode(this.h, ctx, field, availablePatternChildren)
-          )
+          vnodes.push(propAddVNode(ctx, field, availablePatternChildren))
         }
       }
       /**选择oneOf属性操作*/
       if (flattenIsOneOfChildren.length) {
-        vnodes.push(...selectOneOfVNode<VNode>(this.h, ctx, field))
+        vnodes.push(...selectOneOfVNode<VNode>(ctx, field))
       }
 
       const actionVNodes = [] // 对象需要支持的整体操作
@@ -385,7 +389,7 @@ export class ObjectNode<VNode> extends FieldNode<VNode> {
         //const val = ctx.editDoc.get(field.fullname)
         //if (!val || Object.keys(val).length === 0) {
         debug(`对象字段【${field.fullname}】需要支持黏贴操作`)
-        let pasteVNode = propPasteVNode(this.h, ctx, field)
+        let pasteVNode = propPasteVNode(ctx, field)
         actionVNodes.push(pasteVNode)
         //}
       }
@@ -395,17 +399,16 @@ export class ObjectNode<VNode> extends FieldNode<VNode> {
         debug(
           `对象字段【${field.fullname}】【format=file】，需要支持选取文件操作`
         )
-        let pickFileVNode = itemPickVNode(this.h, ctx, field)
+        let pickFileVNode = itemPickVNode(ctx, field)
         actionVNodes.push(pickFileVNode)
       }
 
       /*清除属性。根属性不允许清除。*/
-      if (field.shortname)
-        actionVNodes.push(propRemoveVNode(this.h, ctx, field))
+      if (field.shortname) actionVNodes.push(propRemoveVNode(ctx, field))
 
       if (actionVNodes.length) {
         vnodes.push(
-          this.h('div', { class: ['tvu-jdoc__nest__actions'] }, actionVNodes)
+          ctx.h('div', { class: ['tvu-jdoc__nest__actions'] }, actionVNodes)
         )
       }
     }

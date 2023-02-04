@@ -4,25 +4,13 @@ import { FormContext } from '../builder'
  * 表单中的节点。与Vue中的VNode对应。
  */
 export class Node<VNode> {
-  ctx: FormContext
+  ctx: FormContext<VNode>
   rawArgs
   _vnode: VNode | undefined
-  _h: (type: string, props?: any, children?: any) => VNode
 
-  constructor(
-    ctx: FormContext,
-    rawArgs: { [k: string]: any },
-    h: (type: string, props?: object | null, children?: any) => VNode
-  ) {
+  constructor(ctx: FormContext<VNode>, rawArgs: { [k: string]: any }) {
     this.ctx = ctx
     this.rawArgs = rawArgs
-    this._h = h
-  }
-  /**
-   * 节点渲染函数
-   */
-  get h() {
-    return this._h
   }
   /**
    * 指定的组件选项
@@ -52,7 +40,7 @@ export class Node<VNode> {
   createElem(children: (VNode | string)[] = []): VNode {
     const attrOrProps = this.attrOrProps()
 
-    this._vnode = this._h(this.rawArgs.tag, attrOrProps, children)
+    this._vnode = this.ctx.h(this.rawArgs.tag, attrOrProps, children)
 
     return this._vnode
   }

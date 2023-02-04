@@ -29,13 +29,12 @@ function createWrapClass<VNode>(labelAndDescNodes: VNode): VNode {
  * @returns
  */
 function createFieldWrapNode<VNode>(
-  h: any,
-  ctx: FormContext,
+  ctx: FormContext<VNode>,
   field: Field
 ): VNode {
-  const fieldNode = prepareFieldNode<VNode>(h, ctx, field)
+  const fieldNode = prepareFieldNode<VNode>(ctx, field)
   debug(`createFieldWrapNode - 字段【${field.fullname}】完成准备字段节点`)
-  const wrapNode = new FieldWrap(ctx, fieldNode, h)
+  const wrapNode = new FieldWrap<VNode>(ctx, fieldNode)
   const labelAndDesc = wrapNode.createElem()
   debug(`createFieldWrapNode - 字段【${field.fullname}】完成包裹节点`)
 
@@ -43,8 +42,8 @@ function createFieldWrapNode<VNode>(
 }
 
 /**根据文档数据生成数组项目的字段*/
-function createArrayItemFields(
-  ctx: FormContext,
+function createArrayItemFields<VNode>(
+  ctx: FormContext<VNode>,
   parentField: Field,
   prop: SchemaProp
 ): Field[] {
@@ -72,11 +71,10 @@ function createArrayItemFields(
 }
 
 function createArrayItemNode<VNode>(
-  h: any,
   stack: Stack<VNode>,
   field: Field,
   prop: SchemaProp,
-  ctx: FormContext,
+  ctx: FormContext<VNode>,
   joint: StackJoint<VNode>
 ) {
   if (prop.items?.type) {
@@ -121,7 +119,7 @@ function createArrayItemNode<VNode>(
     } else {
       // 简单类型，生成节点，放入父字段
       itemFields.forEach((itemField) => {
-        const vnode = createFieldWrapNode<VNode>(h, ctx, itemField)
+        const vnode = createFieldWrapNode<VNode>(ctx, itemField)
         stack.addNode({ field: itemField, vnode }, joint)
       })
     }
@@ -132,7 +130,7 @@ function createArrayItemNode<VNode>(
  * 根据文档数据生成可选属性的字段
  */
 function createOptionalFields<VNode>(
-  ctx: FormContext,
+  ctx: FormContext<VNode>,
   prop: SchemaProp,
   joint: StackJoint<VNode>
 ): Field[] {
@@ -203,8 +201,7 @@ type FieldVNodePair<VNode> = {
  * 生成可选属性定义的字段和节点
  */
 function createOptionalFieldAndNode<VNode>(
-  h: any,
-  ctx: FormContext,
+  ctx: FormContext<VNode>,
   prop: SchemaProp,
   joint: StackJoint<VNode>
 ): FieldVNodePair<VNode>[] {
@@ -215,7 +212,7 @@ function createOptionalFieldAndNode<VNode>(
   const fields = createOptionalFields(ctx, prop, joint)
   if (fields.length) {
     const pairs = fields.map((field) => {
-      let vnode = createFieldWrapNode<VNode>(h, ctx, field)
+      let vnode = createFieldWrapNode<VNode>(ctx, field)
       return { field, vnode }
     })
     debug(
@@ -229,8 +226,7 @@ function createOptionalFieldAndNode<VNode>(
 
 /**创建和当前属性定义对应的field和node*/
 function createFieldAndNode<VNode>(
-  h: any,
-  ctx: FormContext,
+  ctx: FormContext<VNode>,
   prop: SchemaProp,
   joint: StackJoint<VNode>
 ): FieldVNodePair<VNode> {
@@ -238,7 +234,7 @@ function createFieldAndNode<VNode>(
   debug(
     `createFieldAndNode - 属性【${prop.fullname}】生成字段【${field.fullname}】`
   )
-  const vnode = createFieldWrapNode<VNode>(h, ctx, field)
+  const vnode = createFieldWrapNode<VNode>(ctx, field)
   debug(`createFieldAndNode - 字段【${field.fullname}】，生成节点`)
   /**处理默认值*/
   let snapshot = ctx.editDoc.snapshot()
@@ -262,17 +258,16 @@ function createFieldAndNode<VNode>(
 
 /**创建连接节点*/
 function createJointNode<VNode>(
-  h: any,
-  ctx: FormContext,
+  ctx: FormContext<VNode>,
   field: Field,
   children: (VNode | null)[]
 ): VNode {
   debug(
     `createJointNode - 字段【${field.fullname}】，生成节点，包含【${children.length}】个子节点`
   )
-  const node = prepareFieldNode<VNode>(h, ctx, field, children)
+  const node = prepareFieldNode<VNode>(ctx, field, children)
 
-  const wrapNode = new FieldWrap(ctx, node, h)
+  const wrapNode = new FieldWrap(ctx, node)
   const labelAndDesc = wrapNode.createElem()
 
   return createWrapClass(labelAndDesc)
@@ -280,40 +275,53 @@ function createJointNode<VNode>(
 /**
  * 检查是否所有规则都满足
  * @param rule
+ * @param parentField
  * @param doc
  * @returns
  */
-function checkPropExistIfProperties(rule: any, doc: DocAsArray): boolean {
+function checkPropExistIfProperties(
+  rule: any,
+  parentField: Field,
+  doc: DocAsArray
+): boolean {
+  let parentVal = doc.get(parentField.fullname)
+  if (!parentVal || typeof parentVal !== 'object') return false
+
   let props = Object.keys(rule)
   return props.every((prop) => {
-    let docVal = doc.get(prop)
+    let depVal = parentVal[prop]
     /**
      * 依赖的属性为非空值
      */
     if (rule[prop].valid === true)
-      return docVal !== null && docVal !== undefined && docVal !== ''
+      return depVal !== null && depVal !== undefined && depVal !== ''
     /**
      * 依赖的属性等于指定值
      */
-    return rule[prop].const === docVal
+    return rule[prop].const === depVal
   })
 }
 /**
  * 每个条件都要满足
  * @param rules
+ * @param parentField
  * @param doc
  * @returns
  */
-function checkPropExistIfallOf(rules: any, doc: DocAsArray): boolean {
+function checkPropExistIfallOf(
+  rules: any,
+  parentField: Field,
+  doc: DocAsArray
+): boolean {
   return rules.every((rule: any) => {
     let matched = false
     let { properties, allOf, oneOf } = rule
     if (typeof properties === 'object') {
-      matched = checkPropExistIfProperties(properties, doc)
+      matched = checkPropExistIfProperties(properties, parentField, doc)
     } else if (Array.isArray(oneOf) && oneOf.length) {
-      matched = checkPropExistIfoneOf(oneOf, doc)
+      matched = checkPropExistIfoneOf(oneOf, parentField, doc)
     } else if (Array.isArray(allOf) && allOf.length) {
-      matched = checkPropExistIfallOf(allOf, doc)
+      matched = checkPropExistIfallOf(allOf, parentField, doc)
     }
     return matched
   })
@@ -321,19 +329,24 @@ function checkPropExistIfallOf(rules: any, doc: DocAsArray): boolean {
 /**
  * 只要有1条规则满足就可以
  * @param rules
+ * @param parentField
  * @param doc
  * @returns
  */
-function checkPropExistIfoneOf(rules: any, doc: DocAsArray): boolean {
+function checkPropExistIfoneOf(
+  rules: any,
+  parentField: Field,
+  doc: DocAsArray
+): boolean {
   return rules.some((rule: any) => {
     let matched = false
     let { properties, allOf, oneOf } = rule
     if (typeof properties === 'object') {
-      matched = checkPropExistIfProperties(properties, doc)
+      matched = checkPropExistIfProperties(properties, parentField, doc)
     } else if (Array.isArray(oneOf) && oneOf.length) {
-      matched = checkPropExistIfoneOf(oneOf, doc)
+      matched = checkPropExistIfoneOf(oneOf, parentField, doc)
     } else if (Array.isArray(allOf) && allOf.length) {
-      matched = checkPropExistIfallOf(allOf, doc)
+      matched = checkPropExistIfallOf(allOf, parentField, doc)
     }
     return matched
   })
@@ -342,10 +355,15 @@ function checkPropExistIfoneOf(rules: any, doc: DocAsArray): boolean {
 /**
  * 检查属性依赖条件
  * @param prop
+ * @param parentField
  * @param doc
  * @returns
  */
-function checkPropExistIf(prop: SchemaProp, doc: DocAsArray): boolean {
+function checkPropExistIf(
+  prop: SchemaProp,
+  parentField: Field,
+  doc: DocAsArray
+): boolean {
   let { existIf } = prop
 
   // 未指定规则，属性存在
@@ -356,11 +374,11 @@ function checkPropExistIf(prop: SchemaProp, doc: DocAsArray): boolean {
   let matched = false
 
   if (typeof properties === 'object') {
-    matched = checkPropExistIfProperties(properties, doc)
+    matched = checkPropExistIfProperties(properties, parentField, doc)
   } else if (Array.isArray(allOf) && allOf.length) {
-    matched = checkPropExistIfallOf(allOf, doc)
+    matched = checkPropExistIfallOf(allOf, parentField, doc)
   } else if (Array.isArray(oneOf) && oneOf.length) {
-    matched = checkPropExistIfoneOf(oneOf, doc)
+    matched = checkPropExistIfoneOf(oneOf, parentField, doc)
   }
 
   return matched
@@ -375,17 +393,11 @@ type StackJoint<VNode> = {
 }
 
 class Stack<VNode> {
-  h: (type: string, props?: any, children?: any) => VNode
-  ctx: FormContext
+  ctx: FormContext<VNode>
   joints: StackJoint<VNode>[] // 等待生成的连接节点
   fieldNames: string[] // 按字段生成VNode的顺序记录字段名称，用于调试
 
-  constructor(
-    h: (type: string, props?: any, children?: any) => VNode,
-    ctx: FormContext,
-    fieldNames?: string[]
-  ) {
-    this.h = h
+  constructor(ctx: FormContext<VNode>, fieldNames?: string[]) {
     this.ctx = ctx
     this.joints = []
     this.fieldNames = fieldNames ?? []
@@ -421,7 +433,10 @@ class Stack<VNode> {
    * 获得属性所有的父字段
    * 从stack中查找
    */
-  propParent(childProp: SchemaProp, ctx: FormContext): StackJoint<VNode>[] {
+  propParent(
+    childProp: SchemaProp,
+    ctx: FormContext<VNode>
+  ): StackJoint<VNode>[] {
     const topJoints = []
     // 倒序查找？终止条件是什么？
     for (let joint of this.joints) {
@@ -534,7 +549,7 @@ class Stack<VNode> {
     let joint, rootVNode
     while (this.joints.length && (joint = this.joints.pop())) {
       let { field, children } = joint
-      let vnode = createJointNode<VNode>(this.h, this.ctx, field, children)
+      let vnode = createJointNode<VNode>(this.ctx, field, children)
       let parent = this.fieldParent(field)
       if (parent) {
         this.addNode({ field, vnode, index: joint.indexInParent }, parent, true)
@@ -560,8 +575,7 @@ class Stack<VNode> {
  * @returns
  */
 export function build<VNode>(
-  h: (type: string, props?: any, children?: any) => VNode,
-  ctx: FormContext,
+  ctx: FormContext<VNode>,
   fieldNames?: string[]
 ): VNode {
   console.time('json-doc:build:form')
@@ -574,7 +588,7 @@ export function build<VNode>(
   let iter = new SchemaIter(JSON.parse(JSON.stringify(schema)))
 
   // 用于记录处理过程的中间数据
-  let stack = new Stack<VNode>(h, ctx, fieldNames)
+  let stack = new Stack<VNode>(ctx, fieldNames)
 
   // 依次处理JSONSchema的属性
   for (let prop of iter) {
@@ -590,7 +604,7 @@ export function build<VNode>(
         debug(
           `属性【${prop.fullname}】生成字段【${rootField.fullname}】放入堆栈，生成连接节点`
         )
-        createArrayItemNode<VNode>(h, stack, rootField, prop, ctx, joint)
+        createArrayItemNode<VNode>(stack, rootField, prop, ctx, joint)
       }
       continue
     }
@@ -602,22 +616,15 @@ export function build<VNode>(
     if (parentJoints.length === 0) {
       debug(`属性【${prop.fullname}】的父字段不存在，跳过`)
       continue
-    } else {
-      debug(`属性【${prop.fullname}】有${parentJoints.length}个父字段`)
     }
-
-    // 需要处理题目是否可见
-    if (false === checkPropExistIf(prop, editDoc)) {
-      // 子字段也不能显示
-      // 将对应数据对象的值清空
-      continue
-    }
+    debug(`属性【${prop.fullname}】有${parentJoints.length}个父字段`)
 
     if (prop.attrs.type === 'object') {
       // 对象，连接节点
       if (prop.isPattern) {
         // 属性是动态的，需要根据文档数据生成字段
         parentJoints.forEach((joint) => {
+          if (false === checkPropExistIf(prop, joint.field, editDoc)) return
           let fields = createOptionalFields(ctx, prop, joint)
           debug(`属性【${prop.fullname}】生成${fields.length}个字段`)
           fields.forEach((field) => {
@@ -629,6 +636,7 @@ export function build<VNode>(
         })
       } else {
         parentJoints.forEach((joint) => {
+          if (false === checkPropExistIf(prop, joint.field, editDoc)) return
           const field = createField(ctx, prop, joint.field)
           // 创建连接节点，等待加入子节点
           stack.newJoint(field, joint)
@@ -645,11 +653,13 @@ export function build<VNode>(
           `属性【${prop.fullname}】生成字段【${field.fullname}】放入堆栈；生成连接节点，在父节点中的位置【${joint.indexInParent}】`
         )
         // 因为数组属性中item没有独立属性定义，因此和父属性同时处理
-        createArrayItemNode<VNode>(h, stack, field, prop, ctx, joint)
+        createArrayItemNode<VNode>(stack, field, prop, ctx, joint)
       }
       // 数组，连接节点
       if (prop.isPattern) {
         parentJoints.forEach((parentJoint) => {
+          if (false === checkPropExistIf(prop, parentJoint.field, editDoc))
+            return
           let fields = createOptionalFields(ctx, prop, parentJoint)
           debug(`属性【${prop.fullname}】生成${fields.length}个可选字段`)
           fields.forEach((field) => {
@@ -658,6 +668,8 @@ export function build<VNode>(
         })
       } else {
         parentJoints.forEach((parentJoint) => {
+          if (false === checkPropExistIf(prop, parentJoint.field, editDoc))
+            return
           const field = createField(ctx, prop, parentJoint.field)
           createArrayNodeAndItems(field, parentJoint)
         })
@@ -666,14 +678,16 @@ export function build<VNode>(
       // 简单类型，叶节点，生成用户输入字段，生成字段节点，放入父连接字段
       if (prop.isPattern) {
         parentJoints.forEach((joint) => {
-          // 在父节点中按顺序添加
-          let pairs = createOptionalFieldAndNode<VNode>(h, ctx, prop, joint)
+          if (false === checkPropExistIf(prop, joint.field, editDoc)) return
+          let pairs = createOptionalFieldAndNode<VNode>(ctx, prop, joint)
           debug(`属性【${prop.fullname}】生成${pairs.length}个可选字段`)
+          // 在父节点中按顺序添加
           pairs.forEach((p) => stack.addNode(p, joint))
         })
       } else {
         parentJoints.forEach((joint) => {
-          let pair = createFieldAndNode<VNode>(h, ctx, prop, joint)
+          if (false === checkPropExistIf(prop, joint.field, editDoc)) return
+          let pair = createFieldAndNode<VNode>(ctx, prop, joint)
           // 在父节点中按顺序添加
           stack.addNode(pair, joint)
         })
@@ -694,16 +708,10 @@ let _uid = 0
  */
 class Builder<VNode> {
   _uid: number
-  h: (type: string, props?: any, children?: any) => VNode
   ctx: any
   fieldNames
-  constructor(
-    h: (type: string, props?: any, children?: any) => VNode,
-    ctx: FormContext,
-    fieldNames?: string[]
-  ) {
+  constructor(ctx: FormContext<VNode>, fieldNames?: string[]) {
     this._uid = ++_uid
-    this.h = h
     if (!ctx.fields) ctx.fields = new Map<string, Field>()
     if (!ctx.nestExpanded) ctx.nestExpanded = new Set<string>()
     this.ctx = ctx
@@ -716,7 +724,7 @@ class Builder<VNode> {
 
     // const formNode = new FormNode(ctx)
 
-    const formSubNode = build(this.h, ctx, this.fieldNames)
+    const formSubNode = build(ctx, this.fieldNames)
 
     // return formNode.createElem(formSubNode)
     return formSubNode
@@ -732,7 +740,8 @@ class Builder<VNode> {
 // 因为编辑器会嵌套，每个编辑器对应不同vm
 let mapBuilders = new Map()
 
-export type FormContext = {
+export type FormContext<VNode> = {
+  h: (type: string, props?: any, children?: any) => VNode
   editDoc: DocAsArray
   schema: RawSchema
   onMessage: Function
@@ -764,13 +773,12 @@ export type FormContext = {
  * @param {*} fieldNames
  */
 export default function <VNode>(
-  h: (type: string, props?: any, children?: any) => VNode,
-  ctx: FormContext,
+  ctx: FormContext<VNode>,
   fieldNames?: string[]
 ) {
   let builder = mapBuilders.get(ctx)
   if (!builder) {
-    builder = new Builder<VNode>(h, ctx, fieldNames)
+    builder = new Builder<VNode>(ctx, fieldNames)
     mapBuilders.set(ctx, builder)
   }
 
