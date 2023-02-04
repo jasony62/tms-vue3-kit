@@ -1,5 +1,5 @@
-import { SampleSchema } from '../data/schema-simple'
-import { SchemaIter } from '../../src/data-aid.js/json-schema/model'
+import { SampleSchema } from '../data/simple'
+import { SchemaIter } from '@/data-aid.js/json-schema/model'
 
 describe('处理JSONSchema', () => {
   // it('迭代JSONSchema属性', () => {
@@ -27,7 +27,7 @@ describe('处理JSONSchema', () => {
       },
     }
     const iter = new SchemaIter(rawSchema)
-    console.log('iter', Array.from(iter))
+    // console.log('iter', Array.from(iter))
     // for (let prop of iter) {
     //   console.log('ppp', prop)
     // }
