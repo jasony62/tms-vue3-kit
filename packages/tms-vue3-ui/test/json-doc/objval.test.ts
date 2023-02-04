@@ -1,4 +1,4 @@
-import { DocAsArray } from '@/data-aid.js/json-doc/model'
+import { DocAsArray } from '@/data-aid.js/json-doc'
 
 describe('属性值是对象的处理', () => {
   it('在文档上追加包含默认值的对象', () => {

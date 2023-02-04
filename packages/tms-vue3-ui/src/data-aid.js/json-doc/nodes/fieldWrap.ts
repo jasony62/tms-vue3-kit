@@ -134,13 +134,13 @@ const fieldReplaceVNode = <VNode>(ctx: FormContext<VNode>, field: Field) => {
           /**删除同亲和组的字段*/
           const fieldNames: any[] = fieldNamesInGroup(field, ctx)
           fieldNames.forEach((name) => {
-            ctx.oneOfSelected.delete(name)
+            ctx.oneOfSelected?.delete(name)
             ctx.editDoc.remove(name, false)
           })
           // 删除组名称
-          ctx.oneOfSelectedInGroups.delete(gname)
+          ctx.oneOfSelectedInGroups?.delete(gname)
         } else {
-          ctx.oneOfSelected.delete(field.fullname)
+          ctx.oneOfSelected?.delete(field.fullname)
           ctx.editDoc.remove(field.fullname, false)
         }
         ctx.editDoc.forceRender()
@@ -227,21 +227,40 @@ export class FieldWrap<VNode> extends Node<VNode> {
           else {
             ctx.nestExpanded?.add(fullname)
             /**
-             * 如果字段只有1个子字段，且子字段是对象或数组类型，自动展开
-             * 如果字段没有展开过，这段代码是不生效的
+             * 如果字段只有1个子字段，且子字段是对象或数组类型，且不是模板属性，自动展开
              */
-            const expandSubField = (f: Field) => {
-              if (f.children?.length === 1) {
-                let childField = f.children[0]
-                if (['object', 'array'].includes(childField.schemaType)) {
-                  if (!ctx.nestExpanded?.has(childField.fullname)) {
-                    ctx.nestExpanded?.add(childField.fullname)
-                    expandSubField(childField)
+            if (
+              field.schemaType === 'object' &&
+              field.schemaProp.children?.length === 1
+            ) {
+              let soleChildProp = field.schemaProp.children[0]
+              if (['object', 'array'].includes(soleChildProp.attrs.type)) {
+                if (soleChildProp.isPattern === false) {
+                  /**
+                   * 展开对象时，自动展开对象下的唯一固定名称复合类型属性
+                   */
+                  let soleChildKey = soleChildProp.name
+                  let soleChildFullname = field.fullname + '.' + soleChildKey
+                  if (!ctx.nestExpanded?.has(soleChildFullname))
+                    ctx.nestExpanded?.add(soleChildFullname)
+                } else {
+                  /**
+                   * 展开对象时，自动展开对象下的模板名称复合类型属性
+                   */
+                  let fieldVal = ctx.editDoc.get(field.fullname)
+                  if (
+                    fieldVal &&
+                    typeof fieldVal === 'object' &&
+                    Object.keys(fieldVal).length === 1
+                  ) {
+                    let soleChildKey = Object.keys(fieldVal)[0]
+                    let soleChildFullname = field.fullname + '.' + soleChildKey
+                    if (!ctx.nestExpanded?.has(soleChildFullname))
+                      ctx.nestExpanded?.add(soleChildFullname)
                   }
                 }
               }
             }
-            expandSubField(field)
           }
           ctx.editDoc.forceRender()
         }
@@ -446,20 +465,20 @@ export class FieldWrap<VNode> extends Node<VNode> {
     if (field.isOneOf) {
       let selected = false
       let ingroup = Field.isOneOfInclusiveGroupName(field)
-      if (!ctx.oneOfSelected.has(field.fullname)) {
+      if (!ctx.oneOfSelected?.has(field.fullname)) {
         // 没有记录在选中集合中，检查是否已经在文档中
         // selected = ctx.editDoc.has(field.fullname)
         let snapshot = ctx.editDoc.snapshot()
         selected = snapshot.has(field.fullname)
         if (selected) {
           // 获得oneOf亲和组名称
-          ctx.oneOfSelected.set(field.fullname, { ingroup })
-          ctx.oneOfSelectedInGroups.add(ingroup)
+          ctx.oneOfSelected?.set(field.fullname, { ingroup })
+          ctx.oneOfSelectedInGroups?.add(ingroup)
         }
       } else {
         selected = true
       }
-      if (selected) {
+      if (selected && ctx.oneOfSelectedInGroups) {
         const groupIndex = Array.from(
           ctx.oneOfSelectedInGroups.values()
         ).indexOf(ingroup)
@@ -487,7 +506,7 @@ export class FieldWrap<VNode> extends Node<VNode> {
 function fieldNamesInGroup<VNode>(field: Field, ctx: FormContext<VNode>) {
   const groupName = Field.isOneOfInclusiveGroupName(field)
   const fieldNames: any[] = []
-  ctx.oneOfSelected.forEach(({ ingroup }, fieldName) => {
+  ctx.oneOfSelected?.forEach(({ ingroup }, fieldName) => {
     if (ingroup === groupName) fieldNames.push(fieldName)
   })
   return fieldNames

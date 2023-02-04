@@ -1,6 +1,5 @@
-import { SampleSchema } from '../data/schema-simple'
-import { build } from '@/data-aid.js/json-doc/builder'
-import { DocAsArray } from '@/data-aid.js/json-doc/model'
+import { SampleSchema } from '../data/simple'
+import { build, DocAsArray } from '@/data-aid.js/json-doc'
 
 describe('简单定义生成表单节点', () => {
   it('构造表单节点', () => {
@@ -8,6 +7,9 @@ describe('简单定义生成表单节点', () => {
     const fieldNames: string[] = []
     build(
       {
+        h: () => {
+          return {}
+        },
         schema: SampleSchema,
         editDoc,
         onMessage: (msg: string) => {

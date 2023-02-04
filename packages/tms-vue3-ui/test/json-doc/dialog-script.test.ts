@@ -1,6 +1,5 @@
 import { SampleSchema, SampleData } from '../data/dialog-script'
-import { build } from '@/data-aid.js/json-doc/builder'
-import { DocAsArray } from '@/data-aid.js/json-doc/model'
+import { build, DocAsArray } from '@/data-aid.js/json-doc'
 
 describe('简单定义生成表单节点', () => {
   it('构造表单节点', () => {
@@ -8,6 +7,9 @@ describe('简单定义生成表单节点', () => {
     const fieldNames: string[] = []
     build(
       {
+        h: () => {
+          return {}
+        },
         schema: SampleSchema,
         editDoc,
         onMessage: (msg: string) => {
@@ -33,7 +35,7 @@ describe('简单定义生成表单节点', () => {
     // expect(fieldNames[4]).toBe('tel')
     // console.log(JSON.stringify(editDoc.build(SampleSchema, true), null, 2))
     editDoc.moveUp('data.script.default')
-    console.log(editDoc.names())
-    console.log(JSON.stringify(editDoc.build(SampleSchema, true), null, 2))
+    // console.log(editDoc.names())
+    // console.log(JSON.stringify(editDoc.build(SampleSchema, true), null, 2))
   })
 })

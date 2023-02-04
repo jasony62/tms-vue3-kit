@@ -1,6 +1,5 @@
 import { SampleSchema } from '../data/schema-array-simple'
-import { build } from '@/data-aid.js/json-doc/builder'
-import { DocAsArray } from '@/data-aid.js/json-doc/model'
+import { build, DocAsArray } from '@/data-aid.js/json-doc'
 
 describe('定义包含数组，数组中项目为简单类型，生成表单节点', () => {
   it('生成表单节点', () => {
@@ -8,6 +7,9 @@ describe('定义包含数组，数组中项目为简单类型，生成表单节�
     const fieldNames: string[] = []
     build(
       {
+        h: () => {
+          return {}
+        },
         schema: SampleSchema,
         editDoc,
         onMessage: (msg: string) => {

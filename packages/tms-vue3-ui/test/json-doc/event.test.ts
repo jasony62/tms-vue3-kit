@@ -1,6 +1,5 @@
 import { SampleSchema } from '../data/schema-autofill'
-import { build } from '@/data-aid.js/json-doc/builder'
-import { DocAsArray } from '@/data-aid.js/json-doc/model'
+import { build, DocAsArray } from '@/data-aid.js/json-doc'
 
 describe('通过API从外部获取值', () => {
   it('返回字段的值', (done) => {
@@ -16,6 +15,9 @@ describe('通过API从外部获取值', () => {
     }
     const editDoc = new DocAsArray({})
     const nodes = build({
+      h: () => {
+        return {}
+      },
       schema: SampleSchema,
       editDoc,
       onMessage: (msg: string) => {
@@ -25,7 +27,7 @@ describe('通过API从外部获取值', () => {
     })
     // console.log(JSON.stringify(nodes, null, 2))
     setTimeout(() => {
-      console.log('editDoc', editDoc)
+      // console.log('editDoc', editDoc)
       done()
     }, 1000)
   })

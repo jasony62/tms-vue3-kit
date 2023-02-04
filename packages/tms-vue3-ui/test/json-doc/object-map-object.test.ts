@@ -1,6 +1,5 @@
 import { SampleSchema } from '../data/schema-object-map'
-import { build } from '@/data-aid.js/json-doc/builder'
-import { DocAsArray } from '@/data-aid.js/json-doc/model'
+import { build, DocAsArray } from '@/data-aid.js/json-doc'
 
 describe('对象包含可选属性，可选属性为对象类型', () => {
   it('生成表单节点', () => {
@@ -17,6 +16,9 @@ describe('对象包含可选属性，可选属性为对象类型', () => {
     const fieldNames: string[] = []
     build(
       {
+        h: () => {
+          return {}
+        },
         schema: SampleSchema,
         fields: new Map(),
         editDoc,

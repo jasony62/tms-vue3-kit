@@ -1,4 +1,4 @@
-import { JSONSchemaBuilder } from '../../src/data-aid.js/json-schema/builder'
+import { JSONSchemaBuilder } from '@/data-aid.js/json-schema/builder'
 
 describe('处理JSONSchema', () => {
   it('测试向前移动属性', () => {
@@ -262,7 +262,7 @@ describe('处理JSONSchema', () => {
     if (prop) {
       prop.name = 'extra1'
     }
-    console.log('pppp', builder.props)
-    console.log('pppp', JSON.stringify(builder.unflatten(), null, 2))
+    // console.log('pppp', builder.props)
+    // console.log('pppp', JSON.stringify(builder.unflatten(), null, 2))
   })
 })

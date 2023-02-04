@@ -430,8 +430,8 @@ class Stack<VNode> {
     return this.joints.pop()
   }
   /**
-   * 获得属性所有的父字段
-   * 从stack中查找
+   * 从stack中查找属性所有的父字段
+   * 父节点是展开状态时，才会被找到
    */
   propParent(
     childProp: SchemaProp,
@@ -446,21 +446,31 @@ class Stack<VNode> {
         // 可选属性
         if (field.schemaProp.fullname === childProp.path) {
           // 父节点展开时才处理子节点
-          if (ctx.nestExpanded?.has(field.fullname)) isParent = true
+          if (!ctx.nestExpanded || ctx.nestExpanded.has(field.fullname))
+            isParent = true
         }
       } else if (childProp.isArrayItem) {
         if (field.schemaProp.fullname === childProp.path) {
           // 父节点展开时才处理子节点
-          if (ctx.nestExpanded?.has(field.fullname)) isParent = true
+          if (!ctx.nestExpanded || ctx.nestExpanded.has(field.fullname))
+            isParent = true
         }
       } else {
         if (childProp.path === field.fullname) {
           // 父节点展开时才处理子节点
-          if (field.fullname === '' || ctx.nestExpanded?.has(field.fullname))
+          if (
+            field.fullname === '' ||
+            !ctx.nestExpanded ||
+            ctx.nestExpanded.has(field.fullname)
+          )
             isParent = true
         } else if (childProp.path === field.schemaProp.fullname) {
           // 父节点展开时才处理子节点
-          if (field.fullname === '' || ctx.nestExpanded?.has(field.fullname))
+          if (
+            field.fullname === '' ||
+            !ctx.nestExpanded ||
+            ctx.nestExpanded.has(field.fullname)
+          )
             isParent = true
         }
       }
@@ -746,8 +756,8 @@ export type FormContext<VNode> = {
   schema: RawSchema
   onMessage: Function
   fields?: Map<string, Field> // 保存表单中的field对象，避免每一次渲染都重新生成
-  oneOfSelected: Map<string, { ingroup?: string }> // 保存选中的oneOf字段
-  oneOfSelectedInGroups: Set<string> // 保存选中的oneOf字段组名称
+  oneOfSelected?: Map<string, { ingroup?: string }> // 保存选中的oneOf字段
+  oneOfSelectedInGroups?: Set<string> // 保存选中的oneOf字段组名称
   nestExpanded?: Set<string> // 保存展开状态的嵌套节点
   enablePaste?: boolean
   autofillRequest?: Function

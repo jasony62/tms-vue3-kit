@@ -12,6 +12,6 @@ describe('处理JSONSchema', () => {
       'experiences[*].content',
     ]
     expect(builder.fullnames()).toEqual(expectNames)
-    console.log(builder.props)
+    // console.log(builder.props)
   })
 })

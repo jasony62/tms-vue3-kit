@@ -1,3 +1,8 @@
+import {
+  PropAutofillTarget,
+  PropAutofillRunPolicy,
+} from '@/data-aid.js/json-schema/model'
+
 export const SampleSchema = {
   $id: 'https://example.com/schema.json',
   $schema: 'https://json-schema.org/draft/2020-12/schema',
@@ -11,8 +16,8 @@ export const SampleSchema = {
       autofill: {
         url: 'http://tms-vue3-kit/autofill/areaCode',
         method: 'GET',
-        target: 'items',
-        runPolicy: 'onCreate',
+        target: PropAutofillTarget.items,
+        runPolicy: PropAutofillRunPolicy.onCreate,
         itemPath: {
           path: 'data.result',
           value: 'code',
@@ -30,8 +35,8 @@ export const SampleSchema = {
           { path: 'areaCode', name: 'areaCode' },
           { value: 'tms-vue3-ui', name: 'fromApp' },
         ],
-        target: 'value',
-        runPolicy: 'onParamChange',
+        target: PropAutofillTarget.value,
+        runPolicy: PropAutofillRunPolicy.onParamChange,
         valuePath: 'data.result.city',
       },
     },
@@ -46,8 +51,8 @@ export const SampleSchema = {
           { path: 'areaCode', bodyPath: 'filter.areaCode.keyword' },
           { value: 'start', bodyPath: 'filter.areaCode.feature' },
         ],
-        target: 'items',
-        runPolicy: 'onParamChange',
+        target: PropAutofillTarget.items,
+        runPolicy: PropAutofillRunPolicy.onParamChange,
         itemPath: {
           path: 'data.result.district',
           value: 'name',

@@ -1,6 +1,5 @@
 import { SampleSchema } from '../data/dialog-script'
-import { build } from '@/data-aid.js/json-doc/builder'
-import { DocAsArray } from '@/data-aid.js/json-doc/model'
+import { build, DocAsArray } from '@/data-aid.js/json-doc'
 
 const SampleData = {
   dialogId: 'biyi-gongshi',
@@ -1270,6 +1269,9 @@ describe('简单定义生成表单节点', () => {
     const fieldNames: string[] = []
     build(
       {
+        h: () => {
+          return {}
+        },
         schema: SampleSchema,
         editDoc,
         onMessage: (msg: string) => {

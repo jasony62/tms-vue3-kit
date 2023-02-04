@@ -127,7 +127,7 @@ const selectOneOfVNode = <VNode>(
                   // 或得亲和组名称
                   let ingroup = Field.isOneOfInclusiveGroupName(childField)
                   ctx.oneOfSelected?.set(childFullname, { ingroup })
-                  ctx.oneOfSelectedInGroups.add(ingroup)
+                  ctx.oneOfSelectedInGroups?.add(ingroup)
                 } else {
                   /**
                    * 如果是模板属性，需要重新生成字段

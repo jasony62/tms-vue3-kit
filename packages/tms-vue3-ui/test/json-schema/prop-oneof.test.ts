@@ -5,6 +5,6 @@ describe('处理oneOf属性', () => {
   it('oneOf属性', () => {
     const builder = new JSONSchemaBuilder()
     builder.flatten(SampleSchema)
-    console.log(builder.props)
+    // console.log(builder.props)
   })
 })

@@ -6,6 +6,6 @@ describe('对象的子属性是数组，数组的项目是对象', () => {
     const iter = new SchemaIter(SampleSchema)
     const props = Array.from(iter)
     // expect(props).toHaveLength(4)
-    console.log('iter', Array.from(iter))
+    // console.log('iter', Array.from(iter))
   })
 })

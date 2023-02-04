@@ -24,7 +24,7 @@ describe('根属性类型是数组', () => {
     builder.flatten(SampleSchema)
     const expectNames = ['', '[*].name', '[*].title', '[*].age']
     expect(builder.fullnames()).toEqual(expectNames)
-    console.log(builder.props)
+    // console.log(builder.props)
   })
   it('新建schema', () => {
     const builder = new JSONSchemaBuilder('$')
@@ -77,6 +77,6 @@ describe('根属性类型是数组', () => {
       expect(builder.fullnames()).toEqual(expectNames)
     }
 
-    console.log(builder.props)
+    // console.log(builder.props)
   })
 })

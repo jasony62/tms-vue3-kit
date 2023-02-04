@@ -91,6 +91,7 @@ export class SchemaProp {
   items?: { type: string; [k: string]: any }
   attachment?: any
   isPattern = false //  是否是由正则表达式定义名称的子属性
+  children: SchemaProp[] | undefined
   patternChildren: SchemaProp[] | undefined
   isOneOf = false // 在父属性中是否为排他属性
   isOneOfInclusiveGroup = '' // 所属亲和组名称
@@ -183,6 +184,17 @@ export class SchemaProp {
   get isArrayItem(): boolean {
     return /\[\*\]$/.test(this.path)
   }
+  /**
+   * 处理循环引用
+   */
+  toJSON() {
+    let clipped = {
+      ...this,
+    }
+    delete clipped.children
+    delete clipped.patternChildren
+    return clipped
+  }
 }
 /**
  * 数组项目定义
@@ -213,7 +225,7 @@ export type RawSchema = {
   anyOf?: any
   oneOf?: any
   default?: any
-  autofill?: PropAutofill
+  autofill?: PropAutofill // 自动填充数据
   lookup?: any
   attachment?: any
   component?: any
@@ -311,8 +323,12 @@ function* _parseOne(
 
   let newProp = new SchemaProp(path, name)
 
-  // 设置父属性
-  if (parents.length) newProp.parent = parents[0]
+  // 设置父子属性间的双向引用
+  if (parents.length) {
+    newProp.parent = parents[0]
+    parents[0].children ??= []
+    parents[0].children.push(newProp)
+  }
 
   if (mandatory) newProp.attrs.required = mandatory
   newProp.isPattern = isPatternProperty
@@ -407,6 +423,7 @@ function* _parseOne(
   ) {
     newProp.patternChildren = []
   }
+
   // 属性查询桂娥
   if (lookup && typeof lookup === 'object') newProp.lookup = lookup
   // 属性依赖规则

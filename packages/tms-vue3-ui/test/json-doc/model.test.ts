@@ -243,6 +243,6 @@ describe('文档迭代器', () => {
     }
     const builder = new DocAsArray(doc)
     //builder.cleanEmpty()
-    console.log(JSON.stringify(builder.build(undefined, true), null, 2))
+    // console.log(JSON.stringify(builder.build(undefined, true), null, 2))
   })
 })
