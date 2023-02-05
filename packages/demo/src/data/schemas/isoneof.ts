@@ -56,3 +56,7 @@ export const SampleSchema = {
 }
 
 export const SampleData = {}
+
+export const SamplePasted = {
+  g1a: 'g1a-val',
+}

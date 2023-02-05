@@ -20,7 +20,7 @@ function _setNewFileData<VNode>(
   ctx: FormContext<VNode>
 ) {
   field.children?.forEach((cf: Field) => {
-    if (typeof fileData[cf.name] !== undefined) {
+    if (typeof fileData[cf.name] !== 'undefined') {
       ctx.editDoc.set(cf.fullname, fileData[cf.name], false)
     }
   })
@@ -124,7 +124,7 @@ const selectOneOfVNode = <VNode>(
                 }${child.name}`
                 let childField = ctx.fields?.get(childFullname)
                 if (childField) {
-                  // 或得亲和组名称
+                  // 获得亲和组名称
                   let ingroup = Field.isOneOfInclusiveGroupName(childField)
                   ctx.oneOfSelected?.set(childFullname, { ingroup })
                   ctx.oneOfSelectedInGroups?.add(ingroup)
@@ -274,7 +274,8 @@ const itemPickVNode = <VNode>(ctx: FormContext<VNode>, field: Field) => {
       onClick: () => {
         if (!field.children?.length) return
         if (typeof ctx.onFileSelect === 'function') {
-          ctx.onFileSelect(field).then((fileData: any) => {
+          const fieldVal = ctx.editDoc.get(field.fullname)
+          ctx.onFileSelect(field, fieldVal).then((fileData: any) => {
             debug(
               `对象字段【${field.fullname}】选取文件：\n` +
                 JSON.stringify(fileData, null, 2)

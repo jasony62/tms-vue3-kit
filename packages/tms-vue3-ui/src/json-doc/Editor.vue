@@ -81,7 +81,7 @@ export default defineComponent({
      * 选择文件的方法
      */
     onFileSelect: {
-      type: Function as PropType<(field: Field) => Promise<any>>,
+      type: Function as PropType<(field: Field, fieldVal: any) => Promise<any>>,
     },
     /**
      * 上传文件并返回文件信息的方法
@@ -171,7 +171,9 @@ export default defineComponent({
       ctx.showFieldFullname = newVal
       editDoc.forceRender()
     })
-
+    /**
+     * 返回渲染函数
+     */
     return () => {
       const fieldNames: string[] = []
       const nodes = BuildEditor<VNode>(ctx, fieldNames)

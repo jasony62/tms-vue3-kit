@@ -28,9 +28,9 @@
     <div class="w-1/3 p-4">
       <json-doc v-if="loading === false" ref="jsonDocEditor" :key="caseName" :schema="testObj.schema"
         :value="testObj.data" :enable-paste="true" :on-lookup="onLookup" :autofill-request="onAutofill"
-        :on-file-download="onFileDownload" :on-file-upload="onFileUpload" :hide-root-title="true"
-        :hide-root-description="true" :hide-field-description="true" :show-field-fullname="showFieldFullname"
-        @jdoc-focus="onJdocFocus" @jdoc-blur="onJdocBlur" :on-paste="onPaste">
+        :on-file-select="onFileSelect" :on-file-download="onFileDownload" :on-file-upload="onFileUpload"
+        :hide-root-title="true" :hide-root-description="true" :hide-field-description="true"
+        :show-field-fullname="showFieldFullname" @jdoc-focus="onJdocFocus" @jdoc-blur="onJdocBlur" :on-paste="onPaste">
       </json-doc>
     </div>
     <div class="w-1/3">
@@ -70,7 +70,7 @@ const jsonResult = ref('') // 表单数据结果
 
 const loading = ref(true)
 
-const testObj = reactive({ schema: {}, data: {}, pasted: null, lookup: null })
+const testObj = reactive({ schema: {}, data: {}, pasted: null, fileSelect: null, lookup: null })
 
 const activeField = ref<Field>() // 正在编辑的字段
 
@@ -81,10 +81,11 @@ const showFieldFullname = ref(false)
 function loadTestData() {
   loading.value = true
   return import(`../data/schemas/${caseName.value}.ts`).then(
-    ({ SampleData, SampleSchema, SamplePasted, SampleLookup }) => {
+    ({ SampleData, SampleSchema, SamplePasted, SampleFileSelect, SampleLookup }) => {
       testObj.schema = SampleSchema
       testObj.data = SampleData
       testObj.pasted = SamplePasted
+      testObj.fileSelect = SampleFileSelect
       testObj.lookup = SampleLookup
       loading.value = false
     }
@@ -137,7 +138,8 @@ const updateJson = () => {
   }
 }
 
-const onLookup = (field: Field) => {
+const onLookup = (field: Field, fieldVal: any) => {
+  console.log('JsonDocUI.onLookup', field, fieldVal)
   let { fullname } = field
   return new Promise((resolve, reject) => {
     let pasted
@@ -189,25 +191,23 @@ const onAutofill = () => {
 /**
  * 从外部文件服务选择文件的方法
  */
-const onFileSelect = (field: Field) => {
+const onFileSelect = (field: Field, fieldVal: any) => {
+  console.log('JsonDocUI.onFileSelect', field, fieldVal)
+  let { fullname } = field
+
+  let fileData: any
   if (field.type === 'object') {
-    const fileData: any = {}
-    if (field.children?.length) {
-      let randexp = new RandExp(/\w*/)
-      field.children.forEach((cf: Field) => {
-        let val: any
-        switch (cf.type) {
-          case 'number':
-            val = Math.floor(Math.random() * 1000)
-            break
-          default:
-            val = randexp.gen()
-        }
-        fileData[cf.name] = val
-      })
+    if (testObj.fileSelect) {
+      fileData = fullname ? _.get(testObj.fileSelect, fullname) : testObj.fileSelect
     }
-    return Promise.resolve(fileData)
   }
+  return new Promise((resolve, reject) => {
+    if (fileData) {
+      resolve(fileData)
+    } else {
+      reject({ message: '没有提供文件数据' })
+    }
+  })
 }
 /**
  * 表单中文件上传方法

@@ -50,7 +50,8 @@ const fieldLookupVNode = <VNode>(ctx: FormContext<VNode>, field: Field) => {
       onClick: async (evt: any) => {
         if (typeof ctx.onLookup === 'function') {
           try {
-            let lookupData = await ctx.onLookup(field)
+            let fieldVal = ctx.editDoc.get(fullname)
+            let lookupData = await ctx.onLookup(field, fieldVal)
             ctx.editDoc.set(fullname, lookupData)
           } catch (e: any) {
             ctx.onMessage(
@@ -353,7 +354,7 @@ export class FieldWrap<VNode> extends Node<VNode> {
     if (field.isOneOf) {
       if (field.schemaProp.isOneOfInclusiveGroup) {
         const fieldNames: any[] = fieldNamesInGroup(field, ctx)
-        // 同组节点的最后一个节点中添加删除组操作
+        // 同亲和组节点的最后一个节点中添加删除组操作
         if (fieldNames.indexOf(field.fullname) === fieldNames.length - 1) {
           let actions = ctx.h(
             'div',
@@ -465,7 +466,9 @@ export class FieldWrap<VNode> extends Node<VNode> {
     if (field.isOneOf) {
       let selected = false
       let ingroup = Field.isOneOfInclusiveGroupName(field)
-      if (!ctx.oneOfSelected?.has(field.fullname)) {
+      if (ctx.oneOfSelected?.has(field.fullname)) {
+        selected = true
+      } else {
         // 没有记录在选中集合中，检查是否已经在文档中
         // selected = ctx.editDoc.has(field.fullname)
         let snapshot = ctx.editDoc.snapshot()
@@ -475,8 +478,6 @@ export class FieldWrap<VNode> extends Node<VNode> {
           ctx.oneOfSelected?.set(field.fullname, { ingroup })
           ctx.oneOfSelectedInGroups?.add(ingroup)
         }
-      } else {
-        selected = true
       }
       if (selected && ctx.oneOfSelectedInGroups) {
         const groupIndex = Array.from(

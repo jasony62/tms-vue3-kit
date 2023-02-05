@@ -65,7 +65,9 @@ const itemAddVNode = <VNode>(ctx: FormContext<VNode>, field: Field) => {
       name: fullname,
       class: ['tvu-button', 'tvu-button--green'],
       onClick: () => {
-        /**保证当前字段的值是数组*/
+        /**
+         * 保证当前字段的值是数组
+         */
         let fieldValue = ctx.editDoc.get(fullname)
         if (fieldValue === undefined || fieldValue === null) {
           ctx.editDoc.set(fullname, [], false)
@@ -76,6 +78,13 @@ const itemAddVNode = <VNode>(ctx: FormContext<VNode>, field: Field) => {
 
         const { items } = schemaProp
         if (items) {
+          if (items.type === 'object') {
+            /**
+             * 如果数组项目是对象，添加后自动展开
+             */
+            let newChildFullname = field.fullname + `[${fieldValue.length}]`
+            ctx.nestExpanded?.add(newChildFullname)
+          }
           const initVal = Field.initialVal(undefined, items.type)
           ctx.editDoc.appendAt(fullname, initVal)
         }
@@ -108,6 +117,12 @@ const itemInsertVNode = <VNode>(
         ctx.activeFieldName = field.fullname + `[${index + 1}]`
         const { items } = field.schemaProp
         if (items) {
+          if (items.type === 'object') {
+            /**
+             * 如果数组项目是对象，添加后自动展开
+             */
+            ctx.nestExpanded?.add(fullname)
+          }
           const initVal = Field.initialVal(undefined, items.type)
           ctx.editDoc.insertAt(fullname, initVal)
         }
