@@ -123,9 +123,12 @@ const selectOneOfVNode = <VNode>(
           }
         })
         /**
-         * 只有1个属性，切属性的类型是对象，设置为展开
+         * 只有1个属性，且属性的类型是对象或数组，设置为展开
          */
-        if (props.length === 1 && props[0].attrs.type === 'object') {
+        if (
+          props.length === 1 &&
+          ['object', 'array'].includes(props[0].attrs.type)
+        ) {
           ctx.nestExpanded?.add(lastChildFullname)
         }
       }
@@ -183,7 +186,7 @@ const selectOneOfVNode = <VNode>(
        * 固定名称的isOneOf属性不论是否选择都会先创建字段，选择的目的是为了让这些字段的节点可见
        * 模板名称的isOneOf属性不会事先生成，要在文档中添加数据，文档中有数据了就会生成节点并且可见
        * 规则2：
-       * 选择的属性只有1个，切属性的类型是对象，那么选中后，设置为展开状态
+       * 选择的属性只有1个，切属性的类型是对象或数组，那么选中后，设置为展开状态
        *
        */
       const vnSelect = ctx.h(
