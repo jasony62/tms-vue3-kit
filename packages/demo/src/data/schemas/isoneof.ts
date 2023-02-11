@@ -44,6 +44,7 @@ export const SampleSchema = {
       type: 'string',
       title: '单独d',
       isOneOf: true,
+      isOneOfDefault: true,
       isOneOfExclusiveGroup: 'g3',
     },
     e: {

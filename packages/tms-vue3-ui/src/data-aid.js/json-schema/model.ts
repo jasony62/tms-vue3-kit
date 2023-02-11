@@ -94,6 +94,7 @@ export class SchemaProp {
   children: SchemaProp[] | undefined
   patternChildren: SchemaProp[] | undefined
   isOneOf = false // 在父属性中是否为排他属性
+  isOneOfDefault = false // 在互斥组中作为默认选项
   isOneOfInclusiveGroup = '' // 所属亲和组名称
   isOneOfExclusiveGroup = '' // 所属互斥组名称
   isOneOfChildren = new Map<string, Map<string, SchemaProp[]>>() // 子属性中的排他属性，第1层是互斥组，第2层是亲和组
@@ -399,6 +400,9 @@ function* _parseOne(
             }
           }
         }
+        break
+      case 'isOneOfDefault':
+        newProp[key] = rawProp[key]
         break
       case 'isOneOfInclusiveGroup':
       case 'isOneOfExclusiveGroup':

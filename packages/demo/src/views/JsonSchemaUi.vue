@@ -16,7 +16,6 @@
             <option value="autofill">自动填充</option>
             <option value="prop-dep">属性依赖</option>
             <option value="enum-dep">选项依赖</option>
-            <option value="rcsbot">rcsbot</option>
             <option value="paste">粘贴子自定</option>
           </select>
         </div>

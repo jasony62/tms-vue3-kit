@@ -94,6 +94,9 @@
       <tvu-form-item class="tvu-jse__field" v-if="prop.isOneOf" label="互斥组名称">
         <tvu-input v-model.trim="prop.isOneOfExclusiveGroup" placeholder="互斥组名称"></tvu-input>
       </tvu-form-item>
+      <tvu-form-item class="tvu-jse__field" v-if="prop.isOneOf">
+        <tvu-checkbox v-model="prop.isOneOfDefault" label="互斥组默认选项"></tvu-checkbox>
+      </tvu-form-item>
       <!--特定格式类型对应的扩展属性-->
       <component v-if="items" :is="compFormatAttrs" v-model:formatAttrs="items.formatAttrs"></component>
       <!--选项设置相关-->

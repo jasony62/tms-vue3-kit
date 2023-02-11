@@ -74,6 +74,7 @@ export const SampleSchema = {
                           format: 'file',
                           required: false,
                           isOneOf: true,
+                          isOneOfDefault: true,
                           isOneOfExclusiveGroup: '媒体文件',
                           properties: {
                             mediaUrl: {
@@ -151,21 +152,19 @@ export const SampleSchema = {
                         },
                         title: {
                           type: 'string',
-                          initialName: 'title',
                           title: '卡片标题',
                           isOneOf: true,
                           isOneOfExclusiveGroup: '卡片标题',
+                          isOneOfDefault: true,
                         },
                         titleTemplate: {
                           type: 'string',
-                          initialName: 'titleTemplate',
                           title: '卡片标题模板',
                           isOneOf: true,
                           isOneOfExclusiveGroup: '卡片标题',
                         },
                         titleSupplier: {
                           type: 'object',
-                          initialName: 'titleSupplier',
                           title: '卡片标题服务',
                           isOneOf: true,
                           isOneOfExclusiveGroup: '卡片标题',
@@ -187,6 +186,7 @@ export const SampleSchema = {
                           initialName: 'description',
                           title: '卡片说明',
                           isOneOf: true,
+                          isOneOfDefault: true,
                           isOneOfExclusiveGroup: '卡片说明',
                         },
                         descriptionTemplate: {
@@ -220,6 +220,7 @@ export const SampleSchema = {
                           initialName: 'suggestions',
                           title: '卡片建议列表',
                           isOneOf: true,
+                          isOneOfDefault: true,
                           isOneOfExclusiveGroup: '卡片建议列表',
                         },
                         suggestionsSupplier: {

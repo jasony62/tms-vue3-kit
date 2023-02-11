@@ -133,6 +133,8 @@ export default defineComponent({
     const oneOfSelected = new Map<string, { ingroup: string }>()
     /**所有使用的oneOf组名称*/
     const oneOfSelectedInGroups = new Set<string>
+    /**打开过的isOneOf字段*/
+    const oneOfSelectedDefault = new Set<string>
     /**全局保留嵌套字段的折叠/展开状态*/
     const nestExpanded = new Set<string>()
 
@@ -142,6 +144,7 @@ export default defineComponent({
       fields,
       oneOfSelected,
       oneOfSelectedInGroups,
+      oneOfSelectedDefault,
       nestExpanded,
       schema,
       enablePaste,

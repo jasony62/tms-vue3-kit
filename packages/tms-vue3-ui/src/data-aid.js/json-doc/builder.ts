@@ -758,6 +758,7 @@ export type FormContext<VNode> = {
   fields?: Map<string, Field> // 保存表单中的field对象，避免每一次渲染都重新生成
   oneOfSelected?: Map<string, { ingroup?: string }> // 保存选中的oneOf字段
   oneOfSelectedInGroups?: Set<string> // 保存选中的oneOf字段组名称
+  oneOfSelectedDefault?: Set<string> // 保存打开的过的默认字段
   nestExpanded?: Set<string> // 保存展开状态的嵌套节点
   enablePaste?: boolean
   autofillRequest?: Function

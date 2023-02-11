@@ -32,6 +32,7 @@ const propToRaw = (prop: SchemaProp, parent: any): any => {
     lookup,
     existIf,
     isOneOf,
+    isOneOfDefault,
     isOneOfInclusiveGroup,
     isOneOfExclusiveGroup,
   } = prop
@@ -47,6 +48,8 @@ const propToRaw = (prop: SchemaProp, parent: any): any => {
   if (existIf) rawProp.existIf = existIf
 
   if (isOneOf) rawProp.isOneOf = isOneOf
+
+  if (isOneOfDefault) rawProp.isOneOfDefault = isOneOfDefault
 
   if (isOneOfInclusiveGroup)
     rawProp.isOneOfInclusiveGroup = isOneOfInclusiveGroup

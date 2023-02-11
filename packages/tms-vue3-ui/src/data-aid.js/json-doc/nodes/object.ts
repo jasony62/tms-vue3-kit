@@ -72,7 +72,9 @@ const selectOneOfVNode = <VNode>(
 
   field.schemaProp.isOneOfChildren.forEach(
     (eg: Map<string, SchemaProp[]>, egName: string) => {
-      // 检查是否已经有被选中使用的定义
+      /**
+       * 检查是否已经有被选中使用的定义，如果有就不用生成选择列表
+       */
       let egChildren: SchemaProp[] = []
       eg.forEach((props: SchemaProp[]) => {
         egChildren.push(...props)
@@ -83,7 +85,76 @@ const selectOneOfVNode = <VNode>(
         return ctx.oneOfSelected?.has(fullname)
       })
       if (hasSelected) return
-      // 一个互斥组中的选项
+      /**
+       *
+       * @param props
+       */
+      let selectIsOneOf = (props: SchemaProp[]) => {
+        let lastChildFullname = ''
+        props.forEach((child) => {
+          let childFullname = `${field.fullname ? field.fullname + '.' : ''}${
+            child.name
+          }`
+          let childField = ctx.fields?.get(childFullname)
+          if (childField) {
+            // 获得亲和组名称
+            let ingroup = Field.isOneOfInclusiveGroupName(childField)
+            ctx.oneOfSelected?.set(childFullname, { ingroup })
+            ctx.oneOfSelectedInGroups?.add(ingroup)
+            lastChildFullname = childFullname
+          } else {
+            /**
+             * 如果是模板属性，需要重新生成字段
+             */
+            const { name, attrs } = child
+            const newKey = Field.initialKey(name)
+            const initVal = Field.initialVal(attrs.default, attrs.type)
+            debug(
+              `字段【${childFullname}】执行【添加${
+                attrs.title ?? name
+              }属性】，随机属性名：${newKey}，初始值：${JSON.stringify(
+                initVal
+              )}`
+            )
+            ctx.editDoc.appendAt(field.fullname, initVal, newKey)
+            lastChildFullname = `${
+              field.fullname ? field.fullname + '.' : ''
+            }${newKey}`
+          }
+        })
+        /**
+         * 只有1个属性，切属性的类型是对象，设置为展开
+         */
+        if (props.length === 1 && props[0].attrs.type === 'object') {
+          ctx.nestExpanded?.add(lastChildFullname)
+        }
+      }
+      /**
+       * 如果互斥组中的属性存在默认选项，且选项没有生成过节点，就生成
+       * 亲和组中任意一个是默认选项，整个亲和就作为默认选项
+       */
+      let hasDefault = false
+      for (let [, props] of eg) {
+        let defaultProp = props.find((p) => p.isOneOfDefault === true)
+        if (defaultProp) {
+          let fullname = `${field.fullname}.${defaultProp.name}`
+          if (!ctx.oneOfSelectedDefault?.has(fullname)) {
+            selectIsOneOf(props)
+            ctx.oneOfSelectedDefault?.add(fullname)
+            hasDefault = true
+            break
+          }
+        }
+      }
+      if (hasDefault) {
+        ctx.editDoc.forceRender()
+        return
+      }
+      /**
+       * 准备生成排他属性下拉列表
+       * 如果只有1个属性，使用属性的标题作为lable，属性的名称作为值
+       * 如果是亲和组，使用组名称作为标题和值
+       */
       const options: VNode[] = []
       const labels: string[] = []
       eg.forEach((props: SchemaProp[], igName: string) => {
@@ -106,7 +177,15 @@ const selectOneOfVNode = <VNode>(
           `--选择【${egName ? egName : labels.join('/')}】输入方式--`
         )
       )
-      // 1个亲和组选项列表
+      /**
+       * 生成选项列表
+       * 规则1：
+       * 固定名称的isOneOf属性不论是否选择都会先创建字段，选择的目的是为了让这些字段的节点可见
+       * 模板名称的isOneOf属性不会事先生成，要在文档中添加数据，文档中有数据了就会生成节点并且可见
+       * 规则2：
+       * 选择的属性只有1个，切属性的类型是对象，那么选中后，设置为展开状态
+       *
+       */
       const vnSelect = ctx.h(
         'select',
         {
@@ -115,36 +194,9 @@ const selectOneOfVNode = <VNode>(
           onChange: (event: any) => {
             const selectedGroupName = event.target ? event.target.value : event
             if (selectedGroupName === '') return
-            /**清除已选字段的选中状态*/
             eg.forEach((props: SchemaProp[], egName: string) => {
               if (egName !== selectedGroupName) return
-              props.forEach((child) => {
-                let childFullname = `${
-                  field.fullname ? field.fullname + '.' : ''
-                }${child.name}`
-                let childField = ctx.fields?.get(childFullname)
-                if (childField) {
-                  // 获得亲和组名称
-                  let ingroup = Field.isOneOfInclusiveGroupName(childField)
-                  ctx.oneOfSelected?.set(childFullname, { ingroup })
-                  ctx.oneOfSelectedInGroups?.add(ingroup)
-                } else {
-                  /**
-                   * 如果是模板属性，需要重新生成字段
-                   */
-                  const { name, attrs } = child
-                  const newKey = Field.initialKey(name)
-                  const initVal = Field.initialVal(attrs.default, attrs.type)
-                  debug(
-                    `字段【${childFullname}】执行【添加${
-                      attrs.title ?? name
-                    }属性】，随机属性名：${newKey}，初始值：${JSON.stringify(
-                      initVal
-                    )}`
-                  )
-                  ctx.editDoc.appendAt(field.fullname, initVal, newKey)
-                }
-              })
+              selectIsOneOf(props)
             })
             ctx.editDoc.forceRender()
           },
@@ -324,16 +376,20 @@ export class ObjectNode<VNode> extends FieldNode<VNode> {
     return options
   }
   /**
+   * 子字段节点
    * 如果对象中包含可选属性，需要提供添加删除属性，修改属性名称的操作。
+   * 粘贴和清空（删除属性）操作
    * 如果对象的格式是文件，需要支持选取文件操作
    */
   protected children(): VNode[] {
     const { ctx, field } = this
 
-    // 节点未展开时，不生成子节点
+    /* 节点未展开时，不生成子节点 */
     if (field.fullname !== '' && !ctx.nestExpanded?.has(field.fullname))
       return []
-
+    /**
+     * 子字段节点
+     */
     let vnodes = []
     if (this._children) {
       this._children.forEach((c) => {
@@ -404,7 +460,7 @@ export class ObjectNode<VNode> extends FieldNode<VNode> {
         actionVNodes.push(pickFileVNode)
       }
 
-      /*清除属性。根属性不允许清除。*/
+      /* 清除属性。根属性不允许清除。*/
       if (field.shortname) actionVNodes.push(propRemoveVNode(ctx, field))
 
       if (actionVNodes.length) {
