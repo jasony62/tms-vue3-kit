@@ -17,7 +17,6 @@
       <option value="rcscard">rcscard</option>
       <option value="rcscarousel">rcscarousel</option>
       <option value="rcssugg">rcssugg</option>
-      <option value="rcsreply">rcsreply</option>
       <option value="dialog-script">dialog-script</option>
       <option value="isoneof">isoneof</option>
       <option value="paste">粘贴</option>
