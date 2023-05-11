@@ -17,6 +17,8 @@ export const Type2Format = {
     { value: 'password', label: '密码' },
     { value: 'idcard', label: '身份证' },
     { value: 'handlebars', label: 'Handlebars模板' },
+    { value: 'xml', label: 'XML格式文本' },
+    { value: 'yaml', label: 'YAML格式文本' },
   ],
   object: [
     { value: 'file', label: '文件' },

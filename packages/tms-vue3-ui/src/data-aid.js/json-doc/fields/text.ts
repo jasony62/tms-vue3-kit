@@ -34,6 +34,8 @@ export class FieldText extends Field {
         case 'longtext':
         case 'mustache':
         case 'handlebars':
+        case 'xml':
+        case 'yaml':
           this.type = 'textarea'
           break
       }

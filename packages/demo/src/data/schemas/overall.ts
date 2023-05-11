@@ -250,6 +250,16 @@ export const SampleSchema = {
       type: 'string',
       format: 'handlebars',
     },
+    xmlText: {
+      title: 'XML文本',
+      type: 'string',
+      format: 'xml',
+    },
+    yamlText: {
+      title: 'YAML文本',
+      type: 'string',
+      format: 'yaml',
+    },
   },
   dependencies: {
     age: {
