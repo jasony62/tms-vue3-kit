@@ -2,9 +2,13 @@
   <div class="tvu-jse__enum-config">
     <div class="tvu-jse__enum-groups">
       <tvu-form-item class="tvu-jse__enum-group tvu-jse__field" v-for="(grp, i) in fieldAttrs.enumGroups" :key="i">
+        <div>分组ID</div>
         <tvu-input v-model="grp.id"></tvu-input>
+        <div>分组名称</div>
         <tvu-input v-model="grp.label"></tvu-input>
+        <div>分组生效属性名</div>
         <tvu-input v-model="grp.assocEnum.property"></tvu-input>
+        <div>分组生效属性值</div>
         <tvu-input v-model="grp.assocEnum.value"></tvu-input>
         <tvu-button @click="onDelEnumGroup(grp, i)">删除分组</tvu-button>
       </tvu-form-item>

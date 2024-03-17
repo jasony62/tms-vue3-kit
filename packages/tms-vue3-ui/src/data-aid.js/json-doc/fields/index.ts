@@ -26,7 +26,9 @@ function createField<VNode>(
       newField = new FieldBoolean(prop, index, name)
       break
     case 'array':
-      newField = ARRAY_KEYWORDS.some((kw) => prop.hasOwnProperty(kw))
+      // anyOf时生成核选框组，enum下拉框方式
+      // newField = ARRAY_KEYWORDS.some((kw) => prop.attrs.hasOwnProperty(kw))
+      newField = prop.attrs.hasOwnProperty('anyOf')
         ? new FieldArray(prop, index, name)
         : new FieldObject(prop, index, name)
       break

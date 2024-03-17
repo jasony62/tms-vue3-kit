@@ -50,6 +50,7 @@ export class FieldArray extends Field {
             break
 
           case 'anyOf':
+            console.log('sssssss11111')
             this.type = 'checkboxgroup'
             this.choiceType = 'checkbox'
             this.value = Array.isArray(this.value) ? this.value : []

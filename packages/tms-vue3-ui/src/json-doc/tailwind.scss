@@ -81,6 +81,11 @@
       content: 'J';
     }
   }
+  .tvu-jdoc__field[data-leaf-field='array'] {
+    > :first-child::before {
+      content: 'A';
+    }
+  }
   /*嵌套字段为折叠状态*/
   .tvu-jdoc__field[data-collapsed-field] > :first-child {
     margin-left: 1.5rem;

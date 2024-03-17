@@ -3,7 +3,7 @@
   "description": "Vue3基础工具库。",
   "author": "jasony62",
   "license": "MIT",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "main": "lib/index.js",
   "files": [
     "lib"
@@ -13,6 +13,6 @@
     "build": "tsc"
   },
   "dependencies": {
-    "axios": "^0.27.2"
+    "axios": "^1.5.0"
   }
 }

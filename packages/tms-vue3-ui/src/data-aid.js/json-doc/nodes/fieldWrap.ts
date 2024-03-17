@@ -449,7 +449,14 @@ export class FieldWrap<VNode> extends Node<VNode> {
     }
     // 嵌套节点默认设置为折叠状态
     if (fullname) {
-      if (['object', 'array'].includes(schemaType)) {
+      if ('object' === schemaType) {
+        Object.assign(options, {
+          'data-collapsed-field': ctx.nestExpanded?.has(fullname)
+            ? 'false'
+            : 'true',
+        })
+      } else if ('array' === schemaType && !field.schemaProp.attrs.anyOf) {
+        // 数字字段如果指定了anyOf，会把所有选项以核选框的方式列出来，因此，没有子节点
         Object.assign(options, {
           'data-collapsed-field': ctx.nestExpanded?.has(fullname)
             ? 'false'
@@ -457,7 +464,8 @@ export class FieldWrap<VNode> extends Node<VNode> {
         })
       } else {
         Object.assign(options, {
-          'data-leaf-field': schemaType,
+          'data-leaf-field':
+            schemaType === 'array' ? field.schemaProp.items?.type : schemaType,
         })
       }
     }

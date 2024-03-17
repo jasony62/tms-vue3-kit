@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="flex flex-row gap-4">
     <select v-model="caseName">
       <option value="overall">整体示例</option>
       <option value="array-simple">数组的项目简单类型</option>
@@ -22,13 +22,14 @@
       <option value="paste">粘贴</option>
     </select>
     <label><input type="checkbox" v-model="showFieldFullname" />是否显示字段路径名称</label>
+    <label><input type="checkbox" v-model="hideFieldDescription" />是否隐藏字段说明</label>
   </div>
   <div class="flex flex-row">
     <div class="w-1/3 p-4">
       <json-doc v-if="loading === false" ref="jsonDocEditor" :key="caseName" :schema="testObj.schema"
         :value="testObj.data" :enable-paste="true" :on-lookup="onLookup" :autofill-request="onAutofill"
         :on-file-select="onFileSelect" :on-file-download="onFileDownload" :on-file-upload="onFileUpload"
-        :hide-root-title="true" :hide-root-description="true" :hide-field-description="true"
+        :hide-root-title="true" :hide-root-description="true" :hide-field-description="hideFieldDescription"
         :show-field-fullname="showFieldFullname" @jdoc-focus="onJdocFocus" @jdoc-blur="onJdocBlur" :on-paste="onPaste">
       </json-doc>
     </div>
@@ -76,6 +77,8 @@ const activeField = ref<Field>() // 正在编辑的字段
 const elJsonEditor = ref<HTMLElement | null>(null)
 
 const showFieldFullname = ref(false)
+
+const hideFieldDescription = ref(false)
 
 function loadTestData() {
   loading.value = true

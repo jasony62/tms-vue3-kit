@@ -104,8 +104,8 @@
         v-if="['string', 'integer', 'number', 'array'].includes(attrs.type)">
         <tvu-select v-model="choiceMode" @change="onChangeChoiceMode">
           <tvu-option label="不提供选项" value=""></tvu-option>
-          <tvu-option label="oneOf" value="oneOf"></tvu-option>
-          <tvu-option label="anyOf" value="anyOf"></tvu-option>
+          <tvu-option label="oneOf" value="oneOf" v-if="attrs.type !== 'array'"></tvu-option>
+          <tvu-option label="anyOf" value="anyOf" v-if="attrs.type === 'array'"></tvu-option>
           <tvu-option label="enum" value="enum"></tvu-option>
         </tvu-select>
       </tvu-form-item>

@@ -5,10 +5,11 @@ export const SampleSchema = {
   type: 'object',
   properties: {
     test: {
-      title: '只读字段',
+      title: '标题',
       type: 'string',
       readonly: true,
       default: 'hello',
+      description: '只读字段',
     },
     name: {
       title: '姓名',
@@ -24,12 +25,13 @@ export const SampleSchema = {
     password: {
       title: '密码',
       type: 'string',
+      description: '密码不可见',
       format: 'password',
     },
     additionalName: {
-      title: '其他名称（基础类型数组）',
+      title: '其他名称',
       type: 'array',
-      lookup: {},
+      description: '基础类型数组',
       items: {
         type: 'string',
       },
@@ -37,10 +39,11 @@ export const SampleSchema = {
     description: {
       title: '介绍',
       type: 'string',
+      description: '长文本',
       format: 'longtext',
     },
     experiences: {
-      title: '经历（对象类型数组）',
+      title: '经历',
       type: 'array',
       items: {
         type: 'object',
@@ -55,10 +58,12 @@ export const SampleSchema = {
           },
         },
       },
+      description: '对象类型数组',
     },
     gender: {
-      title: '性别（单选框）',
+      title: '性别',
       type: 'string',
+      description: '用oneOf生成单选框',
       oneOf: [
         {
           label: '男',
@@ -75,8 +80,9 @@ export const SampleSchema = {
       type: 'string',
     },
     activities: {
-      title: '活动（根据性别关联选项）',
+      title: '活动',
       type: 'string',
+      description: '根据性别关联选项',
       required: false,
       enum: [
         {
@@ -120,8 +126,12 @@ export const SampleSchema = {
       ],
     },
     hobbies: {
-      title: '爱好（多选框）',
-      type: 'string',
+      title: '爱好',
+      type: 'array',
+      items: {
+        type: 'string',
+      },
+      description: '用anyOf生成多选框',
       anyOf: [
         {
           label: '美食',
@@ -142,8 +152,9 @@ export const SampleSchema = {
       ],
     },
     agree: {
-      title: '同意？（布尔）',
+      title: '同意？',
       type: 'boolean',
+      description: '布尔值',
       readonly: true,
       required: true,
     },
@@ -155,6 +166,7 @@ export const SampleSchema = {
     areaCode: {
       title: '区号（选项）',
       type: 'string',
+      description: '用enum生成下拉框',
       enum: [
         {
           label: '010',

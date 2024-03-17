@@ -78,13 +78,15 @@ function createArrayItemNode<VNode>(
   joint: StackJoint<VNode>
 ) {
   if (prop.items?.type) {
-    let { fullname, items } = prop
+    let { fullname, items, attrs } = prop
     debug(
       `createArrayItemNode - 属性【${fullname}】需要生成类型为【${items.type}】的子项目字段`
     )
     // 给数组属性的items生成1个模拟属性，用name=[*]表示
     let itemProp = new SchemaProp(`${fullname}`, '[*]', items.type)
     if (items.format) itemProp.attrs.format = items.format
+    if (attrs.enum) itemProp.attrs.enum = attrs.enum
+    else if (attrs.anyOf) itemProp.attrs.enum = attrs.anyOf // 应该考虑如何优化
 
     // 需要传递和子属性中哪些是oneOf
     itemProp.isOneOfChildren = prop.isOneOfChildren
@@ -680,8 +682,15 @@ export function build<VNode>(
         parentJoints.forEach((parentJoint) => {
           if (false === checkPropExistIf(prop, parentJoint.field, editDoc))
             return
-          const field = createField(ctx, prop, parentJoint.field)
-          createArrayNodeAndItems(field, parentJoint)
+          if (prop.attrs.anyOf) {
+            console.log('ssssss')
+            let pair = createFieldAndNode<VNode>(ctx, prop, parentJoint)
+            // 在父节点中按顺序添加
+            stack.addNode(pair, parentJoint)
+          } else {
+            const field = createField(ctx, prop, parentJoint.field)
+            createArrayNodeAndItems(field, parentJoint)
+          }
         })
       }
     } else {

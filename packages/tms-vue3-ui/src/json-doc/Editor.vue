@@ -174,6 +174,11 @@ export default defineComponent({
       ctx.showFieldFullname = newVal
       editDoc.forceRender()
     })
+    /**切换是否隐藏字段的说明 */
+    watch(() => props.hideFieldDescription, (newVal) => {
+      ctx.hideFieldDescription = newVal
+      editDoc.forceRender()
+    })
     /**
      * 返回渲染函数
      */
