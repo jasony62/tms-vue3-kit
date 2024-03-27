@@ -23,11 +23,17 @@
         <tvu-input v-model="opt.label"></tvu-input>
         <div>选项所属分组</div>
         <tvu-input v-model="opt.group"></tvu-input>
-        <tvu-checkbox v-model="fieldAttrs.default" :value="opt.value" label="默认项">
-        </tvu-checkbox>
         <tvu-button @click="onDelEnumOption(opt, i)">删除选项</tvu-button>
       </tvu-form-item>
       <tvu-button @click="onAddEnumOption">新增选项</tvu-button>
+    </div>
+    <div class="tvu-jse__enum-default">
+      <tvu-form-item class="tvu-jse__field" label="默认选项">
+        <tvu-select v-model="optionAsDefault" @change="onChangeDefaultOption">
+          <tvu-option label="无" value=""></tvu-option>
+          <tvu-option :label="opt.label" :value="opt.value" v-for="(opt, i) in fieldAttrs[fieldAttrsType]"></tvu-option>
+        </tvu-select>
+      </tvu-form-item>
     </div>
     <div class="tvu-jse__enum-range">
       <tvu-form-item class="tvu-jse__field" label="至少选">
@@ -40,13 +46,21 @@
   </div>
 </template>
 <script setup lang="ts">
-import { PropType } from "vue";
+import { PropType, ref } from "vue";
 import { SchemaPropAttrs, EnumOption, EnumGroup } from '../data-aid.js/json-schema/model'
 
 const props = defineProps({
   fieldAttrs: { type: Object as PropType<SchemaPropAttrs>, required: true },
   fieldAttrsType: { type: String, default: "oneOf", required: true }
 })
+
+// 默认选项
+const optionAsDefault = ref<any>(props.fieldAttrs.default)
+// 修改默认选项
+const onChangeDefaultOption = () => {
+  if (optionAsDefault.value) props.fieldAttrs.default = optionAsDefault.value
+  else delete props.fieldAttrs.default
+}
 
 const onAddEnumGroup = () => {
   let newGroup = { id: `g${Date.now()}`, label: "newGroup", assocEnum: { property: '', value: '' } }

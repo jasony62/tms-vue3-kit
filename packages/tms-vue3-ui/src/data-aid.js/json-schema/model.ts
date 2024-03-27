@@ -71,7 +71,7 @@ export type SchemaPropAttrs = {
   enumGroups?: EnumGroup[]
   minItems?: number
   maxItems?: number
-  default?: any
+  default?: any // 默认值
   autofill?: PropAutofill
   lookup?: any
   value?: any // 要要保留？没有对应的逻辑
@@ -195,6 +195,91 @@ export class SchemaProp {
     delete clipped.children
     delete clipped.patternChildren
     return clipped
+  }
+  /**
+   * 将值转换为用户阅读的值
+   *
+   * @param val
+   * @param doc
+   * @returns
+   */
+  readableValue(val: any, doc?: any) {
+    const { attrs } = this
+    switch (attrs.type) {
+      case 'boolean':
+        return val ? '是' : '否'
+      case 'number':
+      case 'string':
+        if (attrs.enum?.length) {
+          if (attrs.enumGroups?.length) {
+            const group = attrs.enumGroups.find(
+              (g: any) => g.assocEnum.value === doc[g.assocEnum.property]
+            )
+            if (!group) return ''
+            const option = attrs.enum.find(
+              (o: any) => o.group === group.id && o.value === val
+            )
+            if (!option) return ''
+            return option.label
+          } else {
+            const option = attrs.enum.find((o: any) => o.value === val)
+            if (!option) return ''
+            return option.label
+          }
+        } else if (attrs.oneOf?.length) {
+          if (attrs.enumGroups?.length) {
+            const group = attrs.enumGroups.find(
+              (g: any) => g.assocEnum.value === doc[g.assocEnum.property]
+            )
+            if (!group) return ''
+            const option = attrs.oneOf.find(
+              (o: any) => o.group === group.id && o.value === val
+            )
+            if (!option) return ''
+            return option.label
+          } else {
+            const option = attrs.oneOf.find((o: any) => o.value === val)
+            if (option) return option.label
+          }
+        }
+        break
+      case 'array':
+        if (!Array.isArray(val) || val.length === 0) return ''
+        if (attrs.enum?.length) {
+          if (attrs.enumGroups?.length) {
+            const group = attrs.enumGroups.find(
+              (g: any) => g.assocEnum.value === doc[g.assocEnum.property]
+            )
+            if (!group) return ''
+            const options = attrs.enum.filter(
+              (o: any) => o.group === group.id && val.includes(o.value)
+            )
+            return options.map((o: any) => o.label).join(' ')
+          } else {
+            const options = attrs.enum.filter((o: any) => val.includes(o.value))
+            return options.map((o: any) => o.label).join(' ')
+          }
+        } else if (attrs.anyOf?.length) {
+          if (attrs.enumGroups?.length) {
+            const group = attrs.enumGroups.find(
+              (g: any) => g.assocEnum.value === doc[g.assocEnum.property]
+            )
+            if (!group) return ''
+            const options = attrs.anyOf.filter(
+              (o: any) => o.group === group.id && val.includes(o.value)
+            )
+            return options.map((o: any) => o.label).join(' ')
+          } else {
+            const options = attrs.anyOf.filter((o: any) =>
+              val.includes(o.value)
+            )
+            return options.map((o: any) => o.label).join(' ')
+          }
+        }
+        break
+    }
+
+    return val
   }
 }
 /**

@@ -134,7 +134,7 @@ const selectOneOfVNode = <VNode>(
       }
       /**
        * 如果互斥组中的属性存在默认选项，且选项没有生成过节点，就生成
-       * 亲和组中任意一个是默认选项，整个亲和就作为默认选项
+       * 亲和组中任意一个是默认选项，整个亲和组就作为默认选项
        */
       let hasDefault = false
       for (let [, props] of eg) {
