@@ -1,11 +1,7 @@
-import {
-  SchemaIter,
-  RawSchema,
-  SchemaProp,
-} from '@/data-aid.js/json-schema/model'
-import { createField, Field } from './fields'
-import { FieldWrap, prepareFieldNode } from './nodes'
-import { DocAsArray } from './model'
+import { SchemaIter, RawSchema, SchemaProp } from '../json-schema/model.js'
+import { createField, Field } from './fields/index.js'
+import { FieldWrap, prepareFieldNode } from './nodes/index.js'
+import { DocAsArray } from './model.js'
 import Debug from 'debug'
 
 const debug = Debug('json-doc:build:form:form:former')
@@ -791,7 +787,7 @@ export type FormContext<VNode> = {
  * @param {*} ctx
  * @param {*} fieldNames
  */
-export default function <VNode>(
+export function JSONDocBuilder<VNode>(
   ctx: FormContext<VNode>,
   fieldNames?: string[]
 ) {

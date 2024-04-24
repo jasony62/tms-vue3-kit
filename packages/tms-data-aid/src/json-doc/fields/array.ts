@@ -1,5 +1,5 @@
-import { SchemaProp } from '@/data-aid.js/json-schema/model'
-import { Field, ARRAY_KEYWORDS } from './field'
+import { SchemaProp } from '../../json-schema/model.js'
+import { Field, ARRAY_KEYWORDS } from './field.js'
 
 type Choice = {
   value: string

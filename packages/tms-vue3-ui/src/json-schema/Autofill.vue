@@ -31,12 +31,12 @@
 
 <script setup lang="ts">
 import { PropType } from 'vue';
-import { PropAutofill } from '../data-aid.js/json-schema/model';
+import { PropAutofill } from 'tms-data-aid/dist/json-schema/model'
 
 const props = defineProps({
   autofill: { type: Object as PropType<PropAutofill>, required: true }
 })
-  // defaultFormatAttrs() {
-  //   return { accept: '', size: null, limit: null }
-  // }
+// defaultFormatAttrs() {
+//   return { accept: '', size: null, limit: null }
+// }
 </script>

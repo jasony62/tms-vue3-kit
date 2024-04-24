@@ -47,7 +47,7 @@
 </template>
 <script setup lang="ts">
 import { PropType, ref } from "vue";
-import { SchemaPropAttrs, EnumOption, EnumGroup } from '../data-aid.js/json-schema/model'
+import { SchemaPropAttrs, EnumOption, EnumGroup } from 'tms-data-aid/dist/json-schema/model'
 
 const props = defineProps({
   fieldAttrs: { type: Object as PropType<SchemaPropAttrs>, required: true },

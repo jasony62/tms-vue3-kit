@@ -7,8 +7,8 @@
   </tvu-form-item>
 </template>
 <script setup lang="ts">
-import { PropType } from 'vue';
-import { SchemaProp } from '../data-aid.js/json-schema/model';
+import { PropType } from 'vue'
+import { SchemaProp } from 'tms-data-aid/dist/json-schema/model'
 
 const props = defineProps({
   schemaProp: { type: Object as PropType<SchemaProp>, required: true },

@@ -287,6 +287,7 @@ export const SampleSchema = {
 }
 
 export const SampleData = {
+  '': null,
   experiences: [
     { time: '2001', content: 'coding' },
     { time: '2002', content: 'pm' },

@@ -1,10 +1,6 @@
 import _set from 'lodash.set'
 import Debug from 'debug'
-import {
-  RawSchema,
-  SchemaIter,
-  SchemaProp,
-} from '@/data-aid.js/json-schema/model'
+import { RawSchema, SchemaIter, SchemaProp } from '../json-schema/model.js'
 
 const debug = Debug('json-doc:model')
 
