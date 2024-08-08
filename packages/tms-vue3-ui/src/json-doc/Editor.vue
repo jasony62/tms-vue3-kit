@@ -98,9 +98,9 @@ export default defineComponent({
     /**
      * 返回表单中正在编辑的数据
      */
-    const editing = (matchSchema = true, cleanEmpty = true): any => {
-      // return editDoc.build(matchSchema === true ? schema : null, cleanEmpty)
-      return editDoc.build(undefined, cleanEmpty)
+    const editing = (matchSchema = false, cleanEmpty = true): any => {
+      return editDoc.build(matchSchema === true ? schema : null, cleanEmpty)
+      // return editDoc.build(undefined, cleanEmpty)
     }
 
     const {
@@ -120,6 +120,7 @@ export default defineComponent({
     } = props
 
     const editDoc = new DocAsArray(deepClone(props.value))
+
     // debug(`初始文档属性列表\n`, JSON.stringify(editDoc.properties, null, 2))
     editDoc.renderCounter = ref(0) // 用于强制触发渲染
 

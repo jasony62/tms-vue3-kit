@@ -62,7 +62,7 @@ import 'jsoneditor/dist/jsoneditor.css'
 import RandExp from 'randexp'
 import _ from 'lodash'
 
-const jsonDocEditor = ref<{ editing: () => string, editDoc: DocAsArray } | null>(null)
+const jsonDocEditor = ref<{ editing: (matchSchema?: boolean) => string, editDoc: DocAsArray } | null>(null)
 
 const caseName = ref('') // 演示数据
 
@@ -241,7 +241,7 @@ const onFileDownload = (name: string, url: string) => {
 }
 
 const getResult = () => {
-  jsonResult.value = JSON.stringify(jsonDocEditor.value?.editing(), null, 2)
+  jsonResult.value = JSON.stringify(jsonDocEditor.value?.editing(true), null, 2)
 }
 
 const onPaste = async (field: Field) => {

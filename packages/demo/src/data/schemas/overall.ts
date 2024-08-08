@@ -155,7 +155,7 @@ export const SampleSchema = {
       title: '同意？',
       type: 'boolean',
       description: '布尔值',
-      readonly: true,
+      readonly: false,
       required: true,
     },
     bday: {
@@ -272,6 +272,10 @@ export const SampleSchema = {
       type: 'string',
       format: 'yaml',
     },
+    urlProp: {
+      title: 'URLProp',
+      type: 'json',
+    },
   },
   dependencies: {
     age: {
@@ -295,6 +299,13 @@ export const SampleData = {
   tel: {
     areaCode: '010',
     phoneNumber: '58551234',
+  },
+  urlProp: {
+    'https?://.+/admin/collection/.+/.+': {
+      addr: 'sip:bot-5gmx@osips',
+      hears: 'fill-form',
+      closeCommand: '/close',
+    },
   },
 }
 
