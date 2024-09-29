@@ -23,6 +23,7 @@
     </select>
     <label><input type="checkbox" v-model="showFieldFullname" />是否显示字段路径名称</label>
     <label><input type="checkbox" v-model="hideFieldDescription" />是否隐藏字段说明</label>
+    <label><input type="checkbox" v-model="schemaArbitrary" />不要求文档严格匹配schema</label>
   </div>
   <div class="flex flex-row">
     <div class="w-1/3 p-4">
@@ -79,6 +80,8 @@ const elJsonEditor = ref<HTMLElement | null>(null)
 const showFieldFullname = ref(false)
 
 const hideFieldDescription = ref(false)
+
+const schemaArbitrary = ref(false)
 
 function loadTestData() {
   loading.value = true
@@ -241,7 +244,7 @@ const onFileDownload = (name: string, url: string) => {
 }
 
 const getResult = () => {
-  jsonResult.value = JSON.stringify(jsonDocEditor.value?.editing(true), null, 2)
+  jsonResult.value = JSON.stringify(jsonDocEditor.value?.editing(schemaArbitrary.value ? false : true), null, 2)
 }
 
 const onPaste = async (field: Field) => {

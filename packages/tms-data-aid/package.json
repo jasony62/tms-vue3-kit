@@ -1,7 +1,7 @@
 {
   "name": "tms-data-aid",
   "type": "module",
-  "version": "0.0.90",
+  "version": "0.0.92",
   "description": "通用数据处理包。",
   "main": "./dist/index.js",
   "exports": {
@@ -24,6 +24,6 @@
     "randexp": "^0.5.3"
   },
   "devDependencies": {
-    "rimraf": "^5.0.5"
+    "rimraf": "6.0.1"
   }
 }

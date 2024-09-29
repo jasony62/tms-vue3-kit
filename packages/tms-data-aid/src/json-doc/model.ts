@@ -345,9 +345,20 @@ export class DocAsArray {
       log('根据指定的schema去除数据')
       /**根据schema生成文档，忽略文档中没有对应schema的内容*/
       schemaProps.forEach((schemaProp, index) => {
+        // 和当前schema匹配的文档属性
         // 模板属性会有多个匹配的文档属性
+        // 数组的item如果不是objct，值名称匹配schema
+        let schemaIsPlainArray =
+          schemaProp.attrs.type === 'array' &&
+          schemaProp.items?.type !== 'object'
         let docProps = this._properties.filter((docProp) => {
-          return schemaProp.fullRegExp.test(docProp.name)
+          if (schemaProp.fullRegExp.test(docProp.name)) {
+            if (schemaIsPlainArray && typeof docProp.key === 'number') {
+              return false
+            }
+            return true
+          }
+          return false
         })
         docProps.forEach((docProp) => {
           // 根节点不需要处理
@@ -366,11 +377,14 @@ export class DocAsArray {
               _set(Output, docProp.name, null)
               return
             }
-            if (schemaProp.attrs.type === 'json') {
+            if (
+              schemaProp.attrs.type === 'json' ||
+              (schemaIsPlainArray && schemaProp.items?.type === 'json')
+            ) {
               log(`文档属性【${docProp.name}】是json类型，需要处理下层节点`)
               JsonDocPropNames.push(docProp.name)
             } else {
-              if (docProp._children.length) {
+              if (schemaIsPlainArray === false && docProp._children.length) {
                 log(`文档属性【${docProp.name}】不是叶节点，赋值null`)
                 _set(Output, docProp.name, null)
                 return
