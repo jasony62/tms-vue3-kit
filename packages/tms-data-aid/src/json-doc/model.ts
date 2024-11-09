@@ -1,7 +1,8 @@
 // import _set from 'lodash.set'
-import JSONPointer from 'jsonpointer'
-import Debug from 'debug'
+// import JSONPointer from 'jsonpointer'
 import { RawSchema, SchemaIter, SchemaProp } from '../json-schema/model.js'
+import { JSONPointerLodash } from '../jsonpointer/index.js'
+import Debug from 'debug'
 
 const debug = Debug('json-doc:model')
 
@@ -337,12 +338,7 @@ export class DocAsArray {
       if (index === 0) return
       let val = this.get(prop)
       val = JSON.parse(JSON.stringify(val))
-      // _set(Output, prop.name, val)
-      JSONPointer.set(
-        Output,
-        prop.name.replace(/\.\[(\d+)\]/, '/$1').replace('.', '/'),
-        val
-      )
+      JSONPointerLodash.set(Output, prop.name, val)
     }
 
     const Output = Array.isArray(this._rawDoc) ? [] : {}
@@ -380,12 +376,7 @@ export class DocAsArray {
               log(
                 `文档属性【${docProp.name}】是json类型的文档属性【${jsonParentName}】的值，赋值null`
               )
-              // _set(Output, docProp.name, null)
-              JSONPointer.set(
-                Output,
-                docProp.name.replace(/\.\[(\d+)\]/, '/$1').replace('.', '/'),
-                null
-              )
+              JSONPointerLodash.set(Output, docProp.name, null)
               return
             }
             if (
@@ -397,12 +388,7 @@ export class DocAsArray {
             } else {
               if (schemaIsPlainArray === false && docProp._children.length) {
                 log(`文档属性【${docProp.name}】不是叶节点，赋值null`)
-                // _set(Output, docProp.name, null)
-                JSONPointer.set(
-                  Output,
-                  docProp.name.replace(/\.\[(\d+)\]/, '/$1').replace('.', '/'),
-                  null
-                )
+                JSONPointerLodash.set(Output, docProp.name, null)
                 return
               }
             }
@@ -732,12 +718,7 @@ export class DocAsArray {
       /**修改父对象 */
       let { _parent } = prop
       if (_parent) {
-        // _set(_parent.value, name, value)
-        JSONPointer.set(
-          _parent.value,
-          name.replace(/\.\[(\d+)\]/, '/$1').replace('.', '/'),
-          value
-        )
+        JSONPointerLodash.set(_parent.value, name, value)
         log(
           `修改属性【${prop.name}】在父属性中的值\n` +
             JSON.stringify(value, null, 2)

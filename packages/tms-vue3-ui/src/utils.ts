@@ -1,5 +1,4 @@
-// import _ from 'lodash'
-import JSONPointer from 'jsonpointer'
+import { JSONPointerLodash } from 'tms-data-aid'
 
 const RE_SEPARATOR = '\\.' // 字段分割符
 const RE_OBJECT_FIELD = '[\\w-]+' // 字段名
@@ -200,12 +199,7 @@ export class JsonSchema {
     const slimDoc = {}
 
     flatSlimDoc.forEach((val, key) => {
-      // _.set(slimDoc, key.replace('.[', '['), val)
-      JSONPointer.set(
-        slimDoc,
-        key.replace(/\.\[(\d+)\]/, '/$1').replace('.', '/'),
-        val
-      )
+      JSONPointerLodash.set(slimDoc, key, val)
     })
 
     return slimDoc

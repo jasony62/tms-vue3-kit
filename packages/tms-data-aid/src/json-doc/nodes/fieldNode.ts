@@ -2,8 +2,7 @@ import { FormContext } from '../builder.js'
 import { Field } from '../fields/index.js'
 import { Node } from './node.js'
 import { components } from './common.js'
-import Jexl from 'jexl'
-import JSONPointer from 'jsonpointer'
+import { JSONPointerLodash, Jexl } from '../../index.js'
 
 const option = { native: true }
 const defaultInput = { tag: 'input', option }
@@ -204,20 +203,8 @@ export abstract class FieldNode<VNode> extends Node<VNode> {
       if (Array.isArray(rule.body) && rule.body.length) {
         body = rule.body.reduce((c: any, p) => {
           let { bodyPath, path, value } = p
-          // if (path) _.set(c, bodyPath, editDoc.get(path))
-          if (path)
-            JSONPointer.set(
-              c,
-              bodyPath.replace(/\.\[(\d+)\]/, '/$1').replace('.', '/'),
-              editDoc.get(path)
-            )
-          // else if (value) _.set(c, bodyPath, value)
-          else if (value)
-            JSONPointer.set(
-              c,
-              bodyPath.replace(/\.\[(\d+)\]/, '/$1').replace('.', '/'),
-              value
-            )
+          if (path) JSONPointerLodash.set(c, bodyPath, editDoc.get(path))
+          else if (value) JSONPointerLodash.set(c, bodyPath, value)
           return c
         }, {})
       }
