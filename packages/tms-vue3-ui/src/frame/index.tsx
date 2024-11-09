@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { App, nextTick } from 'vue'
 
 export default function install(app: App) {

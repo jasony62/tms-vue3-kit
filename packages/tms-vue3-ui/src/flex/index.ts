@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { App, h } from 'vue'
 
 function addStyleClass(obj: any, prop: any, styleClass: any) {

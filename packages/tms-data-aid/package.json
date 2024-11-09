@@ -18,7 +18,7 @@
   "author": "jasony62",
   "license": "MIT",
   "dependencies": {
-    "debug": "^4.3.4",
+    "debug": "^4.3.7",
     "jexl": "^2.3.0",
     "jsonpointer": "^5.0.1",
     "randexp": "^0.5.3"
