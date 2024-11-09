@@ -8,8 +8,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "jsoneditor": "10.0.1",
-    "lodash": "^4.17.21",
+    "jexl": "^2.3.0",
+    "jsoneditor": "10.1.0",
     "randexp": "^0.5.3",
     "tms-vue3": "workspace:*",
     "tms-vue3-ui": "workspace:*",
@@ -17,15 +17,15 @@
     "vue-router": "4"
   },
   "devDependencies": {
+    "@types/jexl": "^2.3.4",
     "@types/jsoneditor": "^9.5.1",
-    "@types/lodash": "4.17.0",
     "@types/node": "20.5.9",
     "@vitejs/plugin-vue": "5.0.4",
     "autoprefixer": "^10.4.4",
     "postcss": "^8.4.12",
-    "sass": "^1.50.1",
-    "stylelint": "^14.7.1",
-    "stylelint-config-standard": "^25.0.0",
+    "sass": "1.80.6",
+    "stylelint": "16.10.0",
+    "stylelint-config-standard": "36.0.1",
     "tailwindcss": "^3.0.24",
     "typescript": "5.2.2",
     "vite": "5.0.11",

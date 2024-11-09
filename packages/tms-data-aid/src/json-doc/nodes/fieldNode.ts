@@ -1,8 +1,9 @@
-import _ from 'lodash'
 import { FormContext } from '../builder.js'
 import { Field } from '../fields/index.js'
 import { Node } from './node.js'
 import { components } from './common.js'
+import Jexl from 'jexl'
+import JSONPointer from 'jsonpointer'
 
 const option = { native: true }
 const defaultInput = { tag: 'input', option }
@@ -135,24 +136,30 @@ export abstract class FieldNode<VNode> extends Node<VNode> {
     const handleResult = (rst: any) => {
       if (rule.target === 'value' && typeof rule.valuePath === 'string') {
         /**返回的是值*/
-        let val = _.get(rst, rule.valuePath)
+        // let val = _.get(rst, rule.valuePath)
+        let val = Jexl.evalSync(rule.valuePath, rst)
+        // 只有数据发生变化才触发渲染
         this.autofillValue(field, val)
       } else if (rule.target === 'items' && typeof rule.itemPath === 'object') {
         /**返回的是选项*/
-        const data = _.get(rst, rule.itemPath.path)
+        // const data = _.get(rst, rule.itemPath.path)
+        const data = Jexl.evalSync(rule.itemPath.path, rst)
         let arr: any = []
         if (Array.isArray(data) && data.length) {
           let labelPath = rule.itemPath.label
           let valuePath = rule.itemPath.value
           data.forEach((item: any) => {
             arr.push({
-              label: _.get(item, labelPath),
-              value: _.get(item, valuePath),
+              // label: _.get(item, labelPath),
+              // value: _.get(item, valuePath),
+              label: Jexl.evalSync(labelPath, item),
+              value: Jexl.evalSync(valuePath, item),
             })
           })
         }
         // 只有数据发生变化才触发渲染
-        if (!_.isEqual(field.choices, arr)) {
+        // if (!_.isEqual(field.choices, arr)) {
+        if (JSON.stringify(field.choices) !== JSON.stringify(arr)) {
           field.choices = arr
           if (arr.length === 1) {
             // 选项唯一时自动赋值
@@ -197,14 +204,27 @@ export abstract class FieldNode<VNode> extends Node<VNode> {
       if (Array.isArray(rule.body) && rule.body.length) {
         body = rule.body.reduce((c: any, p) => {
           let { bodyPath, path, value } = p
-          if (path) _.set(c, bodyPath, editDoc.get(path))
-          else if (value) _.set(c, bodyPath, value)
+          // if (path) _.set(c, bodyPath, editDoc.get(path))
+          if (path)
+            JSONPointer.set(
+              c,
+              bodyPath.replace(/\.\[(\d+)\]/, '/$1').replace('.', '/'),
+              editDoc.get(path)
+            )
+          // else if (value) _.set(c, bodyPath, value)
+          else if (value)
+            JSONPointer.set(
+              c,
+              bodyPath.replace(/\.\[(\d+)\]/, '/$1').replace('.', '/'),
+              value
+            )
           return c
         }, {})
       }
       /**如果依赖的参数没有发生变化，就不进行调用*/
       if (field.autofillBody) {
-        if (_.isEqual(field.autofillBody, body)) {
+        // if (_.isEqual(field.autofillBody, body)) {
+        if (JSON.stringify(field.autofillBody) === JSON.stringify(body)) {
           return
         }
       }

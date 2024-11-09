@@ -1,4 +1,5 @@
-import _ from 'lodash'
+// import _ from 'lodash'
+import JSONPointer from 'jsonpointer'
 
 const RE_SEPARATOR = '\\.' // 字段分割符
 const RE_OBJECT_FIELD = '[\\w-]+' // 字段名
@@ -181,7 +182,16 @@ export class JsonSchema {
     flatDoc.forEach((val, key) => {
       const schema = findSchema(flatSchema, key)
       if (schema) {
-        if (_.isNumber(val) || _.isBoolean(val) || !_.isEmpty(val))
+        if (
+          typeof val === 'number' ||
+          typeof val === 'boolean' ||
+          !(
+            val == null ||
+            val === undefined ||
+            val === '' ||
+            (Array.isArray(val) && val.length === 0)
+          )
+        )
           flatSlimDoc.set(key, val)
         else if (schema.value) flatSlimDoc.set(key, schema.value)
       }
@@ -190,7 +200,12 @@ export class JsonSchema {
     const slimDoc = {}
 
     flatSlimDoc.forEach((val, key) => {
-      _.set(slimDoc, key.replace('.[', '['), val)
+      // _.set(slimDoc, key.replace('.[', '['), val)
+      JSONPointer.set(
+        slimDoc,
+        key.replace(/\.\[(\d+)\]/, '/$1').replace('.', '/'),
+        val
+      )
     })
 
     return slimDoc

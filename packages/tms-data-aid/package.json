@@ -19,11 +19,13 @@
   "license": "MIT",
   "dependencies": {
     "debug": "^4.3.4",
-    "lodash": "^4.17.21",
-    "lodash.set": "^4.3.2",
+    "jexl": "^2.3.0",
+    "jsonpointer": "^5.0.1",
     "randexp": "^0.5.3"
   },
   "devDependencies": {
+    "@types/jexl": "^2.3.4",
+    "@types/jsonpointer": "^4.0.2",
     "rimraf": "6.0.1"
   }
 }

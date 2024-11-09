@@ -61,7 +61,7 @@ import { nextTick, onMounted, reactive, ref, watch } from 'vue'
 import JSONEditor from 'jsoneditor'
 import 'jsoneditor/dist/jsoneditor.css'
 import RandExp from 'randexp'
-import _ from 'lodash'
+import Jexl from 'jexl'
 
 const jsonDocEditor = ref<{ editing: (matchSchema?: boolean) => string, editDoc: DocAsArray } | null>(null)
 
@@ -149,7 +149,8 @@ const onLookup = (field: Field, fieldVal: any) => {
   return new Promise((resolve, reject) => {
     let pasted
     if (testObj.lookup) {
-      pasted = fullname ? _.get(testObj.lookup, fullname) : testObj.lookup
+      // pasted = fullname ? _.get(testObj.lookup, fullname) : testObj.lookup
+      pasted = fullname ? Jexl.evalSync(fullname, testObj.lookup) : testObj.lookup
     }
     if (pasted) {
       resolve(pasted)
@@ -203,7 +204,8 @@ const onFileSelect = (field: Field, fieldVal: any) => {
   let fileData: any
   if (field.type === 'object') {
     if (testObj.fileSelect) {
-      fileData = fullname ? _.get(testObj.fileSelect, fullname) : testObj.fileSelect
+      // fileData = fullname ? _.get(testObj.fileSelect, fullname) : testObj.fileSelect
+      fileData = fullname ? Jexl.evalSync(fullname, testObj.fileSelect) : testObj.fileSelect
     }
   }
   return new Promise((resolve, reject) => {
@@ -252,7 +254,8 @@ const onPaste = async (field: Field) => {
   return new Promise((resolve, reject) => {
     let pasted
     if (testObj.pasted) {
-      pasted = fullname ? _.get(testObj.pasted, fullname) : testObj.pasted
+      // pasted = fullname ? _.get(testObj.pasted, fullname) : testObj.pasted
+      pasted = fullname ? Jexl.evalSync(fullname, testObj.pasted) : testObj.pasted
     }
     if (pasted) {
       resolve(pasted)

@@ -1,4 +1,3 @@
-import _set from 'lodash.set'
 import Debug from 'debug'
 import {
   RawSchema,

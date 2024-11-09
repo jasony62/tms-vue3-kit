@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import Debug from 'debug'
 
 const debug = Debug('json-schema:model')

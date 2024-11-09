@@ -49,7 +49,6 @@
 import { SchemaProp } from 'tms-vue3-ui/dist/es/json-schema';
 import 'tms-vue3-ui/dist/es/json-schema/style/tailwind.scss'
 import { onMounted, reactive, ref, watch } from 'vue'
-import _ from 'lodash'
 
 const caseName = ref('')
 
