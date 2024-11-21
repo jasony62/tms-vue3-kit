@@ -1,7 +1,7 @@
 {
   "name": "tms-data-aid",
   "type": "module",
-  "version": "0.0.100",
+  "version": "0.0.101",
   "description": "通用数据处理包。",
   "main": "./dist/index.js",
   "exports": {
@@ -18,11 +18,18 @@
   "author": "jasony62",
   "license": "MIT",
   "dependencies": {
+    "array-sort": "^1.0.0",
+    "create-frame": "^1.0.0",
     "debug": "^4.3.7",
+    "falsey": "^1.0.0",
+    "get-value": "^3.0.1",
     "handlebars": "^4.7.8",
+    "has-value": "^2.0.2",
+    "is-even": "^1.0.0",
     "jexl": "^2.3.0",
     "json-logic-js": "^2.0.5",
     "jsonpointer": "^5.0.1",
+    "kind-of": "^6.0.3",
     "randexp": "^0.5.3"
   },
   "devDependencies": {

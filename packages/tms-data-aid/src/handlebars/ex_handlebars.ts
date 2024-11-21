@@ -1,7 +1,29 @@
 import Handlebars from 'handlebars'
-// import handlebarsHelpers from 'handlebars-helpers'
+import StringHelpers from './helpers/string.js'
+import RegexHelpers from './helpers/regex.js'
+import MathHelpers from './helpers/math.js'
+import ComparisonHelpers from './helpers/comparison.js'
+import ArrayHelpers from './helpers/array.js'
 
-// handlebarsHelpers({ handlebars: Handlebars })
+Object.keys(StringHelpers).forEach((name) => {
+  Handlebars.registerHelper(name, StringHelpers[name])
+})
+
+Object.keys(RegexHelpers).forEach((name) => {
+  Handlebars.registerHelper(name, RegexHelpers[name])
+})
+
+Object.keys(MathHelpers).forEach((name) => {
+  Handlebars.registerHelper(name, MathHelpers[name])
+})
+
+Object.keys(ComparisonHelpers).forEach((name) => {
+  Handlebars.registerHelper(name, ComparisonHelpers[name])
+})
+
+Object.keys(ArrayHelpers).forEach((name) => {
+  Handlebars.registerHelper(name, ArrayHelpers[name])
+})
 
 const Helpers = {
   /**
@@ -23,9 +45,7 @@ const Helpers = {
 }
 
 Object.keys(Helpers).forEach((name) => {
-  Handlebars.registerHelper(name, (obj, indent = 0) => {
-    return JSON.stringify(obj, null, indent)
-  })
+  Handlebars.registerHelper(name, Helpers[name])
 })
 
 export { Handlebars }
