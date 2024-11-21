@@ -51,7 +51,6 @@ const utils = {
    * @param {Number} start
    * @return {Boolean}
    */
-
   contains: function (val, obj, start) {
     if (val == null || obj == null || !utils.isNumber(val.length)) {
       return false
