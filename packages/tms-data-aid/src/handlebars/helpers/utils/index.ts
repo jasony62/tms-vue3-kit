@@ -1,9 +1,9 @@
-import falsey from 'falsey'
 import isEven from 'is-even'
 import hasValue from 'has-value'
 import typeOf from 'kind-of'
 import sortBy from 'array-sort'
 import getValue from 'get-value'
+import { falsey } from './falsey.js'
 
 const utils = {
   isUndefined: function (val: any) {

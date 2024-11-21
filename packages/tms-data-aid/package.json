@@ -1,7 +1,7 @@
 {
   "name": "tms-data-aid",
   "type": "module",
-  "version": "0.0.104",
+  "version": "0.0.105",
   "description": "通用数据处理包。",
   "main": "./dist/index.js",
   "exports": {
@@ -20,7 +20,6 @@
   "dependencies": {
     "array-sort": "^1.0.0",
     "debug": "^4.3.7",
-    "falsey": "^1.0.0",
     "get-value": "^3.0.1",
     "handlebars": "^4.7.8",
     "has-value": "^2.0.2",
