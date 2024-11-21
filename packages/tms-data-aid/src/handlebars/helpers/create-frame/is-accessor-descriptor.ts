@@ -1,4 +1,4 @@
-import hasOwn from './hasown.js'
+const hasOwn = Object.hasOwn
 
 // accessor descriptor properties
 let accessor = {

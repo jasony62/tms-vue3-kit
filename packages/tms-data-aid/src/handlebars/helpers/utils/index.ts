@@ -3,7 +3,6 @@ import isEven from 'is-even'
 import hasValue from 'has-value'
 import typeOf from 'kind-of'
 import sortBy from 'array-sort'
-import createFrame from '../create-frame/index.js'
 import getValue from 'get-value'
 
 const utils = {
@@ -137,8 +136,7 @@ const utils = {
    * @returns
    */
   createFrame: function (data, hash) {
-    let frame = createFrame(data)
-    frame.extend(hash)
+    let frame = Object.assign({}, data, hash)
     return frame
   },
   /**

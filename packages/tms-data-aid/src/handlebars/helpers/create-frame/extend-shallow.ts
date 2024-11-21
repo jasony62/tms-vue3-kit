@@ -1,7 +1,7 @@
-import isObject from './is-extendable.js'
+const isExtensible = Object.isExtensible
 
 export default function extend(o, ...args) {
-  if (!isObject(o)) {
+  if (!isExtensible(o)) {
     o = {}
   }
 
@@ -9,7 +9,7 @@ export default function extend(o, ...args) {
   for (let i = 1; i < len; i++) {
     let obj = args[i]
 
-    if (isObject(obj)) {
+    if (isExtensible(obj)) {
       assign(o, obj)
     }
   }
@@ -18,15 +18,8 @@ export default function extend(o, ...args) {
 
 function assign(a, b) {
   for (let key in b) {
-    if (hasOwn(b, key)) {
+    if (Object.hasOwn(b, key)) {
       a[key] = b[key]
     }
   }
-}
-
-/**
- * Returns true if the given `key` is an own property of `obj`.
- */
-function hasOwn(obj, key) {
-  return Object.prototype.hasOwnProperty.call(obj, key)
 }

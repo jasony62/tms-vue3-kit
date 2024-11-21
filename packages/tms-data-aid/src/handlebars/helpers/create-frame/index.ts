@@ -6,18 +6,18 @@
  */
 
 import define from './define-property.js'
-import extend from './extend-shallow.js'
+// import extend from './extend-shallow.js'
 
 export default function createFrame(data, ...args) {
   if (!data || typeof data !== 'object') {
     throw new TypeError('createFrame expects data to be an object')
   }
 
-  let frame = extend({}, data)
+  let frame = Object.assign({}, data)
   frame._parent = data
 
   define(frame, 'extend', function (data) {
-    extend(this, data)
+    Object.assign(this, data)
   })
 
   if (args.length) {
