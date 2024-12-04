@@ -1,5 +1,6 @@
 import Handlebars from 'handlebars'
 import StringHelpers from './helpers/string.js'
+import NumberHelpers from './helpers/number.js'
 import RegexHelpers from './helpers/regex.js'
 import MathHelpers from './helpers/math.js'
 import ComparisonHelpers from './helpers/comparison.js'
@@ -7,6 +8,10 @@ import ArrayHelpers from './helpers/array.js'
 
 Object.keys(StringHelpers).forEach((name) => {
   Handlebars.registerHelper(name, StringHelpers[name])
+})
+
+Object.keys(NumberHelpers).forEach((name) => {
+  Handlebars.registerHelper(name, NumberHelpers[name])
 })
 
 Object.keys(RegexHelpers).forEach((name) => {
