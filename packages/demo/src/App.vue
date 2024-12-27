@@ -17,6 +17,7 @@
           <router-link to="/sms-code">短信验证码</router-link>
           <router-link to="/json-schema">JSON定义</router-link>
           <router-link to="/json-doc">JSON文档</router-link>
+          <router-link to="/handlebars">handlebars</router-link>
         </tms-flex>
       </div>
     </template>

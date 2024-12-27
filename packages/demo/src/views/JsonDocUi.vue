@@ -25,8 +25,8 @@
     <label><input type="checkbox" v-model="hideFieldDescription" />是否隐藏字段说明</label>
     <label><input type="checkbox" v-model="schemaArbitrary" />不要求文档严格匹配schema</label>
   </div>
-  <div class="flex flex-row">
-    <div class="w-1/3 p-4">
+  <div class="flex flex-row" style="height: 100vh;">
+    <div class="w-1/3 p-4 h-full overflow-y-auto">
       <json-doc v-if="loading === false" ref="jsonDocEditor" :key="caseName" :schema="testObj.schema"
         :value="testObj.data" :enable-paste="true" :on-lookup="onLookup" :autofill-request="onAutofill"
         :on-file-select="onFileSelect" :on-file-download="onFileDownload" :on-file-upload="onFileUpload"
@@ -40,6 +40,9 @@
           <button @click="updateJson">更新数据【{{ activeField.fullname }}】</button>
         </div>
         <div ref="elJsonEditor" class="flex-grow"></div>
+      </div>
+      <div v-if="activeField?.schemaProp.attrs.format === 'markdown'" class="h-full flex flex-col">
+        <div ref="elMarkdownViewer" class="flex-grow"></div>
       </div>
     </div>
     <div class="p-4">
@@ -57,11 +60,12 @@
 import { JsonDoc } from 'tms-vue3-ui'
 import { Field, DocAsArray } from 'tms-vue3-ui/dist/es/json-doc'
 import 'tms-vue3-ui/dist/es/json-doc/style/tailwind.scss'
-import { nextTick, onMounted, reactive, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
 import JSONEditor from 'jsoneditor'
 import 'jsoneditor/dist/jsoneditor.css'
 import RandExp from 'randexp'
 import Jexl from 'jexl'
+import { marked } from 'marked'
 
 const jsonDocEditor = ref<{ editing: (matchSchema?: boolean) => string, editDoc: DocAsArray } | null>(null)
 
@@ -76,6 +80,8 @@ const testObj = reactive({ schema: {}, data: {}, pasted: null, fileSelect: null,
 const activeField = ref<Field>() // 正在编辑的字段
 
 const elJsonEditor = ref<HTMLElement | null>(null)
+
+const elMarkdownViewer = ref<HTMLElement | null>(null)
 
 const showFieldFullname = ref(false)
 
@@ -128,6 +134,17 @@ const onJdocFocus = (field: Field) => {
           jsonEditor = new JSONEditor(elJsonEditor.value, options)
           let fieldValue = jsonDocEditor.value?.editDoc.get(field.fullname)
           jsonEditor.set(fieldValue ?? '')
+        }
+      })
+    } else if (field.schemaProp.attrs.format === 'markdown') {
+      nextTick(async () => {
+        if (elMarkdownViewer.value) {
+          elMarkdownViewer.value.attachShadow({ mode: 'open' })
+          if (elMarkdownViewer.value.shadowRoot) {
+            let fieldValue = jsonDocEditor.value?.editDoc.get(field.fullname)
+            let text = await marked.parse(fieldValue ?? '')
+            elMarkdownViewer.value.shadowRoot.innerHTML = text
+          }
         }
       })
     }
@@ -264,6 +281,7 @@ const onPaste = async (field: Field) => {
     }
   })
 }
+
 </script>
 
 <style lang="scss">

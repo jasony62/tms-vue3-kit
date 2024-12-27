@@ -162,6 +162,25 @@ const utils = {
   get: function (target, path, options?) {
     return getValue(target, path, options)
   },
+  /**
+   *
+   */
+  getObject: function (obj, prop) {
+    if (!prop) return obj
+    if (!obj) return {}
+    var segs = String(prop)
+      .split(/[[.\]]/)
+      .filter(Boolean)
+    var last = segs[segs.length - 1],
+      res = {}
+    while ((prop = segs.shift())) {
+      obj = obj[prop]
+      if (!obj) return {}
+    }
+    if (utils.isNumber(last)) return [obj]
+    res[last] = obj
+    return res
+  },
 }
 
 const utils_hb = {

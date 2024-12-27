@@ -7,6 +7,7 @@ import RegisterUi from '../views/RegisterUi.vue'
 import SmsCodeUi from '../views/SmsCodeUi.vue'
 import JsonSchemaUi from '../views/JsonSchemaUi.vue'
 import JsonDocUi from '../views/JsonDocUi.vue'
+import Handlebars from '../views/Handlebars.vue'
 
 const VITE_BASE_URL =
   typeof import.meta.env.VITE_BASE_URL === 'string'
@@ -48,6 +49,11 @@ const routes = [
     path: '/json-doc',
     name: 'json-doc',
     component: JsonDocUi,
+  },
+  {
+    path: '/handlebars',
+    name: 'handlebars',
+    component: Handlebars,
   },
 ]
 const router = createRouter({

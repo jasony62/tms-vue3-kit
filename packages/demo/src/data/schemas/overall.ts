@@ -262,6 +262,11 @@ export const SampleSchema = {
       type: 'string',
       format: 'handlebars',
     },
+    markdownText: {
+      title: 'Markdown文本',
+      type: 'string',
+      format: 'markdown',
+    },
     xmlText: {
       title: 'XML文本',
       type: 'string',
@@ -307,6 +312,8 @@ export const SampleData = {
       closeCommand: '/close',
     },
   },
+  markdownText:
+    '# 标题\n\n## 二级标题\n\n### 三级标题\n\n#### 四级标题\n\n##### 五级标题\n\n###### 六级标题\n\n ',
 }
 
 export const SamplePasted = {}
