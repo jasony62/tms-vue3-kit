@@ -1,7 +1,7 @@
 {
   "name": "tms-data-aid",
   "type": "module",
-  "version": "0.0.108",
+  "version": "0.0.109",
   "description": "通用数据处理包。",
   "main": "./dist/index.js",
   "exports": {

@@ -8,6 +8,8 @@ import SmsCodeUi from '../views/SmsCodeUi.vue'
 import JsonSchemaUi from '../views/JsonSchemaUi.vue'
 import JsonDocUi from '../views/JsonDocUi.vue'
 import Handlebars from '../views/Handlebars.vue'
+import Jexl from '../views/Jexl.vue'
+import JsonLogic from '../views/JsonLogic.vue'
 
 const VITE_BASE_URL =
   typeof import.meta.env.VITE_BASE_URL === 'string'
@@ -54,6 +56,16 @@ const routes = [
     path: '/handlebars',
     name: 'handlebars',
     component: Handlebars,
+  },
+  {
+    path: '/jexl',
+    name: 'jexl',
+    component: Jexl,
+  },
+  {
+    path: '/jsonlogic',
+    name: 'jsonlogic',
+    component: JsonLogic,
   },
 ]
 const router = createRouter({

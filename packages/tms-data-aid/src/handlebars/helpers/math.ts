@@ -46,10 +46,46 @@ helpers.add = function (a, b) {
  * @api public
  */
 helpers.avg = function () {
-  var args = [].concat.apply([], arguments)
+  let args = [].concat.apply([], arguments)
   // remove handlebars options object
   args.pop()
   return helpers.sum(args) / args.length
+}
+/**
+ * Returns the max of all numbers in the given array.
+ *
+ * ```handlebars
+ * {{max "[1, 2, 3, 4, 5]"}}
+ * <!-- results in: '5' -->
+ * ```
+ *
+ * @param {Array} `array` Array of numbers to add up.
+ * @return {Number}
+ * @api public
+ */
+helpers.max = function () {
+  let args = [].concat.apply([], arguments)
+  // remove handlebars options object
+  args.pop()
+  return Math.max(...args)
+}
+/**
+ * Returns the min of all numbers in the given array.
+ *
+ * ```handlebars
+ * {{min "[1, 2, 3, 4, 5]"}}
+ * <!-- results in: '1' -->
+ * ```
+ *
+ * @param {Array} `array` Array of numbers to add up.
+ * @return {Number}
+ * @api public
+ */
+helpers.min = function () {
+  let args = [].concat.apply([], arguments)
+  // remove handlebars options object
+  args.pop()
+  return Math.min(...args)
 }
 /**
  * Get the `Math.ceil()` of the given value.
@@ -242,9 +278,9 @@ helpers.subtract = function (a, b) {
  * @api public
  */
 helpers.sum = function () {
-  var args = [].concat.apply([], arguments)
-  var len = args.length
-  var sum = 0
+  let args = [].concat.apply([], arguments)
+  let len = args.length
+  let sum = 0
 
   while (len--) {
     if (utils.isNumber(args[len])) {

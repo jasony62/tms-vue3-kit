@@ -1,3 +1,4 @@
+import getValue from 'get-value'
 import Jexl from 'jexl'
 
 Jexl.addTransform('keys', (val) =>
@@ -30,8 +31,12 @@ Jexl.addTransform('min', (val: number[]) =>
   Array.isArray(val) ? Math.min(...val) : 0
 )
 
-Jexl.addTransform('min', (val: number[]) =>
+Jexl.addTransform('reduce', (val: number[]) =>
   Array.isArray(val) ? val.reduce((a: number, b: number) => a + b, 0) : 0
+)
+
+Jexl.addTransform('pluck', (val: any[], prop: string) =>
+  Array.isArray(val) ? val.map((a: any) => getValue(a, prop)) : val
 )
 
 Jexl.addTransform('avg', (val: number[]) =>
