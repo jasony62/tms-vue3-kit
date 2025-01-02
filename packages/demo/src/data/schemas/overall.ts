@@ -191,7 +191,6 @@ export const SampleSchema = {
     tel: {
       title: '电话（对象）',
       type: 'object',
-      lookup: {},
       properties: {
         areaCode: {
           title: '区号',
