@@ -58,8 +58,14 @@ helpers.forIn = function (obj, options) {
   let data = utils.createFrame(options, options.hash)
   let result = ''
 
+  let keys = Object.keys(obj)
+  let index = 0
+  let length = keys.length
   for (let key in obj) {
     data.key = key
+    data.index = index
+    data.total = length
+    index++
     result += options.fn(obj[key], { data: data })
   }
   return result
@@ -84,9 +90,12 @@ helpers.forOwn = function (obj, options) {
   let data = utils.createFrame(options, options.hash)
   let result = ''
 
+  let index = 0
   for (let key in obj) {
     if (obj.hasOwnProperty(key)) {
       data.key = key
+      data.index = index
+      index++
       result += options.fn(obj[key], { data: data })
     }
   }

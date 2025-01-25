@@ -48,7 +48,7 @@ class JsonTransformer {
           this._parameters
         )
         // 处理JSON字符串
-        if (/^{{\s*JSONstringify/.test(value)) {
+        if (/^\{{2,3}\s*JSONstringify/.test(value)) {
           try {
             return JSON.parse(newValue)
           } catch (e) {
