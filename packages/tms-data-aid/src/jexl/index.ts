@@ -1,6 +1,8 @@
 import getValue from 'get-value'
 import Jexl from 'jexl'
-
+/**
+ * 处理对象
+ */
 Jexl.addTransform('keys', (val) =>
   val && typeof val === 'object' ? Object.keys(val) : []
 )
@@ -9,6 +11,10 @@ Jexl.addTransform('values', (val) =>
   val && typeof val === 'object' ? Object.values(val) : []
 )
 
+Jexl.addTransform('length', (val) => val?.length ?? 0)
+/**
+ * 处理数字
+ */
 Jexl.addTransform('parseInt', (val) =>
   Array.isArray(val) ? val.map((v) => parseInt(v)) : parseInt(val)
 )
@@ -16,8 +22,6 @@ Jexl.addTransform('parseInt', (val) =>
 Jexl.addTransform('parseFloat', (val) =>
   Array.isArray(val) ? val.map((v) => parseFloat(v)) : parseFloat(val)
 )
-
-Jexl.addTransform('length', (val) => val?.length ?? 0)
 
 Jexl.addTransform('sum', (val: number[]) =>
   Array.isArray(val) ? val.reduce((a: number, b: number) => a + b, 0) : 0
@@ -31,9 +35,34 @@ Jexl.addTransform('min', (val: number[]) =>
   Array.isArray(val) ? Math.min(...val) : 0
 )
 
+Jexl.addTransform('avg', (val: number[]) =>
+  Array.isArray(val)
+    ? val.reduce((a: number, b: number) => a + b, 0) / val.length
+    : 0
+)
+
 Jexl.addTransform('reduce', (val: number[]) =>
   Array.isArray(val) ? val.reduce((a: number, b: number) => a + b, 0) : 0
 )
+
+/**
+ * 返回指定长度的小数位
+ *
+ * ```handlebars
+ * {{toFixed "1.1234" 2}}
+ * //=> '1.12'
+ * ```
+ */
+Jexl.addTransform('toFix', (number: number, digits: number) => {
+  if (typeof number !== 'number') {
+    number = 0
+  }
+  if (typeof digits !== 'number') {
+    digits = 0
+  }
+  return Number(number).toFixed(digits)
+})
+
 /**
  * arr1 = [{ a: 1 }, { a: 2 }, { a: 3 }]
  * expr = 'arr1 | pluck("a")'
@@ -85,12 +114,9 @@ Jexl.addTransform('merge', function (val: object, delta: object) {
   return val
 })
 
-Jexl.addTransform('avg', (val: number[]) =>
-  Array.isArray(val)
-    ? val.reduce((a: number, b: number) => a + b, 0) / val.length
-    : 0
-)
-
+/**
+ * 补全数组
+ */
 Jexl.addFunction('padRightToLength', (arr, maxLength = 0, padChar = 0) => {
   if (!Array.isArray(arr)) return arr
   if (arr.length >= maxLength) return arr
@@ -101,20 +127,54 @@ Jexl.addFunction('padRightToLength', (arr, maxLength = 0, padChar = 0) => {
 })
 /**
  * 获取数组长度
+ * push(arr, "a")
  */
 Jexl.addFunction('arrayLength', (arr: any[]) => {
   return arr?.length ?? 0
+})
+/**
+ * 在数组中追加元素
+ *
+ * push('a')
+ */
+Jexl.addFunction('push', (arr: any[], ...newItems: any[]) => {
+  arr.push(...newItems)
+  return arr
 })
 /**
  * 元素不在数组中
  */
 Jexl.addBinaryOp('nin', 1, (item, arr) => !arr?.includes(item))
 /**
- * 在数组中追加元素
+ * 将地址的查询字符串转换对象
+ * ```
+ * '"?abc=123&xyz=789" | querySearch'
+ * ```
  */
-Jexl.addFunction('push', (arr: any[], newItem: any) => {
-  arr.push(newItem)
-  return arr
+Jexl.addTransform('querySearch', (locationSearch: string) => {
+  if (locationSearch && typeof locationSearch === 'string') {
+    let ls = locationSearch.replace('?', '')
+    return ls.split('&').reduce((obj, field) => {
+      let [k, v] = field.split('=')
+      obj[k] = v
+      return obj
+    }, {} as Record<string, string | null>)
+  }
+  return {}
 })
+/**
+ * 字符传替换
+ *
+ * ```
+ * 'str1 | replace("abc", "xyz")'
+ * ```
+ */
+Jexl.addTransform(
+  'replace',
+  (val: string, re: string, replaced = '', flags = '') =>
+    val && typeof val === 'string'
+      ? val.replace(new RegExp(re, flags), replaced)
+      : val
+)
 
 export { Jexl }

@@ -33,6 +33,14 @@
       <div v-html="strRule7"></div>
       <div>{{ result7 }}</div>
     </div>
+    <div class="p-4">
+      <div v-html="strRule8"></div>
+      <div>{{ result8 }}</div>
+    </div>
+    <div class="p-4">
+      <div v-html="strRule9"></div>
+      <div>{{ result9 }}</div>
+    </div>
   </div>
 </template>
 
@@ -48,7 +56,7 @@ let context = {
   obj1,
   obj2,
   arr1,
-  arr2
+  arr2,
 }
 
 let strContext = JSON.stringify(context, null, 2)
@@ -58,12 +66,12 @@ let strRule1 = JSON.stringify(rule1, null, 2)
 //@ts-ignore
 let result1 = JsonLogic.apply(rule1, context)
 
-let rule2 = { map: [{ var: 'arr1' }, { "*": [{ var: 'a' }, 2] }] }
+let rule2 = { map: [{ var: 'arr1' }, { '*': [{ var: 'a' }, 2] }] }
 let strRule2 = JSON.stringify(rule2, null, 2)
 //@ts-ignore
 let result2 = JsonLogic.apply(rule2, context)
 
-let rule3 = { filter: [{ var: 'arr2' }, { ">=": [{ var: '' }, 3] }] }
+let rule3 = { filter: [{ var: 'arr2' }, { '>=': [{ var: '' }, 3] }] }
 let strRule3 = JSON.stringify(rule3, null, 2)
 //@ts-ignore
 let result3 = JsonLogic.apply(rule3, context)
@@ -89,9 +97,18 @@ let strRule6 = JSON.stringify(rule6, null, 2)
 //@ts-ignore
 let result6 = JsonLogic.apply(rule6, context)
 
-
 let rule7 = { max: [1, 2, 3] }
 let strRule7 = JSON.stringify(rule7, null, 2)
 //@ts-ignore
 let result7 = JsonLogic.apply(rule7, context)
+
+let rule8 = { stringMatch: ['helle tms-data-aid', 'TMS', 'i'] }
+let strRule8 = JSON.stringify(rule8, null, 2)
+//@ts-ignore
+let result8 = JsonLogic.apply(rule8, context)
+
+let rule9 = { arange: [3, 20, 5] }
+let strRule9 = JSON.stringify(rule9, null, 2)
+//@ts-ignore
+let result9 = JsonLogic.apply(rule9, context)
 </script>

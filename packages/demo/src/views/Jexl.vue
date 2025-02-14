@@ -14,12 +14,32 @@
       <div>{{ result2 }}</div>
     </div>
     <div class="p-4">
-      <div v-html="expr3"></div>
-      <div>{{ result3 }}</div>
+      <div v-html="expr3_1"></div>
+      <div>{{ result3_1 }}</div>
     </div>
     <div class="p-4">
-      <div v-html="expr4"></div>
-      <div>{{ result4 }}</div>
+      <div v-html="expr3_2"></div>
+      <div>{{ result3_2 }}</div>
+    </div>
+    <div class="p-4">
+      <div v-html="expr3_3"></div>
+      <div>{{ result3_3 }}</div>
+    </div>
+    <div class="p-4">
+      <div v-html="expr3_4"></div>
+      <div>{{ result3_4 }}</div>
+    </div>
+    <div class="p-4">
+      <div v-html="expr4_1"></div>
+      <div>{{ result4_1 }}</div>
+    </div>
+    <div class="p-4">
+      <div v-html="expr4_2"></div>
+      <div>{{ result4_2 }}</div>
+    </div>
+    <div class="p-4">
+      <div v-html="expr4_3"></div>
+      <div>{{ result4_3 }}</div>
     </div>
     <div class="p-4">
       <div v-html="expr5"></div>
@@ -36,6 +56,14 @@
     <div class="p-4">
       <div v-html="expr8"></div>
       <div>{{ result8 }}</div>
+    </div>
+    <div class="p-4">
+      <div v-html="expr10"></div>
+      <div>{{ result10 }}</div>
+    </div>
+    <div class="p-4">
+      <div v-html="expr11"></div>
+      <div>{{ result11 }}</div>
     </div>
   </div>
 </template>
@@ -73,11 +101,26 @@ let result1 = Jexl.evalSync(expr1, context)
 let expr2 = 'arr1 | pluck("a")'
 let result2 = Jexl.evalSync(expr2, context)
 
-let expr3 = 'arr2 | sum'
-let result3 = Jexl.evalSync(expr3, context)
+let expr3_1 = 'arr2 | min'
+let result3_1 = Jexl.evalSync(expr3_1, context)
 
-let expr4 = 'arr2 | avg'
-let result4 = Jexl.evalSync(expr4, context)
+let expr3_2 = 'arr2 | max'
+let result3_2 = Jexl.evalSync(expr3_2, context)
+
+let expr3_3 = 'arr2 | sum'
+let result3_3 = Jexl.evalSync(expr3_3, context)
+
+let expr3_4 = 'arr2 | avg'
+let result3_4 = Jexl.evalSync(expr3_4, context)
+
+let expr4_1 = '"123" | parseInt'
+let result4_1 = Jexl.evalSync(expr4_1, context)
+
+let expr4_2 = '"1.23" | parseFloat'
+let result4_2 = Jexl.evalSync(expr4_2, context)
+
+let expr4_3 = '1.2345 | toFix(2)'
+let result4_3 = Jexl.evalSync(expr4_3, context)
 
 let expr5 = 'arr1 | pluck("a") | sum'
 let result5 = Jexl.evalSync(expr5, context)
@@ -90,4 +133,10 @@ let result7 = Jexl.evalSync(expr7, context)
 
 let expr8 = 'obj4 | merge(obj5)'
 let result8 = Jexl.evalSync(expr8, context)
+
+let expr10 = '"?abc=123&xyz=789" | querySearch'
+let result10 = Jexl.evalSync(expr10, context)
+
+let expr11 = '"123abc789" | replace("abc", "xyz")'
+let result11 = Jexl.evalSync(expr11, context)
 </script>
