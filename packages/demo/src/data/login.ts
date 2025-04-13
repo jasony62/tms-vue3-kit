@@ -25,11 +25,13 @@ const schema: SubmitDataItem[] = [
     // 组件类型
     type: 'text',
     placeholder: '用户名',
+    defaultValue: 'tester01',
   },
   {
     key: 'password',
     type: 'password',
     placeholder: '密码',
+    defaultValue: '123456',
   },
   {
     key: 'pin',

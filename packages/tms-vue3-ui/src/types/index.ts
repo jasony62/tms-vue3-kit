@@ -9,6 +9,7 @@ export type SubmitDataItem = {
   key: string
   type: string
   placeholder: string
+  defaultValue?: string
 }
 /**
  * 验证码返回结果

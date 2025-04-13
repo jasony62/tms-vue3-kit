@@ -77,7 +77,8 @@ export const SampleSchema = {
     },
     age: {
       title: '年龄（性别为男才出现）',
-      type: 'string',
+      type: 'number',
+      default: 1,
     },
     activities: {
       title: '活动',

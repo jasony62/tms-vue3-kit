@@ -22,6 +22,14 @@ export class Input<VNode> extends FieldNode<VNode> {
         /**修改底层数据*/
         this.ctx.editDoc.set(fieldName, updatedValue)
         break
+      case 'integer':
+        updatedValue = parseInt(newValue)
+        this.ctx.editDoc.set(fieldName, updatedValue)
+        break
+      case 'number':
+        updatedValue = parseFloat(newValue)
+        this.ctx.editDoc.set(fieldName, updatedValue)
+        break
       case 'json':
         try {
           let newJson = JSON.parse(newValue)

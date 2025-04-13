@@ -65,6 +65,10 @@
       <div v-html="expr11"></div>
       <div>{{ result11 }}</div>
     </div>
+    <div class="p-4">
+      <div v-html="expr12"></div>
+      <div>{{ result12 }}</div>
+    </div>
   </div>
 </template>
 
@@ -82,7 +86,32 @@ const arr3 = [
 ]
 const obj4 = { a: { x: 1, z: 3, m: 5 } }
 const obj5 = { a: { y: 2, z: 4 } }
-
+const obj6 = {
+  题目1: {
+    得分: '1',
+  },
+  题目2: {
+    得分: '2',
+  },
+  题目3: {
+    得分: '3',
+  },
+  题目4: {
+    得分: '4',
+  },
+  题目5: {
+    得分: '5',
+  },
+  题目6: {
+    得分: '6',
+  },
+  题目7: {
+    得分: '7',
+  },
+  题目8: {
+    得分: '8',
+  },
+}
 let context = {
   obj1,
   obj2,
@@ -91,6 +120,7 @@ let context = {
   arr3,
   obj4,
   obj5,
+  obj6,
 }
 
 let strContext = JSON.stringify(context, null, 2)
@@ -139,4 +169,7 @@ let result10 = Jexl.evalSync(expr10, context)
 
 let expr11 = '"123abc789" | replace("abc", "xyz")'
 let result11 = Jexl.evalSync(expr11, context)
+
+let expr12 = 'obj6 | values | pluck("得分") | parseFloat | sum'
+let result12 = Jexl.evalSync(expr12, context)
 </script>

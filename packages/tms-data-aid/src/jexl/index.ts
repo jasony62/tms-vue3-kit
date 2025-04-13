@@ -177,4 +177,50 @@ Jexl.addTransform(
       : val
 )
 
+/**
+ * 自动填充数组中对象的指定属性的值
+ */
+Jexl.addFunction(
+  'arrayAutoFill',
+  (arr: any[], name: string, defaultValue: any) => {
+    if (name && typeof name === 'string') {
+      let nameVal = defaultValue
+      for (let rowObj of arr) {
+        if (
+          rowObj[name] === null ||
+          rowObj[name] === undefined ||
+          rowObj[name] === ''
+        ) {
+          rowObj[name] = nameVal
+        } else {
+          nameVal = rowObj[name]
+        }
+      }
+    }
+    return arr
+  }
+)
+
+/**
+ * 自动填充数组中对象的指定属性的值
+ */
+Jexl.addFunction('arrayAutoMerge', (arr: any[], name: string) => {
+  if (name && typeof name === 'string') {
+    let lastVal
+    for (let rowObj of arr) {
+      if (
+        (rowObj[name] !== null && rowObj[name] !== undefined) ||
+        rowObj[name] !== ''
+      ) {
+        if (rowObj[name] === lastVal) {
+          delete rowObj[name]
+        } else {
+          lastVal = rowObj[name]
+        }
+      }
+    }
+  }
+  return arr
+})
+
 export { Jexl }
