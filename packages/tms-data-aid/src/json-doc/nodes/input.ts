@@ -129,6 +129,7 @@ export class Input<VNode> extends FieldNode<VNode> {
       //TODO 需要处理选项是否可见
       if (field.choiceType) {
         let props: { [k: string]: any } = {
+          id: `${field.fullname}_${item.value}`,
           type: field.choiceType,
           name: field.fullname,
           value: item.value,
@@ -148,7 +149,11 @@ export class Input<VNode> extends FieldNode<VNode> {
         // radio/checkbox
         let n1 = this.ctx.h(components[field.choiceType].tag, props)
         // label
-        let n2 = this.ctx.h(components.fieldLabel.tag, null, item.label)
+        let n2 = this.ctx.h(
+          components.fieldLabel.tag,
+          { for: `${field.fullname}_${item.value}` },
+          item.label
+        )
         // wrap
         let n3 = this.ctx.h('div', [n1, n2])
         children.push(n3)
