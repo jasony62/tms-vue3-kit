@@ -1,5 +1,13 @@
 <script lang="ts">
-import { defineComponent, h, PropType, ref, getCurrentInstance, watch, VNode } from 'vue'
+import {
+  defineComponent,
+  h,
+  PropType,
+  ref,
+  getCurrentInstance,
+  watch,
+  VNode,
+} from 'vue'
 import { RawSchema } from 'tms-data-aid/dist/json-schema/model'
 import { deepClone } from '@/utils'
 import { JSONDocBuilder, Field, DocAsArray } from 'tms-data-aid'
@@ -63,17 +71,23 @@ export default defineComponent({
      * 查询操作回调函数
      */
     onLookup: {
-      type: Function
+      type: Function,
     },
     /**
      * 通过动态数据
      */
     autofillRequest: { type: Function },
     /**
+     * 数据修改回调函数
+     */
+    onChange: {
+      type: Function,
+    },
+    /**
      * 粘贴操作回调函数
      */
     onPaste: {
-      type: Function
+      type: Function,
     },
     /**
      * 选择文件的方法
@@ -108,6 +122,7 @@ export default defineComponent({
       enablePaste,
       onMessage,
       autofillRequest,
+      onChange,
       onPaste,
       onLookup,
       onFileUpload,
@@ -116,9 +131,11 @@ export default defineComponent({
       hideRootTitle,
       hideRootDescription,
       hideFieldDescription,
-      showFieldFullname
+      showFieldFullname,
     } = props
-
+    /**
+     * 将数据转换为数组表示
+     */
     const editDoc = new DocAsArray(deepClone(props.value))
 
     // debug(`初始文档属性列表\n`, JSON.stringify(editDoc.properties, null, 2))
@@ -131,9 +148,9 @@ export default defineComponent({
     /**根据文档数据和用户选择，全局保存所有的oneOf字段选择状态*/
     const oneOfSelected = new Map<string, { ingroup: string }>()
     /**所有使用的oneOf组名称*/
-    const oneOfSelectedInGroups = new Set<string>
+    const oneOfSelectedInGroups = new Set<string>()
     /**打开过的isOneOf字段*/
-    const oneOfSelectedDefault = new Set<string>
+    const oneOfSelectedDefault = new Set<string>()
     /**全局保留嵌套字段的折叠/展开状态*/
     const nestExpanded = new Set<string>()
 
@@ -150,6 +167,7 @@ export default defineComponent({
       onMessage,
       autofillRequest,
       onLookup,
+      onChange,
       onPaste,
       onFileUpload,
       onFileSelect,
@@ -165,19 +183,76 @@ export default defineComponent({
       onNodeBlur: (field: Field) => {
         debug(`节点【${field.fullname}】获得输入焦点，抛出jdocBlur事件`)
         internalInstance?.emit('jdocBlur', field)
-      }
+      },
+      /**
+       * 修改文档对象
+       * @param fieldName
+       * @param updatedValue
+       * @param needRender
+       */
+      setDocValue(fieldName: string, updatedValue: any, needRender?: boolean) {
+        this.editDoc.set(fieldName, updatedValue, needRender)
+        if (this.onChange && typeof this.onChange === 'function') {
+          this.onChange(fieldName, this.editDoc.build())
+        }
+      },
+      appendAtDocValue(fieldName: string, updatedValue: any, key?: string) {
+        this.editDoc.appendAt(fieldName, updatedValue, key)
+        if (this.onChange && typeof this.onChange === 'function') {
+          this.onChange(fieldName, this.editDoc.build())
+        }
+      },
+      insertAtDocValue(fieldName: string, updatedValue: any, key?: string) {
+        this.editDoc.insertAt(fieldName, updatedValue, key)
+        if (this.onChange && typeof this.onChange === 'function') {
+          this.onChange(fieldName, this.editDoc.build())
+        }
+      },
+      removeDocValue(fieldName: string, needRender?: boolean) {
+        this.editDoc.remove(fieldName, needRender)
+        if (this.onChange && typeof this.onChange === 'function') {
+          this.onChange(fieldName, this.editDoc.build())
+        }
+      },
+      moveUpValue(fieldName: string) {
+        this.editDoc.moveUp(fieldName)
+        if (this.onChange && typeof this.onChange === 'function') {
+          this.onChange(fieldName, this.editDoc.build())
+        }
+      },
+      moveDownDocValue(fieldName: string) {
+        this.editDoc.moveDown(fieldName)
+        if (this.onChange && typeof this.onChange === 'function') {
+          this.onChange(fieldName, this.editDoc.build())
+        }
+      },
+      renameDocValue(fieldName: string, newName: string) {
+        this.editDoc.rename(fieldName, newName)
+        if (this.onChange && typeof this.onChange === 'function') {
+          this.onChange(fieldName, this.editDoc.build())
+        }
+      },
     }
-
-    /**切换是否显示字段的全路径名 */
-    watch(() => props.showFieldFullname, (newVal) => {
-      ctx.showFieldFullname = newVal
-      editDoc.forceRender()
-    })
-    /**切换是否隐藏字段的说明 */
-    watch(() => props.hideFieldDescription, (newVal) => {
-      ctx.hideFieldDescription = newVal
-      editDoc.forceRender()
-    })
+    /**
+     * 切换是否显示字段的全路径名
+     */
+    watch(
+      () => props.showFieldFullname,
+      (newVal) => {
+        ctx.showFieldFullname = newVal
+        editDoc.forceRender()
+      }
+    )
+    /**
+     * 切换是否隐藏字段的说明
+     */
+    watch(
+      () => props.hideFieldDescription,
+      (newVal) => {
+        ctx.hideFieldDescription = newVal
+        editDoc.forceRender()
+      }
+    )
     /**
      * 返回渲染函数
      */

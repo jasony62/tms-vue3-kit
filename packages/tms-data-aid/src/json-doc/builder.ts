@@ -766,6 +766,7 @@ export type FormContext<VNode> = {
   nestExpanded?: Set<string> // 保存展开状态的嵌套节点
   enablePaste?: boolean
   autofillRequest?: Function
+  onChange?: Function
   onPaste?: Function
   onLookup?: Function
   onFileUpload?: Function
@@ -777,6 +778,25 @@ export type FormContext<VNode> = {
   showFieldFullname?: Boolean
   onNodeFocus?: (field: Field) => void
   onNodeBlur?: (field: Field) => void
+  setDocValue?: (
+    fieldName: string,
+    updatedValue: any,
+    needRender?: boolean
+  ) => void
+  appendAtDocValue?: (
+    fieldName: string,
+    updatedValue: any,
+    key?: string
+  ) => void
+  insertAtDocValue?: (
+    fieldName: string,
+    updatedValue: any,
+    key?: string
+  ) => void
+  removeDocValue?: (fieldName: string, needRender?: boolean) => void
+  moveUpDocValue?: (fieldName: string) => void
+  moveDownDocValue?: (fieldName: string) => void
+  renameDocValue?: (fieldName: string, newName: string) => void
   activeFieldName?: string // 用户最近点击的字段
   activePatternFieldName?: string // 用户最近点击的字段
 }

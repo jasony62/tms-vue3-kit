@@ -21,7 +21,8 @@ function _setNewFileData<VNode>(
 ) {
   field.children?.forEach((cf: Field) => {
     if (typeof fileData[cf.name] !== 'undefined') {
-      ctx.editDoc.set(cf.fullname, fileData[cf.name], false)
+      // ctx.editDoc.set(cf.fullname, fileData[cf.name], false)
+      ctx.setDocValue(cf.fullname, fileData[cf.name], false)
     }
   })
   ctx.editDoc.forceRender()
@@ -116,7 +117,8 @@ const selectOneOfVNode = <VNode>(
                 initVal
               )}`
             )
-            ctx.editDoc.appendAt(field.fullname, initVal, newKey)
+            // ctx.editDoc.appendAt(field.fullname, initVal, newKey)
+            ctx.appendAtDocValue(field.fullname, initVal, newKey)
             lastChildFullname = `${
               field.fullname ? field.fullname + '.' : ''
             }${newKey}`
@@ -248,7 +250,8 @@ const propAddVNode = <VNode>(
               attrs.title ?? name
             }属性】，随机属性名：${newKey}，初始值：${JSON.stringify(initVal)}`
           )
-          ctx.editDoc.appendAt(fullname, initVal, newKey)
+          // ctx.editDoc.appendAt(fullname, initVal, newKey)
+          ctx.appendAtDocValue(fullname, initVal, newKey)
         },
       },
       label
@@ -278,7 +281,8 @@ const propPasteVNode = <VNode>(ctx: FormContext<VNode>, field: Field) => {
             const clipText = await navigator.clipboard.readText()
             clipData = JSON.parse(clipText)
           }
-          ctx.editDoc.set(fullname, clipData)
+          // ctx.editDoc.set(fullname, clipData)
+          ctx.setDocValue(fullname, clipData)
         } catch (e: any) {
           if (e)
             ctx.onMessage(
@@ -305,7 +309,8 @@ const propRemoveVNode = <VNode>(ctx: FormContext<VNode>, field: Field) => {
     {
       class: ['tvu-button'],
       onClick: async () => {
-        ctx.editDoc.remove(field.fullname)
+        // ctx.editDoc.remove(field.fullname)
+        ctx.removeDocValue(field.fullname)
       },
       title: field.fullname,
     },

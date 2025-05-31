@@ -33,9 +33,11 @@ export class Checkboxgroup<VNode> extends Input<VNode> {
       /**处理子节点*/
       const childIndex = fieldValue.indexOf(newValue)
       if (childIndex !== -1) {
-        editDoc.remove(`${fullname}[${childIndex}]`)
+        // editDoc.remove(`${fullname}[${childIndex}]`)
+        ctx.removeDocValue(`${fullname}[${childIndex}]`)
       } else {
-        editDoc.appendAt(fullname, newValue)
+        // editDoc.appendAt(fullname, newValue)
+        ctx.appendAtDocValue(fullname, newValue)
       }
     }
   }

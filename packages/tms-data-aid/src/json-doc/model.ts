@@ -92,7 +92,11 @@ export class DocIter {
     }
   }
 }
-
+/**
+ * 数据属性
+ *
+ * 作用有些像对象的descriptor，为了方便对单个属性快速操作
+ */
 export class DocProp {
   _initialKey: string | number
   _value: any
@@ -234,24 +238,63 @@ export class DocProp {
 function nameToRegExp(name: string): string {
   return name.replace('.', '\\.').replace('[', '\\[').replace(']', '\\]')
 }
-
+/**
+ * 跟踪DocAsArray属性添加和删除的情况，同步更新新的数据对象
+ * 不监听属性值的变化
+ * Proxy的handler
+ */
+class DocAsArrayObserver {
+  newerDoc: any
+  constructor(rawDoc: any) {
+    this.newerDoc = JSON.parse(JSON.stringify(rawDoc))
+  }
+  set(target, key, value) {
+    console.log('DocAsArrayObserver.set', key, typeof value)
+    return Reflect.set(target, key, value)
+  }
+  deleteProperty(target, key) {
+    console.log('DocAsArrayObserver.deleteProperty', key)
+    return Reflect.deleteProperty(target, key)
+  }
+}
 /**
  * 将文档转换为数组表示
  * 因为模板属性（patternProperties）和数组子项目属性的定义和文档对象的属性是1对多的关系，不便于进行处理。引入DocAsArray为文档对象建立索引，方便与属性定义对应。
  */
 export class DocAsArray {
+  /**
+   * 被处理的原始数据
+   */
   _rawDoc
+  /**
+   * 要处理属性的根路径
+   */
   _rootName
-  _properties: DocProp[] // 文档的属性
+  /**
+   * 文档属性的数组
+   */
+  _properties: DocProp[]
+  /**
+   * 属性全局名称到属性的映射
+   */
   _snapshot = new Map<string, DocProp>()
-  renderCounter: any // 用于出发渲染
+  /**
+   * 用于触发渲染
+   */
+  renderCounter: { value: number }
+  /**
+   * 根据数据的变化
+   */
+  _observer: DocAsArrayObserver
 
   constructor(rawDoc: any = {}, rootName = DEFAULT_ROOT_NAME) {
     this._rawDoc = rawDoc
     this._rootName = rootName
 
+    this._observer = new DocAsArrayObserver(rawDoc)
+
     let iter = new DocIter(rawDoc, rootName)
-    let props = Array.from(iter)
+    let props = new Proxy(Array.from(iter), this._observer)
     this._properties = props ?? []
 
     this.renderCounter = { value: 0 }
@@ -275,7 +318,7 @@ export class DocAsArray {
     return this._snapshot
   }
   /**
-   *
+   * 触发渲染
    */
   forceRender() {
     this.renderCounter.value++
@@ -338,6 +381,7 @@ export class DocAsArray {
       if (index === 0) return
       let val = this.get(prop)
       val = JSON.parse(JSON.stringify(val))
+      // 这里用的仍然是`dotpath`
       JSONPointerLodash.set(Output, prop.name, val)
     }
 

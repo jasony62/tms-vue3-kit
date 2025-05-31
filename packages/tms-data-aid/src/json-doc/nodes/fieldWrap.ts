@@ -25,7 +25,8 @@ const fieldNameVNode = <VNode>(ctx: FormContext<VNode>, field: Field) => {
           return
         }
       }
-      ctx.editDoc.rename(field.fullname, newName)
+      // ctx.editDoc.rename(field.fullname, newName)
+      ctx.renameDocValue(field.fullname, newName)
     },
   })
 
@@ -53,7 +54,8 @@ const fieldLookupVNode = <VNode>(ctx: FormContext<VNode>, field: Field) => {
           try {
             let fieldVal = ctx.editDoc.get(fullname)
             let lookupData = await ctx.onLookup(field, fieldVal)
-            ctx.editDoc.set(fullname, lookupData)
+            // ctx.editDoc.set(fullname, lookupData)
+            ctx.setDocValue(fullname, lookupData)
           } catch (e: any) {
             ctx.onMessage(
               `查询${fullname ? '【' + fullname + '】' : ''}失败，原因：` +
@@ -85,7 +87,8 @@ const fieldInsertVNode = <VNode>(ctx: FormContext<VNode>, field: Field) => {
         const newKey = Field.initialKey(name)
         const initVal = Field.initialVal(attrs.default, attrs.type)
         debug(`执行【插入属性】，随机属性名：${newKey}`)
-        ctx.editDoc.insertAt(fullname, initVal, newKey)
+        // ctx.editDoc.insertAt(fullname, initVal, newKey)
+        ctx.insertAtDocValue(fullname, initVal, newKey)
       },
     },
     '插入'
@@ -105,7 +108,8 @@ const fieldRemoveVNode = <VNode>(ctx: FormContext<VNode>, field: Field) => {
       class: ['tvu-button', 'tvu-button--yellow'],
       onClick: (evt: any) => {
         evt.stopPropagation()
-        ctx.editDoc.remove(field.fullname)
+        // ctx.editDoc.remove(field.fullname)
+        ctx.removeDocValue(field.fullname)
       },
     },
     '删除'
@@ -137,13 +141,15 @@ const fieldReplaceVNode = <VNode>(ctx: FormContext<VNode>, field: Field) => {
           const fieldNames: any[] = fieldNamesInGroup(field, ctx)
           fieldNames.forEach((name) => {
             ctx.oneOfSelected?.delete(name)
-            ctx.editDoc.remove(name, false)
+            // ctx.editDoc.remove(name, false)
+            ctx.removeDocValue(name, false)
           })
           // 删除组名称
           ctx.oneOfSelectedInGroups?.delete(gname)
         } else {
           ctx.oneOfSelected?.delete(field.fullname)
-          ctx.editDoc.remove(field.fullname, false)
+          // ctx.editDoc.remove(field.fullname, false)
+          ctx.removeDocValue(field.fullname, false)
         }
         ctx.editDoc.forceRender()
       },
@@ -165,7 +171,8 @@ const fieldMoveDownVNode = <VNode>(ctx: FormContext<VNode>, field: Field) => {
       class: ['tvu-button', 'tvu-button--yellow'],
       onClick: (evt: any) => {
         evt.stopPropagation()
-        ctx.editDoc.moveDown(field.fullname)
+        // ctx.editDoc.moveDown(field.fullname)
+        ctx.moveDownDocValue(field.fullname)
       },
     },
     `后移`
@@ -185,7 +192,8 @@ const fieldMoveUpVNode = <VNode>(ctx: FormContext<VNode>, field: Field) => {
       class: ['tvu-button', 'tvu-button--yellow'],
       onClick: (evt: any) => {
         evt.stopPropagation()
-        ctx.editDoc.moveUp(field.fullname)
+        // ctx.editDoc.moveUp(field.fullname)
+        ctx.moveUpDocValue(field.fullname)
       },
     },
     `前移`

@@ -24,8 +24,14 @@ const itemPasteVNode = <VNode>(ctx: FormContext<VNode>, field: Field) => {
         const log = debug.extend('onPaste')
         function setDocData(clipData: any) {
           if (Array.isArray(clipData) && clipData.length) {
-            clipData.forEach((item) => ctx.editDoc.appendAt(fullname, item))
-          } else ctx.editDoc.appendAt(fullname, clipData)
+            clipData.forEach((item) => {
+              // ctx.editDoc.appendAt(fullname, item)
+              ctx.appendAtDocValue(fullname, item)
+            })
+          } else {
+            // ctx.editDoc.appendAt(fullname, clipData)
+            ctx.appendAtDocValue(fullname, clipData)
+          }
         }
         try {
           let clipData
@@ -58,7 +64,7 @@ const itemPasteVNode = <VNode>(ctx: FormContext<VNode>, field: Field) => {
  * @returns
  */
 const itemAddVNode = <VNode>(ctx: FormContext<VNode>, field: Field) => {
-  const { fullname, shortname, schemaProp } = field
+  const { fullname, schemaProp } = field
   let addVNode = ctx.h(
     components.button.tag,
     {
@@ -69,8 +75,13 @@ const itemAddVNode = <VNode>(ctx: FormContext<VNode>, field: Field) => {
          * 保证当前字段的值是数组
          */
         let fieldValue = ctx.editDoc.get(fullname)
-        if (fieldValue === undefined || fieldValue === null) {
-          ctx.editDoc.set(fullname, [], false)
+        if (
+          fieldValue === undefined ||
+          fieldValue === null ||
+          !Array.isArray(fieldValue)
+        ) {
+          // ctx.editDoc.set(fullname, [], false)
+          ctx.setDocValue(fullname, [], false)
           fieldValue = ctx.editDoc.get(fullname)
         }
         if (!Array.isArray(fieldValue))
@@ -86,7 +97,8 @@ const itemAddVNode = <VNode>(ctx: FormContext<VNode>, field: Field) => {
             ctx.nestExpanded?.add(newChildFullname)
           }
           const initVal = Field.initialVal(undefined, items.type)
-          ctx.editDoc.appendAt(fullname, initVal)
+          // ctx.editDoc.appendAt(fullname, initVal)
+          ctx.appendAtDocValue(fullname, initVal)
         }
       },
     },
@@ -124,7 +136,8 @@ const itemInsertVNode = <VNode>(
             ctx.nestExpanded?.add(fullname)
           }
           const initVal = Field.initialVal(undefined, items.type)
-          ctx.editDoc.insertAt(fullname, initVal)
+          // ctx.editDoc.insertAt(fullname, initVal)
+          ctx.insertAtDocValue(fullname, initVal)
         }
       },
     },
@@ -145,7 +158,8 @@ const itemRemoveVNode = <VNode>(
       class: ['tvu-button', 'tvu-button--yellow'],
       onClick: (evt: any) => {
         evt.stopPropagation()
-        ctx.editDoc.remove(fullname)
+        // ctx.editDoc.remove(fullname)
+        ctx.removeDocValue(fullname)
       },
     },
     '删除'
@@ -166,7 +180,8 @@ const itemMoveUpVNode = <VNode>(
       onClick: (evt: any) => {
         evt.stopPropagation()
         ctx.activeFieldName = field.fullname + `[${index - 1}]`
-        ctx.editDoc.moveUp(fullname)
+        // ctx.editDoc.moveUp(fullname)
+        ctx.moveUpDocValue(fullname)
       },
     },
     '前移'
@@ -187,7 +202,8 @@ const itemMoveDownVNode = <VNode>(
       onClick: (evt: any) => {
         evt.stopPropagation()
         ctx.activeFieldName = field.fullname + `[${index + 1}]`
-        ctx.editDoc.moveDown(fullname)
+        // ctx.editDoc.moveDown(fullname)
+        ctx.moveDownDocValue(fullname)
       },
     },
     '后移'
@@ -205,7 +221,8 @@ const propRemoveVNode = <VNode>(ctx: FormContext<VNode>, field: Field) => {
     {
       class: ['tvu-button', 'tvu-button--green'],
       onClick: async () => {
-        ctx.editDoc.remove(field.fullname)
+        // ctx.editDoc.remove(field.fullname)
+        ctx.removeDocValue(field.fullname)
       },
       title: field.fullname,
     },

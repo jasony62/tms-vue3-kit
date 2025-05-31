@@ -14,34 +14,69 @@
       <option value="files">文件（数组）</option>
       <option value="file">文件（单个）</option>
       <option value="defval">默认值</option>
-      <option value="rcscard">rcscard</option>
-      <option value="rcscarousel">rcscarousel</option>
-      <option value="rcssugg">rcssugg</option>
-      <option value="dialog-script">dialog-script</option>
       <option value="isoneof">isoneof</option>
       <option value="paste">粘贴</option>
     </select>
-    <label><input type="checkbox" v-model="showFieldFullname" />是否显示字段路径名称</label>
-    <label><input type="checkbox" v-model="hideFieldDescription" />是否隐藏字段说明</label>
-    <label><input type="checkbox" v-model="schemaArbitrary" />不要求文档严格匹配schema</label>
+    <label
+      ><input
+        type="checkbox"
+        v-model="showFieldFullname"
+      />是否显示字段路径名称</label
+    >
+    <label
+      ><input
+        type="checkbox"
+        v-model="hideFieldDescription"
+      />是否隐藏字段说明</label
+    >
+    <label
+      ><input
+        type="checkbox"
+        v-model="schemaArbitrary"
+      />不要求文档严格匹配schema</label
+    >
   </div>
-  <div class="flex flex-row" style="height: 100vh;">
+  <div class="flex flex-row" style="height: 100vh">
     <div class="w-1/3 p-4 h-full overflow-y-auto">
-      <json-doc v-if="loading === false" ref="jsonDocEditor" :key="caseName" :schema="testObj.schema"
-        :value="testObj.data" :enable-paste="true" :on-lookup="onLookup" :autofill-request="onAutofill"
-        :on-file-select="onFileSelect" :on-file-download="onFileDownload" :on-file-upload="onFileUpload"
-        :hide-root-title="true" :hide-root-description="true" :hide-field-description="hideFieldDescription"
-        :show-field-fullname="showFieldFullname" @jdoc-focus="onJdocFocus" @jdoc-blur="onJdocBlur" :on-paste="onPaste">
+      <json-doc
+        v-if="loading === false"
+        ref="jsonDocEditor"
+        :key="caseName"
+        :schema="testObj.schema"
+        :value="testObj.data"
+        :on-change="onChange"
+        :enable-paste="true"
+        :on-paste="onPaste"
+        :on-lookup="onLookup"
+        :autofill-request="onAutofill"
+        :on-file-select="onFileSelect"
+        :on-file-download="onFileDownload"
+        :on-file-upload="onFileUpload"
+        :hide-root-title="true"
+        :hide-root-description="true"
+        :hide-field-description="hideFieldDescription"
+        :show-field-fullname="showFieldFullname"
+        @jdoc-focus="onJdocFocus"
+        @jdoc-blur="onJdocBlur"
+      >
       </json-doc>
     </div>
     <div class="w-1/3">
-      <div v-if="activeField?.schemaType === 'json'" class="h-full flex flex-col">
+      <div
+        v-if="activeField?.schemaType === 'json'"
+        class="h-full flex flex-col"
+      >
         <div>
-          <button @click="updateJson">更新数据【{{ activeField.fullname }}】</button>
+          <button @click="updateJson">
+            更新数据【{{ activeField.fullname }}】
+          </button>
         </div>
         <div ref="elJsonEditor" class="flex-grow"></div>
       </div>
-      <div v-if="activeField?.schemaProp.attrs.format === 'markdown'" class="h-full flex flex-col">
+      <div
+        v-if="activeField?.schemaProp.attrs.format === 'markdown'"
+        class="h-full flex flex-col"
+      >
         <div ref="elMarkdownViewer" class="flex-grow"></div>
       </div>
     </div>
@@ -60,14 +95,17 @@
 import { JsonDoc } from 'tms-vue3-ui'
 import { Field, DocAsArray } from 'tms-vue3-ui/dist/es/json-doc'
 import 'tms-vue3-ui/dist/es/json-doc/style/tailwind.scss'
-import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
+import { nextTick, onMounted, reactive, ref, watch } from 'vue'
 import JSONEditor from 'jsoneditor'
 import 'jsoneditor/dist/jsoneditor.css'
 import RandExp from 'randexp'
 import Jexl from 'jexl'
 import { marked } from 'marked'
 
-const jsonDocEditor = ref<{ editing: (matchSchema?: boolean) => string, editDoc: DocAsArray } | null>(null)
+const jsonDocEditor = ref<{
+  editing: (matchSchema?: boolean) => string
+  editDoc: DocAsArray
+} | null>(null)
 
 const caseName = ref('') // 演示数据
 
@@ -75,7 +113,13 @@ const jsonResult = ref('') // 表单数据结果
 
 const loading = ref(true)
 
-const testObj = reactive({ schema: {}, data: {}, pasted: null, fileSelect: null, lookup: null })
+const testObj = reactive({
+  schema: {},
+  data: {},
+  pasted: null,
+  fileSelect: null,
+  lookup: null,
+})
 
 const activeField = ref<Field>() // 正在编辑的字段
 
@@ -92,7 +136,13 @@ const schemaArbitrary = ref(false)
 function loadTestData() {
   loading.value = true
   return import(`../data/schemas/${caseName.value}.ts`).then(
-    ({ SampleData, SampleSchema, SamplePasted, SampleFileSelect, SampleLookup }) => {
+    ({
+      SampleData,
+      SampleSchema,
+      SamplePasted,
+      SampleFileSelect,
+      SampleLookup,
+    }) => {
       testObj.schema = SampleSchema
       testObj.data = SampleData
       testObj.pasted = SamplePasted
@@ -151,7 +201,7 @@ const onJdocFocus = (field: Field) => {
   }
 }
 
-const onJdocBlur = (field: Field) => { }
+const onJdocBlur = (field: Field) => {}
 
 const updateJson = () => {
   if (activeField.value) {
@@ -167,7 +217,9 @@ const onLookup = (field: Field, fieldVal: any) => {
     let pasted
     if (testObj.lookup) {
       // pasted = fullname ? _.get(testObj.lookup, fullname) : testObj.lookup
-      pasted = fullname ? Jexl.evalSync(fullname, testObj.lookup) : testObj.lookup
+      pasted = fullname
+        ? Jexl.evalSync(fullname, testObj.lookup)
+        : testObj.lookup
     }
     if (pasted) {
       resolve(pasted)
@@ -200,9 +252,19 @@ const onAutofill = () => {
         let result: any = { data: { result: {} } }
         if ('http://tms-vue3-kit/autofill/district' === url) {
           if (filter?.areaCode?.keyword === '010')
-            result.data.result.district = [{ name: '西城区' }, { name: '东城区' }, { name: '朝阳区' }, { name: '海淀区' }]
+            result.data.result.district = [
+              { name: '西城区' },
+              { name: '东城区' },
+              { name: '朝阳区' },
+              { name: '海淀区' },
+            ]
           else if (filter?.areaCode?.keyword === '029')
-            result.data.result.district = [{ name: '新城区' }, { name: '碑林区' }, { name: '莲湖区' }, { name: '雁塔区' }]
+            result.data.result.district = [
+              { name: '新城区' },
+              { name: '碑林区' },
+              { name: '莲湖区' },
+              { name: '雁塔区' },
+            ]
           else result.data.result.district = []
         }
         console.log('axios.result', result)
@@ -222,7 +284,9 @@ const onFileSelect = (field: Field, fieldVal: any) => {
   if (field.type === 'object') {
     if (testObj.fileSelect) {
       // fileData = fullname ? _.get(testObj.fileSelect, fullname) : testObj.fileSelect
-      fileData = fullname ? Jexl.evalSync(fullname, testObj.fileSelect) : testObj.fileSelect
+      fileData = fullname
+        ? Jexl.evalSync(fullname, testObj.fileSelect)
+        : testObj.fileSelect
     }
   }
   return new Promise((resolve, reject) => {
@@ -263,7 +327,11 @@ const onFileDownload = (name: string, url: string) => {
 }
 
 const getResult = () => {
-  jsonResult.value = JSON.stringify(jsonDocEditor.value?.editing(schemaArbitrary.value ? false : true), null, 2)
+  jsonResult.value = JSON.stringify(
+    jsonDocEditor.value?.editing(schemaArbitrary.value ? false : true),
+    null,
+    2
+  )
 }
 
 const onPaste = async (field: Field) => {
@@ -272,7 +340,9 @@ const onPaste = async (field: Field) => {
     let pasted
     if (testObj.pasted) {
       // pasted = fullname ? _.get(testObj.pasted, fullname) : testObj.pasted
-      pasted = fullname ? Jexl.evalSync(fullname, testObj.pasted) : testObj.pasted
+      pasted = fullname
+        ? Jexl.evalSync(fullname, testObj.pasted)
+        : testObj.pasted
     }
     if (pasted) {
       resolve(pasted)
@@ -282,11 +352,13 @@ const onPaste = async (field: Field) => {
   })
 }
 
+const onChange = async (fieldName: string, editingDoc: any) => {
+  console.log('JsonDocUI.onChange', fieldName, editingDoc)
+}
 </script>
 
 <style lang="scss">
 .jsoneditor {
-
   .jsoneditor-transform,
   .jsoneditor-poweredBy {
     display: none;
