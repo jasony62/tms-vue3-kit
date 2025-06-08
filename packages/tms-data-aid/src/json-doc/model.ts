@@ -549,7 +549,7 @@ export class DocAsArray {
             if (schemaProp.isFullSingleValue) break
           }
         }
-
+        // 删除匹配的文档字段
         matchedDocProps.forEach((docProp) => {
           log(
             `文档属性【${docProp.name}】匹配的属性定义【${schemaProp.fullname}】`
@@ -559,12 +559,12 @@ export class DocAsArray {
            * 从待处理节点中删除
            */
           unhandledDocProps.splice(unhandledDocProps.indexOf(docProp), 1)
-          // 删除子地段
-          if (matchedChildDocProps.length)
-            matchedChildDocProps.forEach((child) =>
-              unhandledDocProps.splice(unhandledDocProps.indexOf(child), 1)
-            )
         })
+        // 删除匹配字段的子字段
+        if (matchedChildDocProps.length)
+          matchedChildDocProps.forEach((child) =>
+            unhandledDocProps.splice(unhandledDocProps.indexOf(child), 1)
+          )
       })
     } else {
       log('返回全部数据')
