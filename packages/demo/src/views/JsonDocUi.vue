@@ -35,6 +35,8 @@
         v-model="schemaArbitrary"
       />不要求文档严格匹配schema</label
     >
+    <label><input type="checkbox" v-model="outputAoa" />输出为数组</label>
+    <label><input type="checkbox" v-model="outputTitle" />输出用title</label>
   </div>
   <div class="flex flex-row" style="height: 100vh">
     <div class="w-1/3 p-4 h-full overflow-y-auto">
@@ -81,10 +83,10 @@
       </div>
     </div>
     <div class="p-4">
-      <div>
+      <div style="height: 24px">
         <button @click="getResult">查看结果</button>
       </div>
-      <div>
+      <div class="overflow-auto" style="height: calc(100% - 24px)">
         <pre>{{ jsonResult }}</pre>
       </div>
     </div>
@@ -101,9 +103,10 @@ import 'jsoneditor/dist/jsoneditor.css'
 import RandExp from 'randexp'
 import Jexl from 'jexl'
 import { marked } from 'marked'
+import { DocAsArrayBuildOptions } from 'tms-data-aid/dist/json-doc/model'
 
 const jsonDocEditor = ref<{
-  editing: (matchSchema?: boolean) => string
+  editing: (matchSchema?: boolean, options?: DocAsArrayBuildOptions) => string
   editDoc: DocAsArray
 } | null>(null)
 
@@ -132,6 +135,10 @@ const showFieldFullname = ref(false)
 const hideFieldDescription = ref(false)
 
 const schemaArbitrary = ref(false)
+
+const outputAoa = ref(false)
+
+const outputTitle = ref(false)
 
 function loadTestData() {
   loading.value = true
@@ -328,7 +335,10 @@ const onFileDownload = (name: string, url: string) => {
 
 const getResult = () => {
   jsonResult.value = JSON.stringify(
-    jsonDocEditor.value?.editing(schemaArbitrary.value ? false : true),
+    jsonDocEditor.value?.editing(schemaArbitrary.value ? false : true, {
+      format: outputAoa.value === true ? 'aoa' : null,
+      useTitleInPath: outputTitle.value,
+    }),
     null,
     2
   )

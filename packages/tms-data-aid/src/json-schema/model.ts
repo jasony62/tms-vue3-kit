@@ -104,6 +104,20 @@ export class SchemaProp {
     this.attrs = { type: type ?? '' }
   }
 
+  get title() {
+    return this.attrs.title ?? this.name
+  }
+
+  get fullTitle() {
+    if (this.parent) {
+      let title = this.parent.fullTitle
+      if (this.parent.attrs.type === 'array') title += '[*]'
+      return title ? title + '.' + this.title : this.title
+    }
+
+    return this.title
+  }
+
   get parent() {
     return this._parent
   }
@@ -150,9 +164,11 @@ export class SchemaProp {
     return fullname
   }
 
-  /**属性定义完整名称的正则表达式，用于检查文档属性是否匹配*/
+  /**
+   * 属性定义完整名称的正则表达式，用于检查文档属性是否匹配
+   */
   get fullRegExp(): RegExp {
-    let log = debug.extend('fullRegExp')
+    // let log = debug.extend('fullRegExp')
     let { fullname } = this
     let re = fullname
       .replace(/^\^/, '')
@@ -162,15 +178,45 @@ export class SchemaProp {
       .replace(/\$\[/g, '[')
       .replaceAll('[*]', '\\[\\d+\\]')
       .replace(new RegExp('\\.', 'g'), '\\.')
-    if (this.attrs.type === 'array' && this.items?.type !== 'object') {
-      log(
-        `属性定义【${fullname}】为数组类型，数组项目的类型不是对象，需要解决子项目属性匹配`
-      )
-      re += '(\\[\\d+\\])?'
+    if (
+      this.attrs.type === 'array' &&
+      this.items?.type !== 'object' &&
+      this.items?.type !== 'array'
+    ) {
+      // log(
+      //   `属性定义【${fullname}】为数组类型，数组项目的类型不是对象，需要解决子项目属性匹配`
+      // )
+      if (this.items?.type === 'json') {
+        re += '(\\[\\d+\\])?([.\\[].*)?'
+      } else {
+        re += '(\\[\\d+\\])?'
+      }
+    } else if (this.attrs.type === 'json') {
+      re += '([.\\[].*)?'
     }
     re = '^' + re + '$'
 
-    log(`属性定义【${fullname}】的正则表达式为【${re}】`)
+    // log(`属性定义【${fullname}】的正则表达式为【${re}】`)
+
+    return new RegExp(re)
+  }
+  /**
+   * 属性定义完整名称的正则表达式，用于检查文档属性是否匹配，不考虑数组下的子项目
+   */
+  get fullRegExpNoChild(): RegExp {
+    // let log = debug.extend('fullRegExp')
+    let { fullname } = this
+    let re = fullname
+      .replace(/^\^/, '')
+      .replace(/\$$/, '')
+      .replace(/\.\^/g, '.')
+      .replace(/\$\./g, '.')
+      .replace(/\$\[/g, '[')
+      .replaceAll('[*]', '\\[\\d+\\]')
+      .replace(new RegExp('\\.', 'g'), '\\.')
+    re = '^' + re + '$'
+
+    // log(`属性定义【${fullname}】的正则表达式为【${re}】`)
 
     return new RegExp(re)
   }
@@ -180,9 +226,38 @@ export class SchemaProp {
     return this.path.replace(/\[\*\]$/, '')
   }
 
-  /**是否是数组中项目*/
+  /**
+   * 是否是数组中项目
+   */
   get isArrayItem(): boolean {
     return /\[\*\]$/.test(this.path)
+  }
+  /**
+   * 是否生成单一的值
+   * 模板属性和数组属性都可以生成多个值
+   */
+  get isSingleValue(): boolean {
+    return !this.isPattern && this.attrs.type !== 'array'
+  }
+  /**
+   * 是否全路径生成单一的值
+   */
+  get isFullSingleValue(): boolean {
+    if (this.parent) {
+      return this.isSingleValue && this.parent.isFullSingleValue
+    }
+    return this.isSingleValue
+  }
+  /**
+   * 是叶子属性？
+   */
+  get isLeaf(): boolean {
+    return (
+      (this.attrs.type !== 'array' && this.attrs.type !== 'object') ||
+      (this.attrs.type === 'array' &&
+        this.items?.type !== 'object' &&
+        this.items?.type !== 'array')
+    )
   }
   /**
    * 处理循环引用

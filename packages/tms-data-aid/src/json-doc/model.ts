@@ -44,6 +44,44 @@ function* _pasrseObj(parent: DocProp): any {
     }
   }
 }
+/**
+ * 根据文档对象中字段名称，更新，字段定义标题名称
+ * 例如：
+ * 经历[*].时间 experiences[0].time
+ * 经历[0].时间 experiences[0].time
+ *
+ * @param fullTitle
+ * @param fullname
+ * @returns
+ */
+function setFullTilePathIndex(fullTitle: string, fullname: string) {
+  let pts = fullTitle.split('.')
+  let pns = fullname.split('.')
+  if (pts.length === pns.length) {
+    pts.forEach((pt, index) => {
+      if (/\[\*\]$/.test(pt) && /\[\d+\]$/.test(pns[index])) {
+        let i = pns[index].match(/\[(\d+)\]/)[1]
+        let n = pt.replace('*', i)
+        pts[index] = n
+      }
+    })
+  }
+  return pts.join('.')
+}
+/**
+ * 是空值？
+ * @param val
+ * @returns
+ */
+function isEmptyValue(val: any): boolean {
+  return (
+    val === null ||
+    val === undefined ||
+    val === '' ||
+    (Array.isArray(val) && val.length === 0) ||
+    (typeof val === 'object' && Object.keys(val).length === 0)
+  )
+}
 
 /**
  * 根节点默认名称
@@ -184,6 +222,14 @@ export class DocProp {
   get parent() {
     return this._parent
   }
+
+  get rootValue() {
+    if (this.parent) {
+      return this.parent.rootValue
+    }
+    return this.value
+  }
+
   /**
    * 返回最后的一个后代字段
    * @returns
@@ -249,13 +295,32 @@ class DocAsArrayObserver {
     this.newerDoc = JSON.parse(JSON.stringify(rawDoc))
   }
   set(target, key, value) {
-    console.log('DocAsArrayObserver.set', key, typeof value)
     return Reflect.set(target, key, value)
   }
   deleteProperty(target, key) {
-    console.log('DocAsArrayObserver.deleteProperty', key)
     return Reflect.deleteProperty(target, key)
   }
+}
+/**
+ *
+ */
+export type DocAsArrayBuildOptions = {
+  /**
+   * 根据指定的schema构造输出对象
+   */
+  rawSchema?: RawSchema
+  /**
+   * 输出中不包含空字段，包括：空字符串，空数组，空对象
+   */
+  cleanEmpty?: boolean
+  /**
+   * 输出格式，默认：json，可选：text
+   */
+  format?: string | null
+  /**
+   * 输出路径使用title而不是name
+   */
+  useTitleInPath?: boolean
 }
 /**
  * 将文档转换为数组表示
@@ -360,89 +425,148 @@ export class DocAsArray {
    *
    * 如果指定了schema参数，属性必须与schema匹配，不匹配的将清除
    *
-   * @param rawSchema 指定的原始属性定义
+   * @param options 指定的原始属性定义
    * @returns
    */
-  build(rawSchema?: RawSchema, cleanEmpty = false): any {
+  build(options?: DocAsArrayBuildOptions): any {
+    const {
+      rawSchema,
+      cleanEmpty = false,
+      format = 'json',
+      useTitleInPath = false,
+    } = options ?? {}
     console.time('json-doc:build:doc')
     let log = debug.extend('build')
-    // 清理空数据
-    if (cleanEmpty === true) {
-      this.cleanEmpty(false)
-    }
 
     let schemaProps: SchemaProp[] = []
     if (rawSchema) {
       const iter = new SchemaIter(rawSchema)
       for (let prop of iter) schemaProps.push(prop)
     }
-
-    const handleDocProp = (prop: DocProp, index: number) => {
-      if (index === 0) return
+    /**
+     * 将单个属性的值放到输出结果中
+     * @param prop
+     * @returns
+     */
+    const outputDocProp = (prop: DocProp, schemaProp?: SchemaProp) => {
       let val = this.get(prop)
-      val = JSON.parse(JSON.stringify(val))
-      // 这里用的仍然是`dotpath`
-      JSONPointerLodash.set(Output, prop.name, val)
+      val = val === undefined ? val : JSON.parse(JSON.stringify(val))
+
+      // 不包含空数据
+      if (cleanEmpty === true && isEmptyValue(val)) return
+
+      if (format === 'aoa') {
+        // 只输出叶子节点
+        if (useTitleInPath === true && schemaProp) {
+          if (schemaProp.isLeaf) {
+            let docPropTitle = schemaProp.isFullSingleValue
+              ? schemaProp.fullTitle
+              : setFullTilePathIndex(schemaProp.fullTitle, prop.name)
+            if (Array.isArray(Output)) Output.push([docPropTitle, val])
+          }
+        } else {
+          if (schemaProp) {
+            if (schemaProp.isLeaf) {
+              if (Array.isArray(Output)) Output.push([prop.name, val])
+            }
+          } else {
+            if (Array.isArray(Output)) Output.push([prop.name, val])
+          }
+        }
+      } else {
+        if (useTitleInPath === true && schemaProp) {
+          if (schemaProp.isLeaf) {
+            let docPropTitle = schemaProp.isFullSingleValue
+              ? schemaProp.fullTitle
+              : setFullTilePathIndex(schemaProp.fullTitle, prop.name)
+            JSONPointerLodash.set(Output, docPropTitle, val)
+          }
+        } else {
+          // 这里用的仍然是`dotpath`
+          JSONPointerLodash.set(Output, prop.name, val)
+        }
+      }
     }
 
-    const Output = Array.isArray(this._rawDoc) ? [] : {}
-    const JsonDocPropNames: string[] = [] // json字段的名称
+    const Output = Array.isArray(this._rawDoc) || format === 'aoa' ? [] : {}
     if (schemaProps.length) {
       log('根据指定的schema去除数据')
-      /**根据schema生成文档，忽略文档中没有对应schema的内容*/
-      schemaProps.forEach((schemaProp, index) => {
+      /**
+       * 待处理的文档属性
+       * 为了提高处理效率
+       * 1、处理过的文档应该删除
+       */
+      const unhandledDocProps = [...this._properties]
+      // 根节点不需要处理
+      unhandledDocProps.shift()
+      /**
+       * 根据schema生成文档，忽略文档中没有对应schema的内容
+       *
+       * 1. 文档字段的顺序可以是任意的
+       * 2. 模板属性的定义可能匹配多个文档字段
+       * 3. 1条数组字段定义可能对应多个文档字段
+       */
+      schemaProps.forEach((schemaProp) => {
+        if (!schemaProp.fullname) return
         // 和当前schema匹配的文档属性
         // 模板属性会有多个匹配的文档属性
+
         // 数组的item如果不是objct，值名称匹配schema
         let schemaIsPlainArray =
           schemaProp.attrs.type === 'array' &&
           schemaProp.items?.type !== 'object'
-        let docProps = this._properties.filter((docProp) => {
+
+        let matchedChildDocProps = []
+        /**
+         * 与当前schema匹配的文档节点
+         * 如果schema的类型是数组，会有多个文档字段匹配，所以用数组记录
+         */
+        let matchedDocProps = []
+        for (let docProp of unhandledDocProps) {
+          /**
+           * 文档字段匹配字段定义
+           */
           if (schemaProp.fullRegExp.test(docProp.name)) {
-            if (schemaIsPlainArray && typeof docProp.key === 'number') {
-              return false
-            }
-            return true
-          }
-          return false
-        })
-        docProps.forEach((docProp) => {
-          // 根节点不需要处理
-          if (!docProp.name) return
-          if (docProp) {
-            log(
-              `文档属性【${docProp.name}】匹配的属性定义【${schemaProp.fullname}】`
-            )
-            let jsonParentName = JsonDocPropNames.find(
-              (n) => docProp?.name.indexOf(n) === 0
-            )
-            if (jsonParentName) {
-              log(
-                `文档属性【${docProp.name}】是json类型的文档属性【${jsonParentName}】的值，赋值null`
-              )
-              JSONPointerLodash.set(Output, docProp.name, null)
-              return
-            }
+            /**
+             * 文档字段是没有字段的定义的子属性，包括：json类型，数组中的原始类型
+             */
             if (
-              schemaProp.attrs.type === 'json' ||
-              (schemaIsPlainArray && schemaProp.items?.type === 'json')
+              (schemaIsPlainArray || schemaProp.attrs.type === 'json') &&
+              !schemaProp.fullRegExpNoChild.test(docProp.name)
             ) {
-              log(`文档属性【${docProp.name}】是json类型，需要处理下层节点`)
-              JsonDocPropNames.push(docProp.name)
-            } else {
-              if (schemaIsPlainArray === false && docProp._children.length) {
-                log(`文档属性【${docProp.name}】不是叶节点，赋值null`)
-                JSONPointerLodash.set(Output, docProp.name, null)
-                return
-              }
+              matchedChildDocProps.push(docProp)
+              continue
             }
-            handleDocProp(docProp, index)
+            /**
+             * 文档字段和定义匹配
+             */
+            matchedDocProps.push(docProp)
+            /**
+             * 字段定义只生成单一值，有匹配的就不用再找了
+             */
+            if (schemaProp.isFullSingleValue) break
           }
+        }
+
+        matchedDocProps.forEach((docProp) => {
+          log(
+            `文档属性【${docProp.name}】匹配的属性定义【${schemaProp.fullname}】`
+          )
+          outputDocProp(docProp, schemaProp)
+          /**
+           * 从待处理节点中删除
+           */
+          unhandledDocProps.splice(unhandledDocProps.indexOf(docProp), 1)
+          // 删除子地段
+          if (matchedChildDocProps.length)
+            matchedChildDocProps.forEach((child) =>
+              unhandledDocProps.splice(unhandledDocProps.indexOf(child), 1)
+            )
         })
       })
     } else {
       log('返回全部数据')
-      this._properties.forEach(handleDocProp)
+      this._properties.forEach((docProp) => outputDocProp(docProp))
     }
 
     console.timeEnd('json-doc:build:doc')
@@ -747,7 +871,7 @@ export class DocAsArray {
   }
   /**
    *
-   * @param name
+   * @param name 文档属性的name是全局名称，例如：
    * @param value
    * @returns
    */
@@ -760,9 +884,10 @@ export class DocAsArray {
       this.appendAt(path, value, key)
     } else {
       /**修改父对象 */
-      let { _parent } = prop
-      if (_parent) {
-        JSONPointerLodash.set(_parent.value, name, value)
+      let { parent } = prop
+      if (parent) {
+        // JSONPointerLodash.set(_parent.value, name, value)
+        JSONPointerLodash.set(parent.rootValue, name, value)
         log(
           `修改属性【${prop.name}】在父属性中的值\n` +
             JSON.stringify(value, null, 2)

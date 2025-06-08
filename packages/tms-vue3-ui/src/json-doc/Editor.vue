@@ -12,6 +12,7 @@ import { RawSchema } from 'tms-data-aid/dist/json-schema/model'
 import { deepClone } from '@/utils'
 import { JSONDocBuilder, Field, DocAsArray } from 'tms-data-aid'
 import Debug from 'debug'
+import { DocAsArrayBuildOptions } from 'tms-data-aid/dist/json-doc/model'
 
 const debug = Debug('json-doc:editor')
 
@@ -112,9 +113,22 @@ export default defineComponent({
     /**
      * 返回表单中正在编辑的数据
      */
-    const editing = (matchSchema = false, cleanEmpty = true): any => {
-      return editDoc.build(matchSchema === true ? schema : null, cleanEmpty)
-      // return editDoc.build(undefined, cleanEmpty)
+    const editing = (
+      matchSchema = false,
+      options?: DocAsArrayBuildOptions | boolean
+    ): any => {
+      if (options && typeof options === 'object') {
+        return editDoc.build({
+          ...options,
+          rawSchema: matchSchema === true ? schema : null,
+        })
+      } else {
+        let matchSchema = typeof options === 'boolean' ? options : false
+        return editDoc.build({
+          rawSchema: matchSchema === true ? schema : null,
+          cleanEmpty: typeof options === 'boolean' ? options : false,
+        })
+      }
     }
 
     const {

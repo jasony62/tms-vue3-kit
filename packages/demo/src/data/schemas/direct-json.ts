@@ -29,6 +29,13 @@ export const SampleSchema = {
         },
       },
     },
+    arrData: {
+      type: 'array',
+      title: 'arrData',
+      items: {
+        type: 'json',
+      },
+    },
   },
   patternProperties: {
     '^ext_\\w+$': {

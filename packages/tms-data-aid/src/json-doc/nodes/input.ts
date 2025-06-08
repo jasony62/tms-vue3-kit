@@ -20,24 +20,20 @@ export class Input<VNode> extends FieldNode<VNode> {
       case 'boolean':
         updatedValue = !this.ctx.editDoc.get(fieldName)
         /**修改底层数据*/
-        // this.ctx.editDoc.set(fieldName, updatedValue)
         this.ctx.setDocValue(fieldName, updatedValue)
         break
       case 'integer':
         updatedValue = parseInt(newValue)
-        // this.ctx.editDoc.set(fieldName, updatedValue)
         this.ctx.setDocValue(fieldName, updatedValue)
         break
       case 'number':
         updatedValue = parseFloat(newValue)
-        // this.ctx.editDoc.set(fieldName, updatedValue)
         this.ctx.setDocValue(fieldName, updatedValue)
         break
       case 'json':
         try {
           let newJson = JSON.parse(newValue)
           updatedValue = newJson
-          // this.ctx.editDoc.set(fieldName, updatedValue)
           this.ctx.setDocValue(fieldName, updatedValue)
         } catch (e) {
           // 不更新文档
@@ -46,7 +42,6 @@ export class Input<VNode> extends FieldNode<VNode> {
       default:
         updatedValue = newValue.trim()
         /**修改底层数据*/
-        // this.ctx.editDoc.set(fieldName, updatedValue)
         this.ctx.setDocValue(fieldName, updatedValue)
     }
   }
