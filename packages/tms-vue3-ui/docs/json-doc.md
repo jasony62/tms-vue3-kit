@@ -11,6 +11,7 @@
 | schema            | JSONSchema 定义              | Object   | -       |
 | value             | 要编辑的 json 文档对象       | Object   | -       |
 | fieldWrapClass    | 输入控件的包裹类             | String   | -       |
+| showFieldName     | 显示字段名称                 | Boolean  | false   |
 | showFieldFullname | 显示字段路径名称             | Boolean  | false   |
 | onMessage         | 接收处理内部消息提醒的方法   | Function | alert() |
 | autofillRequest   |                              | Function |         |

@@ -18,6 +18,9 @@
       <option value="paste">粘贴</option>
     </select>
     <label
+      ><input type="checkbox" v-model="showFieldName" />是否显示字段名称</label
+    >
+    <label
       ><input
         type="checkbox"
         v-model="showFieldFullname"
@@ -57,6 +60,7 @@
         :hide-root-title="true"
         :hide-root-description="true"
         :hide-field-description="hideFieldDescription"
+        :show-field-name="showFieldName"
         :show-field-fullname="showFieldFullname"
         @jdoc-focus="onJdocFocus"
         @jdoc-blur="onJdocBlur"
@@ -129,6 +133,8 @@ const activeField = ref<Field>() // 正在编辑的字段
 const elJsonEditor = ref<HTMLElement | null>(null)
 
 const elMarkdownViewer = ref<HTMLElement | null>(null)
+
+const showFieldName = ref(false)
 
 const showFieldFullname = ref(false)
 

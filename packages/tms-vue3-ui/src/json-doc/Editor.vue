@@ -51,6 +51,10 @@ export default defineComponent({
      */
     hideFieldDescription: { type: Boolean, default: false },
     /**
+     * 显示字段名称
+     */
+    showFieldName: { type: Boolean, default: true },
+    /**
      * 显示字段路径名称
      */
     showFieldFullname: { type: Boolean, default: false },
@@ -145,6 +149,7 @@ export default defineComponent({
       hideRootTitle,
       hideRootDescription,
       hideFieldDescription,
+      showFieldName,
       showFieldFullname,
     } = props
     /**
@@ -189,6 +194,7 @@ export default defineComponent({
       hideRootTitle,
       hideRootDescription,
       hideFieldDescription,
+      showFieldName,
       showFieldFullname,
       onNodeFocus: (field: Field) => {
         debug(`节点【${field.fullname}】获得输入焦点，抛出jdocFocus事件`)
@@ -247,6 +253,16 @@ export default defineComponent({
         }
       },
     }
+    /**
+     * 切换是否显示字段名称
+     */
+    watch(
+      () => props.showFieldName,
+      (newVal) => {
+        ctx.showFieldName = newVal
+        editDoc.forceRender()
+      }
+    )
     /**
      * 切换是否显示字段的全路径名
      */

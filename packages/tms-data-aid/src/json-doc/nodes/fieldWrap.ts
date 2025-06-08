@@ -288,11 +288,13 @@ export class FieldWrap<VNode> extends Node<VNode> {
             },
             ctx.h('div', [
               field.label,
-              ctx.h(
-                'span',
-                { class: ['tvu-jdoc__field-label__field-name'] },
-                `(${field.name})`
-              ),
+              this.ctx.showFieldName === true
+                ? ctx.h(
+                    'span',
+                    { class: ['tvu-jdoc__field-label__field-name'] },
+                    `(${field.name})`
+                  )
+                : null,
             ])
           )
         )
