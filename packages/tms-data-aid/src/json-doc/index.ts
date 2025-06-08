@@ -1,6 +1,11 @@
 import { createField, Field } from './fields/index.js'
 import { JSONDocBuilder, build } from './builder.js'
-import { DocIter, DocProp, DocAsArray } from './model.js'
+import {
+  DocIter,
+  DocProp,
+  DocAsArray,
+  DocAsArrayBuildOptions,
+} from './model.js'
 
 export {
   JSONDocBuilder,
@@ -8,6 +13,7 @@ export {
   DocIter,
   DocProp,
   DocAsArray,
+  DocAsArrayBuildOptions,
   createField,
   Field,
 }

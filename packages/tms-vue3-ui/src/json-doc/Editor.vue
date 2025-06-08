@@ -127,7 +127,6 @@ export default defineComponent({
           rawSchema: matchSchema === true ? schema : null,
         })
       } else {
-        let matchSchema = typeof options === 'boolean' ? options : false
         return editDoc.build({
           rawSchema: matchSchema === true ? schema : null,
           cleanEmpty: typeof options === 'boolean' ? options : false,

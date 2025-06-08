@@ -107,10 +107,9 @@ import 'jsoneditor/dist/jsoneditor.css'
 import RandExp from 'randexp'
 import Jexl from 'jexl'
 import { marked } from 'marked'
-import { DocAsArrayBuildOptions } from 'tms-data-aid/dist/json-doc/model'
 
 const jsonDocEditor = ref<{
-  editing: (matchSchema?: boolean, options?: DocAsArrayBuildOptions) => string
+  editing: (matchSchema?: boolean, options?: any) => string
   editDoc: DocAsArray
 } | null>(null)
 

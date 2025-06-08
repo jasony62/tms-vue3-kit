@@ -489,16 +489,18 @@ export class DocAsArray {
     }
 
     const Output = Array.isArray(this._rawDoc) || format === 'aoa' ? [] : {}
+
+    /**
+     * 待处理的文档属性
+     * 为了提高处理效率
+     * 1、处理过的文档应该删除
+     */
+    const unhandledDocProps = [...this._properties]
+    // 根节点不需要处理
+    unhandledDocProps.shift()
+
     if (schemaProps.length) {
       log('根据指定的schema去除数据')
-      /**
-       * 待处理的文档属性
-       * 为了提高处理效率
-       * 1、处理过的文档应该删除
-       */
-      const unhandledDocProps = [...this._properties]
-      // 根节点不需要处理
-      unhandledDocProps.shift()
       /**
        * 根据schema生成文档，忽略文档中没有对应schema的内容
        *
@@ -566,7 +568,7 @@ export class DocAsArray {
       })
     } else {
       log('返回全部数据')
-      this._properties.forEach((docProp) => outputDocProp(docProp))
+      unhandledDocProps.forEach((docProp) => outputDocProp(docProp))
     }
 
     console.timeEnd('json-doc:build:doc')
