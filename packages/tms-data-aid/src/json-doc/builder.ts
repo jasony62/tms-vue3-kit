@@ -775,6 +775,7 @@ export type FormContext<VNode> = {
   hideRootTitle?: Boolean
   hideRootDescription?: Boolean
   hideFieldDescription?: Boolean
+  placeholderUseFieldDescription?: Boolean
   showFieldName?: Boolean
   showFieldFullname?: Boolean
   onNodeFocus?: (field: Field) => void

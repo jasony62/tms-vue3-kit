@@ -21,6 +21,7 @@ export const SampleSchema = {
       title: '昵称',
       type: 'string',
       required: true,
+      description: '填写昵称',
     },
     password: {
       title: '密码',

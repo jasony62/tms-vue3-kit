@@ -6,18 +6,19 @@
 
 通过组件调用时，支持以下`props`：
 
-| 参数              | 说明                         | 类型     | 默认值  |
-| ----------------- | ---------------------------- | -------- | ------- |
-| schema            | JSONSchema 定义              | Object   | -       |
-| value             | 要编辑的 json 文档对象       | Object   | -       |
-| fieldWrapClass    | 输入控件的包裹类             | String   | -       |
-| showFieldName     | 显示字段名称                 | Boolean  | false   |
-| showFieldFullname | 显示字段路径名称             | Boolean  | false   |
-| onMessage         | 接收处理内部消息提醒的方法   | Function | alert() |
-| autofillRequest   |                              | Function |         |
-| onFileSelect      | 选择文件的方法               | Function |         |
-| onFileUpload      | 上传文件并返回文件信息的方法 | Function |         |
-| onFileDownload    | 文件下载方法                 | Function |         |
+| 参数                           | 说明                         | 类型     | 默认值  |
+| ------------------------------ | ---------------------------- | -------- | ------- |
+| schema                         | JSONSchema 定义              | Object   | -       |
+| value                          | 要编辑的 json 文档对象       | Object   | -       |
+| fieldWrapClass                 | 输入控件的包裹类             | String   | -       |
+| placeholderUseFieldDescription | placeholder 用字段描述信息   | Boolean  | false   |
+| showFieldName                  | 显示字段名称                 | Boolean  | false   |
+| showFieldFullname              | 显示字段路径名称             | Boolean  | false   |
+| onMessage                      | 接收处理内部消息提醒的方法   | Function | alert() |
+| autofillRequest                |                              | Function |         |
+| onFileSelect                   | 选择文件的方法               | Function |         |
+| onFileUpload                   | 上传文件并返回文件信息的方法 | Function |         |
+| onFileDownload                 | 文件下载方法                 | Function |         |
 
 必须传入`schema`对象。支持`v-model`传递要编辑的 json 文档。
 

@@ -88,7 +88,9 @@ export class Input<VNode> extends FieldNode<VNode> {
     if (field.type === 'checkbox' && typeof fieldValue === 'boolean') {
       inpOps.checked = fieldValue
     } else if (field.type === 'text') {
-      inpOps.placeholder = `请输入: ${fieldName}`
+      inpOps.placeholder = ctx.placeholderUseFieldDescription
+        ? field.schemaProp.attrs.description ?? ''
+        : `请输入: ${fieldName}`
     }
 
     return inpOps

@@ -23,6 +23,12 @@
     <label
       ><input
         type="checkbox"
+        v-model="placeholderUseFieldDescription"
+      />placeholder显示字段描述</label
+    >
+    <label
+      ><input
+        type="checkbox"
         v-model="showFieldFullname"
       />是否显示字段路径名称</label
     >
@@ -60,6 +66,7 @@
         :hide-root-title="true"
         :hide-root-description="true"
         :hide-field-description="hideFieldDescription"
+        :placeholder-use-field-description="placeholderUseFieldDescription"
         :show-field-name="showFieldName"
         :show-field-fullname="showFieldFullname"
         @jdoc-focus="onJdocFocus"
@@ -132,6 +139,8 @@ const activeField = ref<Field>() // 正在编辑的字段
 const elJsonEditor = ref<HTMLElement | null>(null)
 
 const elMarkdownViewer = ref<HTMLElement | null>(null)
+
+const placeholderUseFieldDescription = ref(false)
 
 const showFieldName = ref(false)
 

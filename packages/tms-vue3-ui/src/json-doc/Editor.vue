@@ -51,6 +51,10 @@ export default defineComponent({
      */
     hideFieldDescription: { type: Boolean, default: false },
     /**
+     * placeholder用字段描述信息，默认使用字段名称
+     */
+    placeholderUseFieldDescription: { type: Boolean, default: false },
+    /**
      * 显示字段名称
      */
     showFieldName: { type: Boolean, default: true },
@@ -148,6 +152,7 @@ export default defineComponent({
       hideRootTitle,
       hideRootDescription,
       hideFieldDescription,
+      placeholderUseFieldDescription,
       showFieldName,
       showFieldFullname,
     } = props
@@ -193,6 +198,7 @@ export default defineComponent({
       hideRootTitle,
       hideRootDescription,
       hideFieldDescription,
+      placeholderUseFieldDescription,
       showFieldName,
       showFieldFullname,
       onNodeFocus: (field: Field) => {
@@ -252,6 +258,16 @@ export default defineComponent({
         }
       },
     }
+    /**
+     * placeholder用字段的描述信息，默认用字段名称
+     */
+    watch(
+      () => props.placeholderUseFieldDescription,
+      (newVal) => {
+        ctx.placeholderUseFieldDescription = newVal
+        editDoc.forceRender()
+      }
+    )
     /**
      * 切换是否显示字段名称
      */
