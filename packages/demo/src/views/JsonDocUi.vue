@@ -2,6 +2,7 @@
   <div class="flex flex-row gap-4">
     <select v-model="caseName">
       <option value="overall">整体示例</option>
+      <option value="select">选择题</option>
       <option value="array-simple">数组的项目简单类型</option>
       <option value="array-object">数组的项目是对象</option>
       <option value="array-object-pattern">数组的项目是模板属性对象</option>
@@ -16,6 +17,7 @@
       <option value="defval">默认值</option>
       <option value="isoneof">isoneof</option>
       <option value="paste">粘贴</option>
+      <option value="temp01">temp01</option>
     </select>
     <label
       ><input type="checkbox" v-model="showFieldName" />是否显示字段名称</label

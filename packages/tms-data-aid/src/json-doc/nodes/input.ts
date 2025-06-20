@@ -87,7 +87,7 @@ export class Input<VNode> extends FieldNode<VNode> {
     /**设置核选框的值*/
     if (field.type === 'checkbox' && typeof fieldValue === 'boolean') {
       inpOps.checked = fieldValue
-    } else if (field.type === 'text') {
+    } else if (field.type === 'text' || field.type === 'textarea') {
       inpOps.placeholder = ctx.placeholderUseFieldDescription
         ? field.schemaProp.attrs.description ?? ''
         : `请输入: ${fieldName}`
@@ -145,11 +145,11 @@ export class Input<VNode> extends FieldNode<VNode> {
         }
         // radio/checkbox
         let n1 = this.ctx.h(components[field.choiceType].tag, props)
-        // label
+        // label，如果没有指定用value作为label
         let n2 = this.ctx.h(
           components.fieldLabel.tag,
           { for: `${field.fullname}_${item.value}` },
-          item.label
+          item.label ?? item.value
         )
         // wrap
         let n3 = this.ctx.h('div', [n1, n2])

@@ -551,7 +551,9 @@ class Stack<VNode> {
     this.fieldNames.push(pair.field.fullname)
   }
 
-  /**堆栈中的所有字段生成节点*/
+  /**
+   * 堆栈中的所有字段生成节点
+   */
   shrink(): VNode {
     debug('shrink - 执行堆栈收缩，生成连接字段节点')
     let joint, rootVNode

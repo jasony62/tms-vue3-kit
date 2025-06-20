@@ -52,7 +52,7 @@ export class Select<VNode> extends Input<VNode> {
         node.attrOrProps = () => {
           return { value: choice.value }
         }
-        children.push(node.createElem([choice.label]))
+        children.push(node.createElem([choice.label ?? choice.value]))
       }
     })
 
