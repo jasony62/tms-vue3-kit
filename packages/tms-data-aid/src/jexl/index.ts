@@ -23,6 +23,24 @@ Jexl.addTransform('parseFloat', (val) =>
   Array.isArray(val) ? val.map((v) => parseFloat(v)) : parseFloat(val)
 )
 
+/**
+ * 将字符串解析为JSON数据对象
+ *
+ * ```
+ * 'str1 | JSONParse()'
+ * ```
+ */
+Jexl.addTransform('JSONParse', (val: string) => {
+  if (val && typeof val === 'string') {
+    try {
+      return JSON.parse(val)
+    } catch {
+      return val
+    }
+  }
+  return val
+})
+
 Jexl.addTransform('sum', (val: number[]) =>
   Array.isArray(val) ? val.reduce((a: number, b: number) => a + b, 0) : 0
 )

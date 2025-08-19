@@ -48,7 +48,14 @@ class JsonTransformer {
           this._parameters
         )
         // 处理JSON字符串
-        if (/^\{{2,3}\s*JSONstringify/.test(value)) {
+        let re
+        if (Array.isArray(this._delimiters) && this._delimiters.length === 2) {
+          const [begin, end] = this._delimiters
+          re = new RegExp(`^${begin}\s*JSONstringify`)
+        } else {
+          re = new RegExp('^{{2,3}s*JSONstringify')
+        }
+        if (re.test(value)) {
           try {
             return JSON.parse(newValue)
           } catch (e) {
