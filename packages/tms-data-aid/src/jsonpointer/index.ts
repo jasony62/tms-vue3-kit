@@ -1,5 +1,6 @@
 import JSONPointer from 'jsonpointer'
-import lodashSet from 'lodash.set'
+// import lodashSet from 'lodash.set'
+import { set } from 'es-toolkit/compat'
 
 /**
  * lodash兼容的路径
@@ -27,7 +28,8 @@ class JSONPointerLodash {
     //     } else JSONPointer.set(object, pp, undefined)
     // }
     // JSONPointer.set(object, pointer, value)
-    lodashSet(object, dotPath, value)
+    // lodashSet(object, dotPath, value)
+    set(object, dotPath, value)
   }
 }
 

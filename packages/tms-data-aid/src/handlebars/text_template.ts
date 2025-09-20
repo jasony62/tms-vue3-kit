@@ -20,7 +20,24 @@ export async function textRender(
     setDelimiters(Handlebars, delimiters)
   }
 
-  const rewrited = Handlebars.compile(template)(parameters)
+  let rewrited = Handlebars.compile(template)(parameters)
+
+  /**
+   * 将数据还原为原始值
+   */
+  let re
+  if (Array.isArray(delimiters) && delimiters.length === 2) {
+    const [begin] = this._delimiters
+    re = new RegExp(`^${begin}\s*JSONstringify`)
+  } else {
+    re = new RegExp('^{{2,3}s*JSONstringify')
+  }
+  if (re.test(template)) {
+    try {
+      let parsed = JSON.parse(rewrited)
+      rewrited = parsed
+    } catch (e) {}
+  }
 
   if (reserveDelimiters !== true) {
     resetDelimiters(Handlebars)
