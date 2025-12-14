@@ -35,10 +35,22 @@ Object.keys(ObjectHelpers).forEach((name) => {
   Handlebars.registerHelper(name, ObjectHelpers[name])
 })
 
-const Helpers = {}
+// const Helpers = {}
 
-Object.keys(Helpers).forEach((name) => {
-  Handlebars.registerHelper(name, Helpers[name])
+// Object.keys(Helpers).forEach((name) => {
+//   Handlebars.registerHelper(name, Helpers[name])
+// })
+
+/**
+ * 直接返回对象
+ * 通知jsonRender将字符串转换为JSON值
+ *
+ * ```handlebars
+ * {{JSONLiteral value}}
+ * ```
+ */
+Handlebars.registerHelper('JSONLiteral', function (value) {
+  return JSON.stringify(value)
 })
 
 export { Handlebars }

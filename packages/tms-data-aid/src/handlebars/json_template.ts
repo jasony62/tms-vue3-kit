@@ -2,6 +2,9 @@ import { resetDelimiters, setDelimiters } from './delimiters.js'
 import { RewriteOptions } from './types.js'
 
 class JsonTransformer {
+  /**
+   * 转换后的值
+   */
   private _transformedValue: any
 
   constructor(
@@ -26,6 +29,40 @@ class JsonTransformer {
     return new RegExp(`{{.*}}`).test(value)
   }
   /**
+   * 检查是否是JSONstringify模板
+   *
+   * @deprecated
+   * @param valueTemplate
+   * @returns
+   */
+  private isJSONstringify(valueTemplate: string) {
+    let re
+    if (Array.isArray(this._delimiters) && this._delimiters.length === 2) {
+      const [begin, end] = this._delimiters
+      re = new RegExp(`^${begin}\s*JSONstringify`)
+    } else {
+      re = new RegExp('^{{2,3}s*JSONstringify')
+    }
+    return re.test(valueTemplate)
+  }
+  /**
+   * 检查是否是JSONLiteral模板
+   *
+   * @param valueTemplate
+   * @returns
+   */
+  private isJSONLiteral(valueTemplate: string) {
+    let re
+    if (Array.isArray(this._delimiters) && this._delimiters.length === 2) {
+      const [begin, end] = this._delimiters
+      re = new RegExp(`^${begin}\s*JSONLiteral`)
+    } else {
+      re = new RegExp('^{{2,3}s*JSONLiteral')
+    }
+    return re.test(valueTemplate)
+  }
+  /**
+   * 递归转换值
    *
    * @param value
    * @returns
@@ -48,14 +85,15 @@ class JsonTransformer {
           this._parameters
         )
         // 处理JSON字符串
-        let re
-        if (Array.isArray(this._delimiters) && this._delimiters.length === 2) {
-          const [begin, end] = this._delimiters
-          re = new RegExp(`^${begin}\s*JSONstringify`)
-        } else {
-          re = new RegExp('^{{2,3}s*JSONstringify')
-        }
-        if (re.test(value)) {
+        // let re
+        // if (Array.isArray(this._delimiters) && this._delimiters.length === 2) {
+        //   const [begin, end] = this._delimiters
+        //   re = new RegExp(`^${begin}\s*JSONstringify`)
+        // } else {
+        //   re = new RegExp('^{{2,3}s*JSONstringify')
+        // }
+        // if (re.test(value)) {
+        if (this.isJSONLiteral(value) || this.isJSONstringify(value)) {
           try {
             return JSON.parse(newValue)
           } catch (e) {
