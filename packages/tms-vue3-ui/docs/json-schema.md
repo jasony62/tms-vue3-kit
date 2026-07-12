@@ -1,208 +1,196 @@
-# JSONSchema 编辑器（json-schema）
+# JsonSchema Schema 编辑器
 
-生成`JSONSchema`的编辑器。`JSONSchema`本身是个`json`格式的数据，主要包含自定义的属性（property）和按照`JSONSchema`标准描述每个属性的关键字（keywords）。
+一个可视化编辑 **JSON Schema** 的组件。支持为 schema 添加属性、配置属性类型、
+设置默认值、选择列表、属性依赖等。
 
-## 核心功能
+## 注册
 
-`JSONSchema`支持 7 种基本属性数据类型，包括：`string`，`number`，`integer`，`object`，`array`，`boolean`，`null`，扩展`json`类型用于直接编辑 json 格式数据。针对每种类型，`JSONSchema`定义了若干关键字（keywords），用来描述每种类型的数据规范化要求，例如：`minLength`和`maxLength`限制字符串类型的长度等。（参考：[Understanding JSON Schema](https://json-schema.org/understanding-json-schema/index.html))
-
-`JSONSchema`标准对`string`类型提供了格式（format）关键字，说明输入格式要求，`json-schema`将`format`扩展到了`object`类型，例如，限制文件的类型和大小等。`JSONSchema`内置实现了一些常用格式扩展信息，例如：文件。组件的使用者也可以通过`setFormatAttrsComp`方法，指定特定格式对应的扩展信息编辑组件。格式扩展信息记录在`formatAttrs`关键字中。自定义的格式扩展信息编辑组件必须实现`defaultFormatAttrs`方法，提供扩展信息的默认设置。
-
-## 内置支持的格式
-
-| 基础类型（type） | 支持的格式（format） | 说明             |
-| ---------------- | -------------------- | ---------------- |
-| string           | name                 | 用户名           |
-| string           | mobile               | 手机号           |
-| string           | email                | 电子邮件         |
-| object           | file                 | 文件             |
-| object           | image                | 图片             |
-| object           | score                | 打分             |
-| object           | url                  | 外部链接         |
-| integer          | date-time            | 日期时间的秒表示 |
-| string           | date                 | 日期             |
-| string           | time                 | 时间             |
-
-## 设置必填（未按规范实现）
-
-指定某些属性为必填字段。
-
-[Required Properties](https://json-schema.org/understanding-json-schema/reference/object.html#id3)
-
-## 选项
-
-属性的类型为`integer`、`number`、`string`、`array`，出现设置【选项模式】。
-
-【选项模式】要支持`enum`，`oneOf`和`anyOf`几种情况。
-
-选项中的值固定为包含`label`和`value`属性的对象。
-
-```json
-[
-  {
-    "label": "男",
-    "value": "male"
-  },
-  {
-    "label": "女",
-    "value": "female"
-  }
-]
-```
-
-支持设置要求的选项数量`minItems`和`maxItems`。
-
-## 属性依赖
-
-用`existIf`指定属性间的依赖关系，只有当某个（或某些）属性的值满足条件时，属性才存在（出现在表达中）。
-
-用`properties`定义属性的取值条件，多个属性取值条件是和的关系（同时满足）。
-
-```json
-{
-  "properties": { "prop1": { "const": "value" }, "prop2": { "const": "value" } }
-}
-```
-
-用`oneOf`定义多组条件间任意满足一项的情况，多个条件放在数组中。
-
-```json
-{
-  "oneOf": [
-    { "properties": { "prop1": { "const": "value" } } },
-    { "properties": { "prop2": { "const": "value" } } }
-  ]
-}
-```
-
-用`allOf`定义多组条件间同时满足的情况，多个条件放在数组中。
-
-```json
-{
-  "allOf": [
-    { "properties": { "prop1": { "const": "value" } } },
-    { "properties": { "prop2": { "const": "value" } } }
-  ]
-}
-```
-
-支持条件嵌套。
-
-```json
-{
-  "allOf": [
-    {
-      "anyOf": [
-        { "prop1": { "const": "value" } },
-        { "prop2": { "const": "value" } }
-      ]
-    },
-    { "properties": [{ "prop3": { "const": "value" } }] }
-  ]
-}
-```
-
-注：目前，仅支持通过直接填入规则`JSON`文本的方式定义属性依赖规则。
-
-[dependentRequired](https://json-schema.org/understanding-json-schema/reference/conditionals.html#id4)
-
-[dependentSchemas](https://json-schema.org/understanding-json-schema/reference/conditionals.html#id5)
-
-[If-Then-Else](https://json-schema.org/understanding-json-schema/reference/conditionals.html#id6)
-
-[Property dependencies](https://json-schema.org/understanding-json-schema/reference/object.html#id7)
-
-[Constant values](https://json-schema.org/understanding-json-schema/reference/generic.html#id5)
-
-## 选项依赖
-
-属性值的可选项根据其他属性的值决定，例如：省市属性的值为北京时，区县属性的可选值（enum）只有北京下的区县。
-
-在区县属性下建立选项组，每个选项组匹配省市属性下的某个值。（为了降低复杂度，不要求所有的属性组都关联同一个属性下的不同选项。）
-
-```json
-{
-  "enumGroups": [
-    {
-      "id": "选项组id",
-      "label": "选项组名称",
-      "assocEnum": { "property": "关联的属性id", "value": "关联属性的取值" }
-    }
-  ],
-  "enum": [
-    { "label": "选项1", "value": "选项1的值", "group": "选项组的id" },
-    { "label": "选项2", "value": "选项2的值", "group": "选项组的id" }
-  ]
-}
-```
-
-## 属性值自动填充
-
-通过`autofill`可以定义为属性通过调用 API 获取数据的规则。
-
-| 字段       | 说明                                                                                                              |
-| ---------- | ----------------------------------------------------------------------------------------------------------------- |
-| url        | API 的地址。                                                                                                      |
-| method     | HTTP 请求方法，支持 POST 和 GET。                                                                                 |
-| params     | 设置 url 中的查询参数。数组，可包含多个定义。                                                                     |
-| --name     | 查询参数的名称。                                                                                                  |
-| --path     | 从 schema 对应的文档中获取查询参数值的路径。                                                                      |
-| --vaule    | 查询参数的值。（用于指定固定值）                                                                                  |
-| body       | 设置 POST 请求的消息体。数组，可包含多个定义。消息体为 JSON 对象。                                                |
-| --bodyPath | 消息对象中的属性名称。                                                                                            |
-| --path     | 从 schema 对应的文档中获取查询参数值的路径。                                                                      |
-| --value    | 消息对象中属性的值。（用于指定固定值）                                                                            |
-| target     | 指定获取的数据的填充位置，作为填入只（value）或作为选项（items）的值。                                            |
-| runPolicy  | 执行运行策略。构造表单时执行一次（onCreate）。依赖的参数发生变化时执行（onParamChange）。用户主动更新（onUser）。 |
-
-注：查询参数和消息体定义中的路径遵循`lodash`属性名的命名规则，支持多级，支持数组。
-
-注：`autofill`不是`JSONSchema`标准中的内容。
-
-## 文件属性
-
-待补充
-
-## 扩展属性定义
-
-在实际的项目中可能存在两类扩展需求：1、规范中的关键字（keywords）不满足要求需要扩展，例如：指定某些属性只读；2、某些常用类型对象的输入限制条件，例如：手机号码、文件等。
-
-`json-schema`通过`slot`实现关键字扩展，插槽名称为`extattrs`，示例代码如下：
-
-```
-<tms-json-schema schema="schema" :on-message="onMessage" :root-name="'$'">
-  <template #extattrs="{ attrs }">
-    <div>
-      <label><input type="checkbox" v-model="attrs.readonly" />不允许编辑</label>
-    </div>
-    <div>
-      <label><input type="checkbox" v-model="attrs.groupable" />可否分组</label>
-    </div>
-  </template>
- </tms-json-schema>
-```
-
-关键字扩展适用于对所有属性统一添加某种信息。
-
-注：`JSONSchema`新版本规范中已经支持`readOnly`和`writeOnly`属性。
-
-## 使用组件
-
-| 组件属性  | 说明                                                     | 类型     | 必填 | 默认值 |
-| --------- | -------------------------------------------------------- | -------- | ---- | ------ |
-| schema    | 要编辑的`JSONSchema`对象。编辑过程中不会改变传入的对象。 | object   | 否   |        |
-| onMessage | 显示提示信息。                                           | function | 否   |        |
-| onUpload  | 为文件属性提供上传模版文件的方法。                       | function | 否   |        |
-| rootName  | 属性路径名的根节点名称。请参考`JSON Path`的定义。        | sting    | 否   | $      |
-
-```js
+```ts
+import { createApp } from 'vue'
 import { JsonSchema } from 'tms-vue3-ui'
+
+const app = createApp(App)
+app.use(JsonSchema.install) // 注册为 <tms-json-schema />
+app.mount('#app')
 ```
 
-```html
-<json-schema :schema="jsonSchema"></json-schema>
+样式：
+
+```ts
+import 'tms-vue3-ui/dist/es/json-schema/style/json-schema.css'
 ```
 
-# 参考
+## 基本用法
 
-https://json-schema.org
+```vue
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { JSONSchemaBuilder } from 'tms-vue3-ui'
+
+const schemaEditor = ref<{ editing: () => object } | null>(null)
+
+// 初始 schema（为空则新建一个空 schema）
+const schema = ref({
+  type: 'object',
+  properties: {},
+})
+
+onMounted(() => {
+  // 使用 JSONSchemaBuilder 构造复杂 schema
+  const builder = new JSONSchemaBuilder()
+  builder.addProp('name', { type: 'string' })
+  builder.addProp('age', { type: 'number' })
+  schema.value = builder.schema
+})
+
+// 获取最终 schema
+const getResult = () => {
+  const result = schemaEditor.value?.editing()
+  console.log('当前 schema', result)
+}
+</script>
+
+<template>
+  <tms-json-schema ref="schemaEditor" :schema="schema" />
+  <button @click="getResult">查看结果</button>
+</template>
+```
+
+## Props
+
+| 属性              | 类型             | 默认值 | 说明                         |
+| ----------------- | ---------------- | ------ | ---------------------------- |
+| `schema`          | Object           | —      | 初始 JSON Schema             |
+| `onUpload`        | Function         | —      | 文件上传回调（上传图标等）  |
+| `onMessage`       | Function         | —      | 文本消息回调                 |
+| `onPaste`         | Function         | —      | 粘贴数据的回调（接收 SchemaProp） |
+
+## Slots
+
+| 名称          | 说明                                 |
+| ------------- | ------------------------------------ |
+| `extattrs`    | 扩展属性区（`attrs` 中可放自定义配置） |
+
+## 支持的属性类型
+
+| 类型      | 说明                           |
+| --------- | ------------------------------ |
+| `string`  | 字符串                          |
+| `number`  | 数字                            |
+| `integer` | 整数                            |
+| `boolean` | 布尔                            |
+| `object`  | 对象（支持嵌套子属性、patternProperties）|
+| `array`   | 数组（items 类型可选）          |
+| `null`    | null                           |
+| `*`        | 自动推断（根据 default 推断）   |
+
+## 常用扩展属性
+
+| 属性             | 说明                         |
+| ---------------- | --------------------------- |
+| `title`          | 显示名                       |
+| `description`    | 描述                         |
+| `default`        | 默认值                       |
+| `enum`           | 枚举可选值                   |
+| `oneOf`          | 单选枚举值                   |
+| `readOnly`       | 是否只读                     |
+| `minItems / maxItems` | 数组最小/最大元素数      |
+| `minLength / maxLength` | 字符串最小/最大长度    |
+| `minimum / maximum` | 数字最小/最大值           |
+| `format`         | 扩展格式化（email/uri 等）   |
+
+## 返回 schema
+
+调用组件的 `editing()` 方法可获取当前正在编辑的 schema 对象：
+
+```ts
+const currentSchema = schemaEditor.value?.editing()
+// => { type: 'object', properties: { ... } }
+```
+
+## 导入的类型
+
+从 `tms-vue3-ui` 导出的常用类型（这些类型在底层实际来自 `tms-data-aid`）：
+
+- `JSONSchemaBuilder` — 快速构建一个基础 schema
+- `SchemaProp` — 单个属性对象的类型描述
+- `SchemaIter` — schema 的迭代器
+
+```ts
+import { JSONSchemaBuilder, SchemaProp } from 'tms-vue3-ui'
+
+const builder = new JSONSchemaBuilder()
+builder.addProp('name', { type: 'string', title: '姓名' })
+builder.addProp('age', { type: 'integer', title: '年龄' })
+
+const schema = builder.schema
+```
+
+## 修改默认样式
+
+组件默认样式通过以 `.tvu-jse` 为前缀的 CSS 类实现，
+在 `tms-vue3-ui/dist/es/json-schema/style/json-schema.css` 中定义，
+使用了 Tailwind 的 utility class（如 `p-2`, `flex`, `flex-row` 等）。
+
+关键 CSS 类：
+
+| 类名                              | 作用                                    |
+| --------------------------------- | --------------------------------------- |
+| `.tvu-jse.tvu-jse--layout-default` | 根容器（左侧属性 + 中间字段 + 右侧依赖）|
+| `.tvu-jse__properties`            | 左侧属性列表区                          |
+| `.tvu-jse__property`              | 单个属性项                              |
+| `.tvu-jse__property--active`      | 当前选中的属性                          |
+| `.tvu-jse__property--highlight`   | 高亮属性                                |
+| `.tvu-jse__property__actions`     | 属性操作区（添加 / 删除等按钮）       |
+| `.tvu-jse__property-fields`       | 中间字段编辑区                          |
+| `.tvu-jse__field`                 | 单字段编辑容器                          |
+| `.tvu-jse__field input, .tvu-jse__field select, .tvu-jse__field textarea` | 表单输入控件 |
+| `.tvu-jse__checkbox`              | 复选框容器                              |
+| `.tvu-jse__upload`                | 文件上传区                              |
+| `.tvu-jse__file-attrs`            | 文件属性编辑区                          |
+| `.tvu-jse__field--json`           | JSON 类型的字段（textarea）           |
+| `.tvu-jse__form__actions`         | 表单底部按钮区                          |
+| `.tvu-jse__enum-config`           | 枚举配置区                              |
+| `.tvu-jse__enum-groups / .tvu-jse__enum-group` | 枚举分组 |
+| `.tvu-jse__enum-options / .tvu-jse__enum-option` | 枚举选项   |
+| `.tvu-jse__dependencies`          | 属性依赖区                              |
+| `.tvu-jse__dependencies__rule-group` | 依赖规则分组                    |
+| `.tvu-jse__dependencies__rule`    | 单条依赖规则                            |
+| `.tvu-jse__dependencies__rule-group-actions` | 依赖操作按钮区              |
+| `.tvu-jse__event-config`          | 事件配置区                              |
+
+覆盖示例：
+
+```css
+/* 让左侧属性区的最大宽度更大 */
+.tvu-jse__properties {
+  min-width: 240px;
+}
+
+/* 选中属性的高亮样式 */
+.tvu-jse__property--active {
+  background: #e6f7ff;
+  border-right: 2px solid #1890ff;
+}
+
+/* 调整输入框外观 */
+.tvu-jse__field input,
+.tvu-jse__field select,
+.tvu-jse__field textarea {
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  padding: 4px 8px;
+}
+
+/* 禁用输入框的样式 */
+.tvu-jse__field input:disabled {
+  background: #f5f5f5;
+  color: #999;
+}
+
+/* JSON 字段（textarea）的最小高度 */
+.tvu-jse__field--json textarea.tvu-input {
+  min-height: 200px;
+  font-family: Menlo, Consolas, monospace;
+}
+```

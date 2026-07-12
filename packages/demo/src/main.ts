@@ -5,10 +5,10 @@ import { Frame, Flex, Card, Text, JsonSchema } from 'tms-vue3-ui'
 import router from './router'
 import './index.css'
 
-// import 'tms-vue3-ui/dist/es/frame/style/index.css'
-// import 'tms-vue3-ui/dist/es/flex/style/index.css'
-// import 'tms-vue3-ui/dist/es/text/style/index.css'
-// import 'tms-vue3-ui/dist/es/card/style/index.css'
+import 'tms-vue3-ui/dist/es/frame/style/frame.css'
+import 'tms-vue3-ui/dist/es/flex/style/flex.css'
+import 'tms-vue3-ui/dist/es/text/style/text.css'
+import 'tms-vue3-ui/dist/es/card/style/card.css'
 
 localStorage.debug = '*'
 

@@ -20,7 +20,7 @@
 
 <script setup lang="ts">
 import { SmsCode } from 'tms-vue3-ui'
-import 'tms-vue3-ui/dist/es/sms-code/style/tailwind.scss'
+import 'tms-vue3-ui/dist/es/sms-code/style/sms-code.css'
 import { fnSendCode, fnVerify, schema, fnSendSmsCode } from '@/data/smscode'
 
 const showSmsCodeDialog = () => {

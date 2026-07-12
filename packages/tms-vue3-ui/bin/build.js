@@ -2,7 +2,9 @@ const path = require('path')
 const { defineConfig, build } = require('vite')
 const vue = require('@vitejs/plugin-vue')
 const vueJsx = require('@vitejs/plugin-vue-jsx')
-const sass = require('sass')
+const postcss = require('postcss')
+const postcssNested = require('postcss-nested')
+const tailwindcss = require('@tailwindcss/postcss')
 const fs = require('fs')
 const { resolve } = require('path')
 
@@ -10,14 +12,14 @@ const format = 'es'
 const scriptRegExp = /\.(ts|tsx)$/
 const isDir = (dir) => fs.lstatSync(dir).isDirectory()
 const isScript = (path) => scriptRegExp.test(path) && path !== 'env.d.ts'
-const isScss = (path) => /\.scss/.test(path)
+const isCss = (path) => /\.css$/.test(path)
 const isCopied = (path) => /\.(js)/.test(path)
 
 // 打包的入口文件
 const baseEntryDir = path.resolve(__dirname, '../src')
 // 出口文件夹
 const baseOutDir = path.resolve(__dirname, `../dist/${format}`)
-// vite基础配置
+// vite 基础配置（JS 构建时不加载 postcss.config.js 中的 Tailwind 插件）
 const baseConfig = defineConfig({
   configFile: false,
   publicDir: false,
@@ -27,11 +29,14 @@ const baseConfig = defineConfig({
       '@': baseEntryDir,
     },
   },
+  css: {
+    postcss: null,
+  },
 })
-// rollup配置
+// rollup 配置
 const rollupOptions = {
   // 确保外部化处理那些你不想打包进库的依赖
-  external: ['vue'],
+  external: ['vue', 'tms-vue3', 'tms-data-aid', 'debug', 'jsonpointer', 'randexp'],
 }
 
 // 根据文件所在路径，获得输出路径
@@ -60,22 +65,20 @@ const directCopy = async (dir, file) => {
   fs.copyFileSync(entry, outFile)
 }
 
-// 生成样式文件
+// 生成样式文件（使用 PostCSS + postcss-nested + @tailwindcss/postcss 编译）
 const buildStyle = async (dir, file) => {
-  let entry = resolve(dir, file)
-  let result = await sass.compileAsync(entry)
+  const entry = resolve(dir, file)
+  const css = fs.readFileSync(entry, 'utf-8')
+  const result = await postcss([postcssNested(), tailwindcss()]).process(css, {
+    from: entry,
+    to: file,
+  })
 
-  let subDir = getSubDir(dir)
-  let outDir = `${baseOutDir}${subDir}/style`
+  const subDir = getSubDir(dir)
+  const outDir = `${baseOutDir}${subDir}/style`
   if (!fs.existsSync(outDir)) await fs.mkdirSync(outDir, { recursive: true })
 
-  let outFile
-  if (file === 'tailwind.scss') {
-    outFile = `${outDir}/${file}`
-  } else {
-    outFile = `${outDir}/${file.split('.').shift()}.css`
-  }
-
+  const outFile = `${outDir}/${file}`
   await fs.writeFileSync(outFile, result.css)
 }
 
@@ -120,7 +123,7 @@ const travel = async (dir) => {
         await buildComponent(dir, file)
       }
       // 处理样式文件
-      if (isScss(file)) {
+      if (isCss(file)) {
         await buildStyle(dir, file)
       }
     })

@@ -1,26 +1,15 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import styleImport from 'vite-plugin-style-import'
 import { resolve } from 'path'
 
 export default defineConfig({
-  plugins: [
-    vue(),
-    styleImport({
-      libs: [
-        {
-          libraryName: 'tms-vue3-ui',
-          // esModule: true,
-          resolveStyle: (name) => {
-            if (name === 'json-doc') return ''
-            if (name === 'json-schema-factory')
-              return `tms-vue3-ui/dist/es/json-schema/style/index.css`
-            return `tms-vue3-ui/dist/es/${name}/style/index.css`
-          },
-        },
-      ],
-    }),
-  ],
+  plugins: [vue()],
+  css: {
+    transformer: 'postcss',
+  },
+  build: {
+    cssMinify: false,
+  },
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),

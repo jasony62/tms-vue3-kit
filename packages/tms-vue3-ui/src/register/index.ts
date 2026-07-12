@@ -25,7 +25,7 @@ function showAsDialog(options: any) {
  * @param {*} App
  */
 function install(app: App) {
-  app.component('tms-regiser', Register)
+  app.component('tms-register', Register)
 }
 
 Register.install = install

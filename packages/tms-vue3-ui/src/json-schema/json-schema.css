@@ -1,5 +1,9 @@
-@import '../style/tailwind.common.scss';
-@import './index.scss';
+@import '../style/tailwind.css';
+
+.tvu-jse.tvu-jse--layout-default {
+  display: flex;
+  gap: 1rem;
+}
 
 .tvu-jse__properties {
   min-width: 16rem;

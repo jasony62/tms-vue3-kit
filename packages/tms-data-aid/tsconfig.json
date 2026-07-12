@@ -4,6 +4,7 @@
     "target": "esnext",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
+    "strict": false,
     "noImplicitAny": false,
     "removeComments": true,
     "preserveConstEnums": true,

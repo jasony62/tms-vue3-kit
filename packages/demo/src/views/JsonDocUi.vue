@@ -109,7 +109,7 @@
 <script setup lang="ts">
 import { JsonDoc } from 'tms-vue3-ui'
 import { Field, DocAsArray } from 'tms-vue3-ui/dist/es/json-doc'
-import 'tms-vue3-ui/dist/es/json-doc/style/tailwind.scss'
+import 'tms-vue3-ui/dist/es/json-doc/style/json-doc.css'
 import { nextTick, onMounted, reactive, ref, watch } from 'vue'
 import JSONEditor from 'jsoneditor'
 import 'jsoneditor/dist/jsoneditor.css'
@@ -383,7 +383,7 @@ const onChange = async (fieldName: string, editingDoc: any) => {
 }
 </script>
 
-<style lang="scss">
+<style>
 .jsoneditor {
   .jsoneditor-transform,
   .jsoneditor-poweredBy {

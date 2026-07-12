@@ -1,49 +1,117 @@
-# 卡片（card）
+# Card 卡片
 
-用卡片的形式显示信息，包括：图片，标题，描述。可以通过插槽进行定制。
+通用卡片组件，支持缩略图、标题、描述、底部操作区，可通过 `url` / `to` 实现点击跳转。
 
-## 使用
+## 注册
 
-```js
-import Vue from 'vue'
-import { Flex, Card } from 'tms-vue-ui'
-Vue.use(Flex).use(Card)
+```ts
+import { createApp } from 'vue'
+import { Card } from 'tms-vue3-ui'
+
+const app = createApp(App)
+app.use(Card)  // 注册为 <tms-card />
+app.mount('#app')
 ```
 
+样式：
+
+```ts
+import 'tms-vue3-ui/dist/es/card/style/card.css'
 ```
-<tms-card></tms-card>
+
+## 基本用法
+
+```vue
+<template>
+  <tms-card
+    thumb="/images/demo.png"
+    title="产品卡片"
+    desc="这是产品的描述信息"
+    :gap="4"
+  />
+</template>
 ```
 
-## 属性（props）
+## 带插槽的用法
 
-| 参数       | 说明                                               | 类型   | 默认值  |
-| ---------- | -------------------------------------------------- | ------ | ------- |
-| thumb      | 左侧图片 URL                                       | string | boolean | - |
-| title      | 标题                                               | string | -       |
-| desc       | 描述                                               | string | -       |
-| gap        | 头，主体和脚的间隙                                 | number | 2       |
-| gapMain    | 缩略图和内容的间隙                                 | number | 2       |
-| gapContent | 内容中标题，描述和底部内容的间隙                   | number | 2       |
-| back-color | 背景底色                                           | string | #fffff  |
-| desc-color | 描述文字颜色                                       | string | #666666 |
-| to         | 点击后跳转的目标路由对象，同 vue-router 的 to 属性 | object |         |
-| url        | 点击后跳转的链接地址                               | string |         |
+```vue
+<template>
+  <tms-card back-color="#fff">
+    <template #thumb>
+      <img src="/images/custom.png" />
+    </template>
+    <template #title>
+      <b>自定义标题</b>
+    </template>
+    <template #desc>
+      <span>自定义描述</span>
+    </template>
+    <template #bottom>
+      <tms-flex :elastic-items="[1]">
+        <span>作者</span>
+        <span>2025-01-01</span>
+      </tms-flex>
+    </template>
+  </tms-card>
+</template>
+```
 
-如果`thumb`未指定或值是布尔值`false`，不生成`thumb`元素。
+## Props
 
-卡片在第一层从上到下分为：`header`，`main`和`footer`三个区域，`header`和`footer`默认没有内容，用`tms-flex`包裹，`gap`参数和`gap`对应。
+| 属性          | 类型              | 默认值   | 说明                                       |
+| ------------- | ----------------- | -------- | ------------------------------------------ |
+| `thumb`       | String / Boolean  | —        | 缩略图 URL；`false` 时不显示缩略图         |
+| `title`       | String            | —        | 卡片标题（当没有 #title 插槽时使用）       |
+| `desc`        | String            | —        | 卡片描述文本（当没有 #desc 插槽时使用）    |
+| `gap`         | Number            | `2`      | 卡片整体各区块的间距                       |
+| `gapMain`     | Number            | `2`      | 缩略图与内容区之间的间距                   |
+| `gapContent`  | Number            | `2`      | 标题 / 描述 / 底部之间的间距               |
+| `backColor`   | String            | `#ffffff`| 卡片背景色                                 |
+| `descColor`   | String            | `#666666`| 描述文本颜色                               |
+| `url`         | String            | —        | 点击后跳转的 URL（`window.location.href`）|
+| `to`          | Object            | —        | 点击后通过 `$router.push(to)` 路由跳转     |
 
-`main`从左到右分为`thumb`和`content`两个区域，用`tms-flex`包裹，`gap`参数和`gapMain`对应。
+## Slots
 
-`content`从上到下分为`title`，`desc`和`bottom`三个区域，用`tms-flex`包裹，`gap`参数和`gapContent`对应。
+| 名称       | 说明                |
+| ---------- | ------------------- |
+| `header`   | 卡片顶部内容        |
+| `thumb`    | 缩略图区域          |
+| `title`    | 标题区域            |
+| `desc`     | 描述文本区域        |
+| `bottom`   | 底部操作区          |
+| `footer`   | 卡片底部内容        |
 
-## 插槽（slots）
+## 点击行为
 
-| 名称   | 说明           |
-| ------ | -------------- |
-| header | 自定义顶部内容 |
-| footer | 自定义底部内容 |
-| thumb  | 自定义图片内容 |
-| title  | 自定义标题内容 |
-| desc   | 自定义描述内容 |
-| bottom | 自定义底部内容 |
+- 如果同时设置 `url` 和 `to`，优先响应 `url`。
+- 没有设置跳转时，整张卡片可点击但不会发生跳转，适合用于受控场景。
+
+## 修改默认样式
+
+组件的默认样式通过以 `.tms-card` 为前缀的 CSS 类实现，
+在 `tms-vue3-ui/dist/es/card/style/card.css` 中定义。
+
+关键 CSS 类：
+
+| 类名                            | 作用                 |
+| ------------------------------- | -------------------- |
+| `.tms-card`                     | 卡片根容器           |
+| `.tms-card__thumb`              | 缩略图区域           |
+| `.tms-card__item`               | 卡片子区域项         |
+
+覆盖示例：
+
+```css
+/* 让整张卡片有圆角和阴影 */
+.tms-card {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* 缩略图固定高度 */
+.tms-card .tms-card__thumb {
+  height: 160px;
+  object-fit: cover;
+}
+```

@@ -9,29 +9,24 @@
   },
   "dependencies": {
     "jexl": "^2.3.0",
-    "jsoneditor": "10.1.2",
-    "marked": "^15.0.4",
+    "jsoneditor": "10.4.3",
+    "marked": "^18.0.6",
     "randexp": "^0.5.3",
     "tms-vue3": "workspace:*",
     "tms-vue3-ui": "workspace:*",
     "tms-data-aid": "workspace:*",
-    "vue": "3.5.13",
-    "vue-router": "4"
+    "vue": "3.5.39",
+    "vue-router": "5"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.2",
     "@types/jexl": "^2.3.4",
-    "@types/jsoneditor": "9.9.5",
-    "@types/node": "22.7.4",
-    "@vitejs/plugin-vue": "5.2.1",
-    "autoprefixer": "10.4.20",
-    "postcss": "8.4.49",
-    "sass": "1.83.0",
-    "stylelint": "16.10.0",
-    "stylelint-config-standard": "36.0.1",
-    "tailwindcss": "3.4.17",
-    "typescript": "5.2.2",
-    "vite": "6.0.6",
-    "vite-plugin-style-import": "1.4.1",
-    "vue-tsc": "2.2.0"
+    "@types/jsoneditor": "9.9.6",
+    "@types/node": "26.1.1",
+    "@vitejs/plugin-vue": "6.0.7",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^4.3.2",
+    "vite": "8.1.4",
+    "vue-tsc": "3.3.7"
   }
 }

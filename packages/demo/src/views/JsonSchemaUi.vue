@@ -47,7 +47,7 @@
 
 <script setup lang="ts">
 import { SchemaProp } from 'tms-vue3-ui/dist/es/json-schema';
-import 'tms-vue3-ui/dist/es/json-schema/style/tailwind.scss'
+import 'tms-vue3-ui/dist/es/json-schema/style/json-schema.css'
 import { onMounted, reactive, ref, watch } from 'vue'
 
 const caseName = ref('')

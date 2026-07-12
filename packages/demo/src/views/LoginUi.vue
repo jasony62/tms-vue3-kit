@@ -12,7 +12,7 @@
 
 <script setup lang="ts">
 import { Login, LoginResponse } from 'tms-vue3-ui'
-import 'tms-vue3-ui/dist/es/login/style/tailwind.scss'
+import 'tms-vue3-ui/dist/es/login/style/login.css'
 import { schema, fnCaptcha, fnLogin } from '@/data/login'
 
 const showLoginDialog = () => {

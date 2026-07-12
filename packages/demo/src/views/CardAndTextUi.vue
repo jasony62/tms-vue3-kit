@@ -37,7 +37,7 @@
   </div>
 </template>
 
-<style lang="scss">
+<style>
 #myCard {
   height: 100px;
 
